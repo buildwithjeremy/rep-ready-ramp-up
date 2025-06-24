@@ -1,9 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ArrowLeft, ChevronDown, ChevronUp, Calendar, Phone, Mail, User } from "lucide-react";
@@ -17,7 +16,7 @@ interface RepProfileProps {
 
 export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
   const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>({});
-  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [celebratingSteps, setCelebratingSteps] = useState<Record<string, boolean>>({});
 
   const toggleStage = (stage: number) => {
     setExpandedStages(prev => ({
@@ -34,8 +33,7 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
             return {
               ...subtask,
               isCompleted,
-              completedDate: isCompleted ? new Date().toISOString() : undefined,
-              notes: notes[subtaskId] || subtask.notes
+              completedDate: isCompleted ? new Date().toISOString() : undefined
             };
           }
           return subtask;
@@ -43,13 +41,24 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
 
         // Check if all subtasks are completed to auto-complete the stage
         const allSubtasksCompleted = updatedSubtasks.every(st => st.isCompleted);
+        const wasIncomplete = !item.isCompleted;
         
-        return {
+        const updatedItem = {
           ...item,
           subtasks: updatedSubtasks,
           isCompleted: allSubtasksCompleted,
-          completedDate: allSubtasksCompleted && !item.isCompleted ? new Date().toISOString() : item.completedDate
+          completedDate: allSubtasksCompleted && wasIncomplete ? new Date().toISOString() : item.completedDate
         };
+
+        // Trigger celebration animation if step just completed
+        if (allSubtasksCompleted && wasIncomplete) {
+          setCelebratingSteps(prev => ({ ...prev, [item.id]: true }));
+          setTimeout(() => {
+            setCelebratingSteps(prev => ({ ...prev, [item.id]: false }));
+          }, 2000);
+        }
+
+        return updatedItem;
       }
       return item;
     });
@@ -83,13 +92,6 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
     onUpdateRep(updatedRep);
   };
 
-  const handleNotesChange = (subtaskId: string, noteText: string) => {
-    setNotes(prev => ({
-      ...prev,
-      [subtaskId]: noteText
-    }));
-  };
-
   const hasNoRecentActivity = (checklist: ChecklistItem[]): boolean => {
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
     return !checklist.some(item => 
@@ -106,6 +108,18 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
       case 'Independent': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getCompletedSubtasks = (item: ChecklistItem) => {
+    return item.subtasks.filter(st => st.isCompleted).length;
+  };
+
+  const formatCompletionDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -159,81 +173,95 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
 
         {/* Checklist */}
         <div className="space-y-3">
-          {rep.checklist.map((item) => (
-            <Card key={item.id} className={item.isCompleted ? "bg-green-50 border-green-200" : ""}>
-              <Collapsible 
-                open={expandedStages[item.stage] || false}
-                onOpenChange={() => toggleStage(item.stage)}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          item.isCompleted 
-                            ? 'bg-green-500 text-white' 
-                            : item.stage === rep.stage 
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-200 text-gray-600'
-                        }`}>
-                          {item.stage}
-                        </div>
-                        <div>
-                          <CardTitle className="text-base">{item.title}</CardTitle>
-                          <p className="text-sm text-gray-600">{item.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {item.isCompleted && (
-                          <span className="text-xs text-green-600 font-medium">Complete</span>
-                        )}
-                        {expandedStages[item.stage] ? 
-                          <ChevronUp className="w-4 h-4" /> : 
-                          <ChevronDown className="w-4 h-4" />
-                        }
-                      </div>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {item.subtasks.map((subtask) => (
-                        <div key={subtask.id} className="border rounded-lg p-3">
-                          <div className="flex items-start space-x-3">
-                            <Checkbox
-                              checked={subtask.isCompleted}
-                              onCheckedChange={(checked) => 
-                                handleSubtaskToggle(item.id, subtask.id, checked === true)
-                              }
-                            />
-                            <div className="flex-1">
-                              <p className={`font-medium ${subtask.isCompleted ? 'line-through text-gray-500' : ''}`}>
-                                {subtask.title}
-                              </p>
-                              {subtask.completedDate && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Completed: {new Date(subtask.completedDate).toLocaleDateString()}
-                                </p>
+          {rep.checklist.map((item) => {
+            const completedSubtasks = getCompletedSubtasks(item);
+            const totalSubtasks = item.subtasks.length;
+            const isCelebrating = celebratingSteps[item.id];
+            
+            return (
+              <Card key={item.id} className={item.isCompleted ? "bg-green-50/50 border-green-200/50" : ""}>
+                <Collapsible 
+                  open={expandedStages[item.stage] || false}
+                  onOpenChange={() => toggleStage(item.stage)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors relative">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            item.isCompleted 
+                              ? 'bg-green-500 text-white' 
+                              : item.stage === rep.stage 
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {item.stage}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <CardTitle className="text-base">{item.title}</CardTitle>
+                              {isCelebrating && (
+                                <span className="text-lg animate-bounce">🎉</span>
                               )}
-                              <Textarea
-                                placeholder="Add notes..."
-                                value={notes[subtask.id] || subtask.notes || ''}
-                                onChange={(e) => handleNotesChange(subtask.id, e.target.value)}
-                                className="mt-2 text-sm"
-                                rows={2}
-                              />
                             </div>
+                            <p className="text-sm text-gray-600">{item.description}</p>
+                            {!item.isCompleted && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Progress: {completedSubtasks}/{totalSubtasks}
+                              </p>
+                            )}
+                            {item.isCompleted && item.completedDate && (
+                              <p className="text-xs text-green-600 mt-1">
+                                Completed: {formatCompletionDate(item.completedDate)}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          ))}
+                        <div className="flex items-center space-x-2">
+                          {item.isCompleted && (
+                            <span className="text-xs text-green-600 font-medium">Complete</span>
+                          )}
+                          {expandedStages[item.stage] ? 
+                            <ChevronUp className="w-4 h-4" /> : 
+                            <ChevronDown className="w-4 h-4" />
+                          }
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        {item.subtasks.map((subtask) => (
+                          <div key={subtask.id} className="border rounded-lg p-3">
+                            <div className="flex items-center space-x-3">
+                              <Checkbox
+                                checked={subtask.isCompleted}
+                                onCheckedChange={(checked) => 
+                                  handleSubtaskToggle(item.id, subtask.id, checked === true)
+                                }
+                              />
+                              <div className="flex-1">
+                                <p className={`font-medium ${subtask.isCompleted ? 'line-through text-gray-500' : ''}`}>
+                                  {subtask.title}
+                                </p>
+                                {subtask.completedDate && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Completed: {formatCompletionDate(subtask.completedDate)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
