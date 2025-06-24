@@ -24,9 +24,6 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
     }
   };
 
-  const completedTasks = rep.checklist.filter(item => item.isCompleted).length;
-  const totalTasks = rep.checklist.length;
-
   // Find the trainer for this rep
   const trainer = mockTrainers.find(t => t.id === rep.trainerId);
 
@@ -50,7 +47,6 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
             {rep.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-lg truncate">{rep.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(rep.status)}`}>
                 {rep.status}
@@ -63,10 +59,7 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">{rep.overallProgress}%</span>
-              <span className="text-xs text-gray-500">({completedTasks}/{totalTasks})</span>
-            </div>
+            <span className="text-sm font-medium text-gray-700">{rep.overallProgress}%</span>
           </div>
           <Progress value={rep.overallProgress} className="h-2" />
         </div>
@@ -99,6 +92,10 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
                 <span className="truncate">Trainer: {trainer?.name || 'Not assigned'}</span>
+              </div>
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">Presenter: {trainer?.name || 'Not assigned'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />

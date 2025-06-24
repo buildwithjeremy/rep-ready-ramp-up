@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rep, ChecklistItem } from "@/types";
 import { RepContactCard } from "./rep-contact-card";
 import { ChecklistCard } from "./checklist-card";
@@ -12,6 +12,7 @@ interface RepProfileProps {
 export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
   const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>({});
   const [celebratingSteps, setCelebratingSteps] = useState<Record<string, boolean>>({});
+  const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
 
   const toggleStage = (stage: number) => {
     if (stage > rep.stage) return;
@@ -67,8 +68,16 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
     const currentStage = Math.min(completedStages + 1, 13);
     
     let status: Rep['status'] = 'Active';
+    const wasNotIndependent = rep.status !== 'Independent';
     if (currentStage === 13 && overallProgress === 100) {
       status = 'Independent';
+      // Trigger celebration if they just became independent
+      if (wasNotIndependent) {
+        setShowIndependentCelebration(true);
+        setTimeout(() => {
+          setShowIndependentCelebration(false);
+        }, 4000);
+      }
     } else if (hasNoRecentActivity(updatedChecklist)) {
       status = 'Stuck';
     }
@@ -95,7 +104,23 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20 relative">
+      {/* Independent Celebration Overlay */}
+      {showIndependentCelebration && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate-fade-in">
+          <div className="bg-white rounded-lg p-8 mx-4 text-center animate-scale-in">
+            <div className="text-6xl mb-4 animate-bounce">🎉</div>
+            <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
+            <p className="text-lg text-gray-700 mb-4">{rep.name} is now Independent!</p>
+            <div className="flex justify-center space-x-2">
+              <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>🎊</span>
+              <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌟</span>
+              <span className="text-2xl animate-bounce" style={{ animationDelay: '0.3s' }}>🎊</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="p-4 space-y-4">
         <RepContactCard rep={rep} onBack={onBack} />
 
