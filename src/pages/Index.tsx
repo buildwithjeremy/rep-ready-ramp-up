@@ -4,13 +4,17 @@ import { LoginScreen } from "@/components/login/login-screen";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
+import { RepProfile } from "@/components/rep/rep-profile";
+import { AddRepForm } from "@/components/rep/add-rep-form";
 import { AuthButton } from "@/components/ui/auth-button";
 import { mockTrainers, mockReps } from "@/data/mockData";
-import { User } from "@/types";
+import { User, Rep } from "@/types";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [currentPath, setCurrentPath] = useState('/dashboard');
+  const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
+  const [reps, setReps] = useState(mockReps);
   const [isLoading, setIsLoading] = useState(false);
 
   // Mock authentication - TODO: Replace with real Google Sign-In
@@ -36,20 +40,45 @@ const Index = () => {
   const handleSignOut = () => {
     setUser(null);
     setCurrentPath('/dashboard');
+    setSelectedRepId(null);
   };
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path);
+    if (path !== '/rep-profile') {
+      setSelectedRepId(null);
+    }
   };
 
   const handleRepClick = (repId: string) => {
-    // TODO: Navigate to rep profile/checklist
-    console.log('Navigate to rep:', repId);
+    setSelectedRepId(repId);
+    setCurrentPath('/rep-profile');
   };
 
   const handleTrainerClick = (trainerId: string) => {
-    // TODO: Navigate to trainer dashboard
+    // TODO: Navigate to specific trainer dashboard
     console.log('Navigate to trainer:', trainerId);
+  };
+
+  const handleAddRep = (newRep: Rep) => {
+    setReps(prev => [...prev, newRep]);
+    setCurrentPath('/dashboard'); // Navigate back to dashboard
+    console.log('New rep added:', newRep);
+  };
+
+  const handleUpdateRep = (updatedRep: Rep) => {
+    setReps(prev => prev.map(rep => 
+      rep.id === updatedRep.id ? updatedRep : rep
+    ));
+  };
+
+  const handleBackFromRep = () => {
+    setSelectedRepId(null);
+    setCurrentPath(user?.role === 'admin' ? '/admin' : '/dashboard');
+  };
+
+  const handleBackFromAddRep = () => {
+    setCurrentPath('/dashboard');
   };
 
   // Show login screen if not authenticated
@@ -57,11 +86,14 @@ const Index = () => {
     return <LoginScreen onSignIn={handleSignIn} isLoading={isLoading} />;
   }
 
+  // Get current rep for profile view
+  const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
+
   // Get trainer-specific data
   const currentTrainer = mockTrainers.find(t => t.id === user.trainerId);
   const trainerReps = user.role === 'trainer' 
-    ? mockReps.filter(rep => rep.trainerId === user.trainerId)
-    : mockReps;
+    ? reps.filter(rep => rep.trainerId === user.trainerId)
+    : reps;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,9 +123,25 @@ const Index = () => {
         {currentPath === '/admin' && user.role === 'admin' && (
           <AdminDashboard 
             trainers={mockTrainers}
-            reps={mockReps}
+            reps={reps}
             onTrainerClick={handleTrainerClick}
             onRepClick={handleRepClick}
+          />
+        )}
+
+        {currentPath === '/rep-profile' && selectedRep && (
+          <RepProfile
+            rep={selectedRep}
+            onBack={handleBackFromRep}
+            onUpdateRep={handleUpdateRep}
+          />
+        )}
+
+        {currentPath === '/add-rep' && (
+          <AddRepForm
+            onBack={handleBackFromAddRep}
+            onAddRep={handleAddRep}
+            trainerId={user.trainerId || user.id}
           />
         )}
 
@@ -104,21 +152,16 @@ const Index = () => {
             <p className="text-gray-600">Coming soon...</p>
           </div>
         )}
-
-        {currentPath === '/add-rep' && (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Add New Rep</h2>
-            <p className="text-gray-600">Coming soon...</p>
-          </div>
-        )}
       </div>
 
-      {/* Mobile Navigation */}
-      <MobileNav 
-        currentPath={currentPath}
-        userRole={user.role}
-        onNavigate={handleNavigate}
-      />
+      {/* Show mobile nav only when not in rep profile or add rep screens */}
+      {!currentPath.includes('/rep-profile') && !currentPath.includes('/add-rep') && (
+        <MobileNav 
+          currentPath={currentPath}
+          userRole={user.role}
+          onNavigate={handleNavigate}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { Rep, Trainer, ChecklistItem } from '@/types';
 
 // 13-step checklist template
@@ -171,6 +170,7 @@ export const mockTrainers: Trainer[] = [
   }
 ];
 
+// Helper function to generate a complete checklist for a rep at a specific stage
 const generateChecklist = (stage: number): ChecklistItem[] => {
   return checklistTemplate.map((template, index) => ({
     ...template,
