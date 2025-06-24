@@ -1,15 +1,18 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Mail, Phone, Calendar, User, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Rep } from "@/types";
+import { mockTrainers } from "@/data/mockData";
 
 interface RepContactCardProps {
   rep: Rep;
+  onBack: () => void;
 }
 
-export function RepContactCard({ rep }: RepContactCardProps) {
+export function RepContactCard({ rep, onBack }: RepContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   const getStatusColor = (status: Rep['status']) => {
@@ -24,9 +27,23 @@ export function RepContactCard({ rep }: RepContactCardProps) {
   const completedTasks = rep.checklist.filter(item => item.isCompleted).length;
   const totalTasks = rep.checklist.length;
 
+  // Find the trainer for this rep
+  const trainer = mockTrainers.find(t => t.id === rep.trainerId);
+
   return (
-    <Card>
+    <Card className="bg-white shadow-sm sticky top-0 z-10">
       <CardContent className="p-4">
+        {/* Header with Back Button */}
+        <div className="flex items-center mb-4">
+          <Button variant="ghost" size="sm" onClick={onBack} className="mr-3 p-2">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-lg truncate">{rep.name}</h1>
+            <p className="text-sm text-gray-600">Stage {rep.stage} of 13</p>
+          </div>
+        </div>
+
         {/* Main Profile Info */}
         <div className="flex items-center space-x-4 mb-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
@@ -78,6 +95,10 @@ export function RepContactCard({ rep }: RepContactCardProps) {
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
                 <span className="truncate">{rep.phone}</span>
+              </div>
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">Trainer: {trainer?.name || 'Not assigned'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />

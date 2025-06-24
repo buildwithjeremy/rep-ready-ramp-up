@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { Rep, ChecklistItem } from "@/types";
-import { RepProfileHeader } from "./rep-profile-header";
 import { RepContactCard } from "./rep-contact-card";
 import { ChecklistCard } from "./checklist-card";
 
@@ -98,10 +96,8 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <RepProfileHeader rep={rep} onBack={onBack} />
-
       <div className="p-4 space-y-4">
-        <RepContactCard rep={rep} />
+        <RepContactCard rep={rep} onBack={onBack} />
 
         <div className="space-y-3">
           {rep.checklist.map((item) => (

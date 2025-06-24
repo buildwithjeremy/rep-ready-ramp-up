@@ -55,7 +55,7 @@ export function ChecklistCard({
   };
 
   const getCardClasses = () => {
-    let classes = "transition-all duration-200 ease-in-out ";
+    let classes = "transition-all duration-200 ease-in-out rounded-lg ";
     
     if (item.stage === rep.stage && !item.isCompleted) {
       classes += "border-2 border-orange-300 ";
@@ -102,7 +102,7 @@ export function ChecklistCard({
                   ) : isLocked ? (
                     <>
                       <span className="text-xs">{item.stage}</span>
-                      <Lock className="w-2 h-2 absolute -top-1 -right-1 bg-gray-400 rounded-full p-0.5" />
+                      <Lock className="w-3 h-3 text-gray-400 absolute -top-1 -right-1" />
                     </>
                   ) : (
                     item.stage
@@ -116,18 +116,18 @@ export function ChecklistCard({
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className={`text-xs ${getStepStatusColor(stepStatus)}`}>
+                    <span className={`text-xs font-normal ${getStepStatusColor(stepStatus)}`}>
                       {stepStatus === 'LOCKED' ? 'Locked' : stepStatus.toLowerCase()}
                     </span>
                     {!item.isCompleted && !isLocked && (
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-gray-500 ml-auto">
                         {completedSubtasks}/{totalSubtasks}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 flex-shrink-0">
+              <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
                 {!isLocked && (
                   isExpanded ? 
                     <ChevronUp className="w-5 h-5 text-gray-400" /> : 
