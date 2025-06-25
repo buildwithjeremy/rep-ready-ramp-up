@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
@@ -22,6 +23,22 @@ const Index = () => {
   const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
   console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user:', user?.email, 'profile:', profile);
+
+  // Set initial path based on user role - ALWAYS call this hook
+  useEffect(() => {
+    if (profile) {
+      console.log('Setting initial path for user with role:', profile.role);
+      if (profile.role === 'ADMIN') {
+        setCurrentPath('/admin');
+      } else if (profile.role === 'TRAINER') {
+        setCurrentPath('/dashboard');
+      } else if (profile.role === 'REP') {
+        setCurrentPath('/dashboard');
+      } else {
+        setCurrentPath('/dashboard');
+      }
+    }
+  }, [profile]);
 
   // Show loading screen while checking authentication
   if (authLoading || (user && profileLoading)) {
@@ -74,24 +91,6 @@ const Index = () => {
   }
 
   console.log('Rendering main app with profile:', profile);
-
-  // Set initial path based on user role
-  useEffect(() => {
-    if (profile) {
-      console.log('Setting initial path for user with role:', profile.role);
-      if (profile.role === 'ADMIN') {
-        setCurrentPath('/admin');
-      } else if (profile.role === 'TRAINER') {
-        setCurrentPath('/dashboard');
-      } else if (profile.role === 'REP') {
-        // For REP users, show a simple dashboard or redirect to trainer view
-        setCurrentPath('/dashboard');
-      } else {
-        // Fallback for any other role
-        setCurrentPath('/dashboard');
-      }
-    }
-  }, [profile]);
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path);

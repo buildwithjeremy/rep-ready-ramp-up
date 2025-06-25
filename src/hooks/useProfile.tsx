@@ -37,6 +37,15 @@ export function useProfile() {
 
         if (error) {
           console.error('Error fetching profile:', error);
+          // If it's a 406 error or similar, the profile might not exist yet
+          // Let's wait a bit and try again
+          if (error.code === 'PGRST116' || error.message.includes('406')) {
+            console.log('Profile not found, retrying in 1 second...');
+            setTimeout(() => {
+              fetchProfile();
+            }, 1000);
+            return;
+          }
           setProfile(null);
         } else {
           console.log('Profile fetched successfully:', data);
