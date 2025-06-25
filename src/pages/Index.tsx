@@ -1,44 +1,23 @@
 
-import { useState, useEffect } from "react";
-import { MobileNav } from "@/components/layout/mobile-nav";
-import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
-import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
-import { RepProfile } from "@/components/rep/rep-profile";
-import { AddRepForm } from "@/components/rep/add-rep-form";
-import { AllReps } from "@/components/rep/all-reps";
+import { useState } from "react";
 import { AuthScreen } from "@/components/auth/auth-screen";
-import { AuthButton } from "@/components/ui/auth-button";
-import { mockTrainers, mockReps } from "@/data/mockData";
+import { AppLayout } from "@/components/layout/app-layout";
+import { mockReps } from "@/data/mockData";
 import { Rep } from "@/types";
-import { RepFilterOption } from "@/utils/filterUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 
 const Index = () => {
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
-  const [currentPath, setCurrentPath] = useState('/dashboard');
-  const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
   const [reps, setReps] = useState(mockReps);
-  const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
   console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user:', user?.email, 'profile:', profile);
 
-  // Set initial path based on user role - ALWAYS call this hook
-  useEffect(() => {
-    if (profile) {
-      console.log('Setting initial path for user with role:', profile.role);
-      if (profile.role === 'ADMIN') {
-        setCurrentPath('/admin');
-      } else if (profile.role === 'TRAINER') {
-        setCurrentPath('/dashboard');
-      } else if (profile.role === 'REP') {
-        setCurrentPath('/dashboard');
-      } else {
-        setCurrentPath('/dashboard');
-      }
-    }
-  }, [profile]);
+  const navigation = useAppNavigation({ 
+    userRole: profile?.role || 'REP' 
+  });
 
   // Show loading screen while checking authentication
   if (authLoading || (user && profileLoading)) {
@@ -67,11 +46,12 @@ const Index = () => {
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-4">Profile not found</h2>
           <p className="text-gray-600 mb-4">There was an issue loading your profile.</p>
-          <AuthButton 
-            isAuthenticated={true}
-            onSignIn={signInWithGoogle}
-            onSignOut={signOut}
-          />
+          <button 
+            onClick={() => signOut()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     );
@@ -92,28 +72,9 @@ const Index = () => {
 
   console.log('Rendering main app with profile:', profile);
 
-  const handleNavigate = (path: string) => {
-    setCurrentPath(path);
-    if (path !== '/rep-profile') {
-      setSelectedRepId(null);
-    }
-    if (path === '/reps') {
-      setRepsFilter('all');
-    }
-  };
-
-  const handleRepClick = (repId: string) => {
-    setSelectedRepId(repId);
-    setCurrentPath('/rep-profile');
-  };
-
-  const handleTrainerClick = (trainerId: string) => {
-    console.log('Navigate to trainer:', trainerId);
-  };
-
   const handleAddRep = (newRep: Rep) => {
     setReps(prev => [...prev, newRep]);
-    setCurrentPath('/dashboard');
+    navigation.handleNavigate('/dashboard');
     console.log('New rep added:', newRep);
   };
 
@@ -123,119 +84,32 @@ const Index = () => {
     ));
   };
 
-  const handleBackFromRep = () => {
-    setSelectedRepId(null);
-    setCurrentPath(profile.role === 'ADMIN' ? '/admin' : '/dashboard');
-  };
-
-  const handleBackFromAddRep = () => {
-    setCurrentPath('/dashboard');
-  };
-
-  const handleStatCardClick = (filter: 'all' | 'active' | 'stuck' | 'independent') => {
-    setRepsFilter(filter);
-    setCurrentPath('/reps');
-  };
-
   const handleSignOut = async () => {
     await signOut();
   };
 
-  // Get current rep for profile view
-  const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
-
-  // Get trainer-specific data
-  const currentTrainer = mockTrainers.find(t => t.id === profile.trainer_id || t.id === profile.id);
-  const trainerReps = profile.role === 'TRAINER' || profile.role === 'ADMIN'
-    ? (profile.role === 'ADMIN' ? reps : reps.filter(rep => rep.trainerId === profile.id))
-    : [];
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="font-bold text-lg">Team Tenacious</h1>
-          <p className="text-sm text-gray-600">
-            {profile.full_name || user.email} 
-            <span className="ml-2 text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-              {profile.role}
-            </span>
-          </p>
-        </div>
-        <AuthButton 
-          isAuthenticated={true}
-          onSignIn={signInWithGoogle}
-          onSignOut={handleSignOut}
-        />
-      </div>
-
-      {/* Main Content */}
-      <div className="p-4">
-        {currentPath === '/dashboard' && profile.role === 'TRAINER' && currentTrainer && (
-          <TrainerDashboard 
-            trainer={currentTrainer}
-            reps={trainerReps}
-            onRepClick={handleRepClick}
-            onStatCardClick={handleStatCardClick}
-          />
-        )}
-
-        {currentPath === '/dashboard' && profile.role === 'REP' && (
-          <div className="text-center py-8">
-            <h2 className="text-xl font-semibold mb-4">Welcome to Team Tenacious!</h2>
-            <p className="text-gray-600 mb-4">Your trainer will guide you through your onboarding process.</p>
-            <p className="text-sm text-gray-500">Contact your trainer for next steps.</p>
-          </div>
-        )}
-        
-        {currentPath === '/admin' && profile.role === 'ADMIN' && (
-          <AdminDashboard 
-            trainers={mockTrainers}
-            reps={reps}
-            onTrainerClick={handleTrainerClick}
-            onRepClick={handleRepClick}
-            onStatCardClick={handleStatCardClick}
-          />
-        )}
-
-        {currentPath === '/rep-profile' && selectedRep && (
-          <RepProfile
-            rep={selectedRep}
-            onBack={handleBackFromRep}
-            onUpdateRep={handleUpdateRep}
-          />
-        )}
-
-        {currentPath === '/add-rep' && (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
-          <AddRepForm
-            onBack={handleBackFromAddRep}
-            onAddRep={handleAddRep}
-            trainerId={profile.trainer_id || profile.id}
-          />
-        )}
-
-        {currentPath === '/reps' && (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
-          <AllReps
-            reps={trainerReps}
-            onRepClick={handleRepClick}
-            title={profile.role === 'ADMIN' ? 'All Reps' : 'My Reps'}
-            initialFilter={repsFilter}
-          />
-        )}
-      </div>
-
-      {/* Show mobile nav only when not in rep profile or add rep screens and user has appropriate role */}
-      {!currentPath.includes('/rep-profile') && 
-       !currentPath.includes('/add-rep') && 
-       (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
-        <MobileNav 
-          currentPath={currentPath}
-          userRole={profile.role === 'ADMIN' ? 'admin' : 'trainer'}
-          onNavigate={handleNavigate}
-        />
-      )}
-    </div>
+    <AppLayout
+      profileName={profile.full_name}
+      userEmail={user.email}
+      userRole={profile.role}
+      userId={profile.id}
+      trainerId={profile.trainer_id}
+      currentPath={navigation.currentPath}
+      selectedRepId={navigation.selectedRepId}
+      reps={reps}
+      repsFilter={navigation.repsFilter}
+      onSignOut={handleSignOut}
+      onSignIn={signInWithGoogle}
+      onNavigate={navigation.handleNavigate}
+      onRepClick={navigation.handleRepClick}
+      onTrainerClick={navigation.handleTrainerClick}
+      onStatCardClick={navigation.handleStatCardClick}
+      onBackFromRep={navigation.handleBackFromRep}
+      onBackFromAddRep={navigation.handleBackFromAddRep}
+      onAddRep={handleAddRep}
+      onUpdateRep={handleUpdateRep}
+    />
   );
 };
 
