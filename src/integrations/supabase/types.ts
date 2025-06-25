@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      milestones: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          rep_id: string
+          step_number: number
+          step_title: string
+          sub_task: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          rep_id: string
+          step_number: number
+          step_title: string
+          sub_task: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          rep_id?: string
+          step_number?: number
+          step_title?: string
+          sub_task?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -41,6 +92,56 @@ export type Database = {
           },
         ]
       }
+      reps: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          join_date: string
+          phone: string | null
+          promotion_date: string | null
+          stage: Database["public"]["Enums"]["rep_stage"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          join_date?: string
+          phone?: string | null
+          promotion_date?: string | null
+          stage?: Database["public"]["Enums"]["rep_stage"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          join_date?: string
+          phone?: string | null
+          promotion_date?: string | null
+          stage?: Database["public"]["Enums"]["rep_stage"]
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reps_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -48,10 +149,11 @@ export type Database = {
     Functions: {
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
+        Returns: string
       }
     }
     Enums: {
+      rep_stage: "board_a" | "board_b" | "board_c" | "independent"
       user_role: "ADMIN" | "TRAINER" | "REP"
     }
     CompositeTypes: {
@@ -168,6 +270,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      rep_stage: ["board_a", "board_b", "board_c", "independent"],
       user_role: ["ADMIN", "TRAINER", "REP"],
     },
   },

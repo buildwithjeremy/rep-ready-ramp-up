@@ -1,57 +1,56 @@
 
 import { useState, useEffect } from "react";
-import { LoginScreen } from "@/components/login/login-screen";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
 import { RepProfile } from "@/components/rep/rep-profile";
 import { AddRepForm } from "@/components/rep/add-rep-form";
 import { AllReps } from "@/components/rep/all-reps";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { AuthButton } from "@/components/ui/auth-button";
 import { mockTrainers, mockReps } from "@/data/mockData";
-import { User, Rep } from "@/types";
+import { Rep } from "@/types";
 import { RepFilterOption } from "@/utils/filterUtils";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 const Index = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const [currentPath, setCurrentPath] = useState('/dashboard');
   const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
   const [reps, setReps] = useState(mockReps);
-  const [isLoading, setIsLoading] = useState(false);
   const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
-  // Mock authentication - TODO: Replace with real Google Sign-In
-  const handleSignIn = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock user - could be trainer or admin
-    const mockUser: User = {
-      id: 'user-1',
-      name: 'Sarah Johnson',
-      email: 'sarah@teamtenacious.com',
-      role: Math.random() > 0.5 ? 'trainer' : 'admin', // Random for demo
-      trainerId: 'trainer-1'
-    };
-    
-    setUser(mockUser);
-    setCurrentPath(mockUser.role === 'admin' ? '/admin' : '/dashboard');
-    setIsLoading(false);
-  };
+  // Show loading screen while checking authentication
+  if (authLoading || (user && profileLoading)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSignOut = () => {
-    setUser(null);
-    setCurrentPath('/dashboard');
-    setSelectedRepId(null);
-  };
+  // Show auth screen if not authenticated
+  if (!user || !profile) {
+    return <AuthScreen />;
+  }
+
+  // Set initial path based on user role
+  useEffect(() => {
+    if (profile) {
+      setCurrentPath(profile.role === 'ADMIN' ? '/admin' : '/dashboard');
+    }
+  }, [profile]);
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path);
     if (path !== '/rep-profile') {
       setSelectedRepId(null);
     }
-    // Reset filter when navigating to reps without a specific filter
     if (path === '/reps') {
       setRepsFilter('all');
     }
@@ -63,13 +62,12 @@ const Index = () => {
   };
 
   const handleTrainerClick = (trainerId: string) => {
-    // TODO: Navigate to specific trainer dashboard
     console.log('Navigate to trainer:', trainerId);
   };
 
   const handleAddRep = (newRep: Rep) => {
     setReps(prev => [...prev, newRep]);
-    setCurrentPath('/dashboard'); // Navigate back to dashboard
+    setCurrentPath('/dashboard');
     console.log('New rep added:', newRep);
   };
 
@@ -81,7 +79,7 @@ const Index = () => {
 
   const handleBackFromRep = () => {
     setSelectedRepId(null);
-    setCurrentPath(user?.role === 'admin' ? '/admin' : '/dashboard');
+    setCurrentPath(profile.role === 'ADMIN' ? '/admin' : '/dashboard');
   };
 
   const handleBackFromAddRep = () => {
@@ -93,18 +91,17 @@ const Index = () => {
     setCurrentPath('/reps');
   };
 
-  // Show login screen if not authenticated
-  if (!user) {
-    return <LoginScreen onSignIn={handleSignIn} isLoading={isLoading} />;
-  }
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   // Get current rep for profile view
   const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
 
   // Get trainer-specific data
-  const currentTrainer = mockTrainers.find(t => t.id === user.trainerId);
-  const trainerReps = user.role === 'trainer' 
-    ? reps.filter(rep => rep.trainerId === user.trainerId)
+  const currentTrainer = mockTrainers.find(t => t.id === profile.trainer_id || t.id === profile.id);
+  const trainerReps = profile.role === 'TRAINER' 
+    ? reps.filter(rep => rep.trainerId === profile.id)
     : reps;
 
   return (
@@ -113,18 +110,18 @@ const Index = () => {
       <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
         <div>
           <h1 className="font-bold text-lg">Team Tenacious</h1>
-          <p className="text-sm text-gray-600">{user.name}</p>
+          <p className="text-sm text-gray-600">{profile.full_name || user.email}</p>
         </div>
         <AuthButton 
           isAuthenticated={true}
-          onSignIn={handleSignIn}
+          onSignIn={signInWithGoogle}
           onSignOut={handleSignOut}
         />
       </div>
 
       {/* Main Content */}
       <div className="p-4">
-        {currentPath === '/dashboard' && user.role === 'trainer' && currentTrainer && (
+        {currentPath === '/dashboard' && profile.role === 'TRAINER' && currentTrainer && (
           <TrainerDashboard 
             trainer={currentTrainer}
             reps={trainerReps}
@@ -133,7 +130,7 @@ const Index = () => {
           />
         )}
         
-        {currentPath === '/admin' && user.role === 'admin' && (
+        {currentPath === '/admin' && profile.role === 'ADMIN' && (
           <AdminDashboard 
             trainers={mockTrainers}
             reps={reps}
@@ -155,7 +152,7 @@ const Index = () => {
           <AddRepForm
             onBack={handleBackFromAddRep}
             onAddRep={handleAddRep}
-            trainerId={user.trainerId || user.id}
+            trainerId={profile.trainer_id || profile.id}
           />
         )}
 
@@ -163,19 +160,17 @@ const Index = () => {
           <AllReps
             reps={trainerReps}
             onRepClick={handleRepClick}
-            title={user.role === 'admin' ? 'All Reps' : 'My Reps'}
+            title={profile.role === 'ADMIN' ? 'All Reps' : 'My Reps'}
             initialFilter={repsFilter}
           />
         )}
-
-        {/* Placeholder for other routes */}
       </div>
 
       {/* Show mobile nav only when not in rep profile or add rep screens */}
       {!currentPath.includes('/rep-profile') && !currentPath.includes('/add-rep') && (
         <MobileNav 
           currentPath={currentPath}
-          userRole={user.role}
+          userRole={profile.role === 'ADMIN' ? 'admin' : 'trainer'}
           onNavigate={handleNavigate}
         />
       )}
