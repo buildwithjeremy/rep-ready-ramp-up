@@ -17,13 +17,17 @@ export function useProfile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('useProfile effect triggered, user:', user?.email);
+    
     if (!user) {
+      console.log('No user, clearing profile');
       setProfile(null);
       setLoading(false);
       return;
     }
 
     const fetchProfile = async () => {
+      console.log('Fetching profile for user:', user.id);
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -33,12 +37,14 @@ export function useProfile() {
 
         if (error) {
           console.error('Error fetching profile:', error);
-          return;
+          setProfile(null);
+        } else {
+          console.log('Profile fetched successfully:', data);
+          setProfile(data);
         }
-
-        setProfile(data);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error in fetchProfile:', error);
+        setProfile(null);
       } finally {
         setLoading(false);
       }

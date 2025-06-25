@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
@@ -22,8 +21,11 @@ const Index = () => {
   const [reps, setReps] = useState(mockReps);
   const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
+  console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user:', user?.email, 'profile:', profile);
+
   // Show loading screen while checking authentication
   if (authLoading || (user && profileLoading)) {
+    console.log('Showing loading screen');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -35,14 +37,48 @@ const Index = () => {
   }
 
   // Show auth screen if not authenticated
-  if (!user || !profile) {
+  if (!user) {
+    console.log('No user, showing auth screen');
     return <AuthScreen />;
   }
+
+  // If user exists but no profile, show error message
+  if (user && !profile && !profileLoading) {
+    console.log('User exists but no profile found');
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Profile not found</h2>
+          <p className="text-gray-600 mb-4">There was an issue loading your profile.</p>
+          <AuthButton 
+            isAuthenticated={true}
+            onSignIn={signInWithGoogle}
+            onSignOut={signOut}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // If we don't have a profile yet, show loading
+  if (!profile) {
+    console.log('No profile yet, showing loading');
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up your account...</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Rendering main app with profile:', profile);
 
   // Set initial path based on user role
   useEffect(() => {
     if (profile) {
-      console.log('User profile:', profile);
+      console.log('Setting initial path for user with role:', profile.role);
       if (profile.role === 'ADMIN') {
         setCurrentPath('/admin');
       } else if (profile.role === 'TRAINER') {
