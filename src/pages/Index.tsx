@@ -42,7 +42,18 @@ const Index = () => {
   // Set initial path based on user role
   useEffect(() => {
     if (profile) {
-      setCurrentPath(profile.role === 'ADMIN' ? '/admin' : '/dashboard');
+      console.log('User profile:', profile);
+      if (profile.role === 'ADMIN') {
+        setCurrentPath('/admin');
+      } else if (profile.role === 'TRAINER') {
+        setCurrentPath('/dashboard');
+      } else if (profile.role === 'REP') {
+        // For REP users, show a simple dashboard or redirect to trainer view
+        setCurrentPath('/dashboard');
+      } else {
+        // Fallback for any other role
+        setCurrentPath('/dashboard');
+      }
     }
   }, [profile]);
 
@@ -100,9 +111,9 @@ const Index = () => {
 
   // Get trainer-specific data
   const currentTrainer = mockTrainers.find(t => t.id === profile.trainer_id || t.id === profile.id);
-  const trainerReps = profile.role === 'TRAINER' 
-    ? reps.filter(rep => rep.trainerId === profile.id)
-    : reps;
+  const trainerReps = profile.role === 'TRAINER' || profile.role === 'ADMIN'
+    ? (profile.role === 'ADMIN' ? reps : reps.filter(rep => rep.trainerId === profile.id))
+    : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,7 +121,12 @@ const Index = () => {
       <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
         <div>
           <h1 className="font-bold text-lg">Team Tenacious</h1>
-          <p className="text-sm text-gray-600">{profile.full_name || user.email}</p>
+          <p className="text-sm text-gray-600">
+            {profile.full_name || user.email} 
+            <span className="ml-2 text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+              {profile.role}
+            </span>
+          </p>
         </div>
         <AuthButton 
           isAuthenticated={true}
@@ -128,6 +144,14 @@ const Index = () => {
             onRepClick={handleRepClick}
             onStatCardClick={handleStatCardClick}
           />
+        )}
+
+        {currentPath === '/dashboard' && profile.role === 'REP' && (
+          <div className="text-center py-8">
+            <h2 className="text-xl font-semibold mb-4">Welcome to Team Tenacious!</h2>
+            <p className="text-gray-600 mb-4">Your trainer will guide you through your onboarding process.</p>
+            <p className="text-sm text-gray-500">Contact your trainer for next steps.</p>
+          </div>
         )}
         
         {currentPath === '/admin' && profile.role === 'ADMIN' && (
@@ -148,7 +172,7 @@ const Index = () => {
           />
         )}
 
-        {currentPath === '/add-rep' && (
+        {currentPath === '/add-rep' && (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
           <AddRepForm
             onBack={handleBackFromAddRep}
             onAddRep={handleAddRep}
@@ -156,7 +180,7 @@ const Index = () => {
           />
         )}
 
-        {currentPath === '/reps' && (
+        {currentPath === '/reps' && (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
           <AllReps
             reps={trainerReps}
             onRepClick={handleRepClick}
@@ -166,8 +190,10 @@ const Index = () => {
         )}
       </div>
 
-      {/* Show mobile nav only when not in rep profile or add rep screens */}
-      {!currentPath.includes('/rep-profile') && !currentPath.includes('/add-rep') && (
+      {/* Show mobile nav only when not in rep profile or add rep screens and user has appropriate role */}
+      {!currentPath.includes('/rep-profile') && 
+       !currentPath.includes('/add-rep') && 
+       (profile.role === 'TRAINER' || profile.role === 'ADMIN') && (
         <MobileNav 
           currentPath={currentPath}
           userRole={profile.role === 'ADMIN' ? 'admin' : 'trainer'}
