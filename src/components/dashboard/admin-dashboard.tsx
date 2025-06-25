@@ -9,9 +9,10 @@ interface AdminDashboardProps {
   reps: Rep[];
   onTrainerClick: (trainerId: string) => void;
   onRepClick: (repId: string) => void;
+  onStatCardClick?: (filter: 'all' | 'active' | 'stuck' | 'independent') => void;
 }
 
-export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick }: AdminDashboardProps) {
+export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onStatCardClick }: AdminDashboardProps) {
   const totalReps = reps.length;
   const activeReps = reps.filter(rep => rep.status === 'Active').length;
   const independentReps = reps.filter(rep => rep.status === 'Independent').length;
@@ -35,24 +36,32 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick }: A
           value={totalReps}
           icon={Users}
           className="bg-white"
+          clickable={true}
+          onClick={() => onStatCardClick?.('all')}
         />
         <StatCard
           title="Active"
           value={activeReps}
           icon={TrendingUp}
           className="bg-white"
+          clickable={true}
+          onClick={() => onStatCardClick?.('active')}
         />
         <StatCard
           title="Independent"
           value={independentReps}
           icon={UserCheck}
           className="bg-white"
+          clickable={true}
+          onClick={() => onStatCardClick?.('independent')}
         />
         <StatCard
           title="Stuck"
           value={stuckReps}
           icon={AlertTriangle}
           className={stuckReps > 0 ? "bg-red-50 border-red-200" : "bg-white"}
+          clickable={true}
+          onClick={() => onStatCardClick?.('stuck')}
         />
       </div>
 

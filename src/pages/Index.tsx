@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { LoginScreen } from "@/components/login/login-screen";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -9,6 +10,7 @@ import { AllReps } from "@/components/rep/all-reps";
 import { AuthButton } from "@/components/ui/auth-button";
 import { mockTrainers, mockReps } from "@/data/mockData";
 import { User, Rep } from "@/types";
+import { RepFilterOption } from "@/utils/filterUtils";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -16,6 +18,7 @@ const Index = () => {
   const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
   const [reps, setReps] = useState(mockReps);
   const [isLoading, setIsLoading] = useState(false);
+  const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
   // Mock authentication - TODO: Replace with real Google Sign-In
   const handleSignIn = async () => {
@@ -48,6 +51,10 @@ const Index = () => {
     if (path !== '/rep-profile') {
       setSelectedRepId(null);
     }
+    // Reset filter when navigating to reps without a specific filter
+    if (path === '/reps') {
+      setRepsFilter('all');
+    }
   };
 
   const handleRepClick = (repId: string) => {
@@ -79,6 +86,11 @@ const Index = () => {
 
   const handleBackFromAddRep = () => {
     setCurrentPath('/dashboard');
+  };
+
+  const handleStatCardClick = (filter: 'all' | 'active' | 'stuck' | 'independent') => {
+    setRepsFilter(filter);
+    setCurrentPath('/reps');
   };
 
   // Show login screen if not authenticated
@@ -117,6 +129,7 @@ const Index = () => {
             trainer={currentTrainer}
             reps={trainerReps}
             onRepClick={handleRepClick}
+            onStatCardClick={handleStatCardClick}
           />
         )}
         
@@ -126,6 +139,7 @@ const Index = () => {
             reps={reps}
             onTrainerClick={handleTrainerClick}
             onRepClick={handleRepClick}
+            onStatCardClick={handleStatCardClick}
           />
         )}
 
@@ -150,6 +164,7 @@ const Index = () => {
             reps={trainerReps}
             onRepClick={handleRepClick}
             title={user.role === 'admin' ? 'All Reps' : 'My Reps'}
+            initialFilter={repsFilter}
           />
         )}
 

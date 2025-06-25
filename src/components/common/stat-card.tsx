@@ -12,6 +12,7 @@ interface StatCardProps {
   };
   className?: string;
   onClick?: () => void;
+  clickable?: boolean;
 }
 
 export function StatCard({ 
@@ -20,12 +21,13 @@ export function StatCard({
   icon: Icon, 
   trend, 
   className,
-  onClick 
+  onClick,
+  clickable = false
 }: StatCardProps) {
   return (
     <Card 
       className={cn(
-        "cursor-pointer hover:shadow-md transition-shadow",
+        clickable && "cursor-pointer hover:shadow-md transition-shadow",
         className
       )}
       onClick={onClick}

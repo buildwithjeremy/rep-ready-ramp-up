@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rep } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,17 +7,25 @@ import { ProgressBar } from "@/components/common/progress-bar";
 import { FilterControls } from "@/components/common/filter-controls";
 import { sortReps, filterReps, RepSortOption, RepFilterOption } from "@/utils/filterUtils";
 import { AlertTriangle } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 
 interface AllRepsProps {
   reps: Rep[];
   onRepClick: (repId: string) => void;
   title?: string;
+  initialFilter?: RepFilterOption;
 }
 
-export function AllReps({ reps, onRepClick, title = "All Reps" }: AllRepsProps) {
+export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }: AllRepsProps) {
   const [sortBy, setSortBy] = useState<RepSortOption>('name');
-  const [filterBy, setFilterBy] = useState<RepFilterOption>('all');
+  const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter || 'all');
+
+  // Update filter when initialFilter changes
+  useEffect(() => {
+    if (initialFilter) {
+      setFilterBy(initialFilter);
+    }
+  }, [initialFilter]);
 
   const filteredAndSortedReps = sortReps(filterReps(reps, filterBy), sortBy);
   const stuckReps = reps.filter(rep => rep.status === 'Stuck');
@@ -37,8 +45,21 @@ export function AllReps({ reps, onRepClick, title = "All Reps" }: AllRepsProps) 
     }
   };
 
+  const getDaysSinceLastActivity = (lastActivity: string) => {
+    return differenceInDays(new Date(), new Date(lastActivity));
+  };
+
+  const getLastCompletedTask = (rep: Rep) => {
+    // Find the last completed task
+    const completedTasks = rep.checklist
+      .flatMap(stage => stage.subtasks.filter(task => task.isCompleted))
+      .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime());
+    
+    return completedTasks[0]?.title || 'No tasks completed';
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24 max-h-screen overflow-y-auto">
       {/* Stuck Reps Alert */}
       {stuckReps.length > 0 && (
         <Card className="bg-red-50 border-red-200">
@@ -48,23 +69,32 @@ export function AllReps({ reps, onRepClick, title = "All Reps" }: AllRepsProps) 
               <h3 className="font-semibold">Stuck Reps Require Attention</h3>
             </div>
             <div className="space-y-2">
-              {stuckReps.map((rep) => (
-                <div
-                  key={rep.id}
-                  className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50"
-                  onClick={() => onRepClick(rep.id)}
-                >
-                  <div>
-                    <p className="font-medium text-gray-900">{rep.name}</p>
-                    <p className="text-sm text-gray-600">
-                      Stage {rep.stage} • {rep.overallProgress}% complete
-                    </p>
+              {stuckReps.map((rep) => {
+                const daysSinceLastActivity = getDaysSinceLastActivity(rep.lastActivity);
+                const lastTask = getLastCompletedTask(rep);
+                
+                return (
+                  <div
+                    key={rep.id}
+                    className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50"
+                    onClick={() => onRepClick(rep.id)}
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{rep.name}</p>
+                      <p className="text-sm text-gray-600">Stage {rep.stage}</p>
+                      <p className="text-xs text-gray-500">
+                        {daysSinceLastActivity} days since last activity
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Last task: {lastTask}
+                      </p>
+                    </div>
+                    <button className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800">
+                      View
+                    </button>
                   </div>
-                  <button className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800">
-                    View
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

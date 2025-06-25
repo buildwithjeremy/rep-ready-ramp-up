@@ -6,18 +6,32 @@ import { StatCard } from "@/components/common/stat-card";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { Users, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import { Rep, Trainer } from "@/types";
+import { differenceInDays } from "date-fns";
 
 interface TrainerDashboardProps {
   trainer: Trainer;
   reps: Rep[];
   onRepClick: (repId: string) => void;
+  onStatCardClick?: (filter: 'all' | 'active' | 'stuck' | 'independent') => void;
 }
 
-export function TrainerDashboard({ trainer, reps, onRepClick }: TrainerDashboardProps) {
+export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }: TrainerDashboardProps) {
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d'>('7d');
 
   const stuckReps = reps.filter(rep => rep.status === 'Stuck');
   const activeReps = reps.filter(rep => rep.status === 'Active');
+
+  const getLastCompletedTask = (rep: Rep) => {
+    const completedTasks = rep.checklist
+      .flatMap(stage => stage.subtasks.filter(task => task.isCompleted))
+      .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime());
+    
+    return completedTasks[0]?.title || 'No tasks completed';
+  };
+
+  const getDaysSinceLastActivity = (lastActivity: string) => {
+    return differenceInDays(new Date(), new Date(lastActivity));
+  };
 
   return (
     <div className="space-y-6 pb-20">
@@ -34,6 +48,8 @@ export function TrainerDashboard({ trainer, reps, onRepClick }: TrainerDashboard
           value={trainer.activeReps}
           icon={Users}
           className="bg-white"
+          clickable={true}
+          onClick={() => onStatCardClick?.('active')}
         />
         <StatCard
           title="Success Rate"
@@ -41,6 +57,8 @@ export function TrainerDashboard({ trainer, reps, onRepClick }: TrainerDashboard
           icon={TrendingUp}
           trend={{ value: 5, isPositive: true }}
           className="bg-white"
+          clickable={true}
+          onClick={() => onStatCardClick?.('independent')}
         />
         <StatCard
           title="Avg. Time"
@@ -53,6 +71,8 @@ export function TrainerDashboard({ trainer, reps, onRepClick }: TrainerDashboard
           value={trainer.stuckReps}
           icon={AlertTriangle}
           className={trainer.stuckReps > 0 ? "bg-red-50 border-red-200" : "bg-white"}
+          clickable={true}
+          onClick={() => onStatCardClick?.('stuck')}
         />
       </div>
 
@@ -66,17 +86,28 @@ export function TrainerDashboard({ trainer, reps, onRepClick }: TrainerDashboard
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {stuckReps.map(rep => (
-              <div key={rep.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                <div>
-                  <p className="font-medium">{rep.name}</p>
-                  <p className="text-sm text-gray-600">Stage {rep.stage} • {rep.overallProgress}% complete</p>
+            {stuckReps.map(rep => {
+              const daysSinceLastActivity = getDaysSinceLastActivity(rep.lastActivity);
+              const lastTask = getLastCompletedTask(rep);
+              
+              return (
+                <div key={rep.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium">{rep.name}</p>
+                    <p className="text-sm text-gray-600">Stage {rep.stage}</p>
+                    <p className="text-xs text-gray-500">
+                      {daysSinceLastActivity} days since last activity
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Last task: {lastTask}
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={() => onRepClick(rep.id)}>
+                    View
+                  </Button>
                 </div>
-                <Button size="sm" onClick={() => onRepClick(rep.id)}>
-                  View
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}
