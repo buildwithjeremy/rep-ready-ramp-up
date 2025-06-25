@@ -44,7 +44,11 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
           ...item,
           subtasks: updatedSubtasks,
           isCompleted: allSubtasksCompleted,
-          completedDate: allSubtasksCompleted && wasIncomplete ? new Date().toISOString() : item.completedDate
+          completedDate: allSubtasksCompleted
+            ? wasIncomplete
+              ? new Date().toISOString()
+              : item.completedDate
+            : undefined
         };
 
         if (allSubtasksCompleted && wasIncomplete) {
