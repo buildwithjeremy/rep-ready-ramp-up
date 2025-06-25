@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { LoginScreen } from "@/components/login/login-screen";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -6,6 +5,7 @@ import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
 import { RepProfile } from "@/components/rep/rep-profile";
 import { AddRepForm } from "@/components/rep/add-rep-form";
+import { AllReps } from "@/components/rep/all-reps";
 import { AuthButton } from "@/components/ui/auth-button";
 import { mockTrainers, mockReps } from "@/data/mockData";
 import { User, Rep } from "@/types";
@@ -145,13 +145,15 @@ const Index = () => {
           />
         )}
 
-        {/* Placeholder for other routes */}
         {currentPath === '/reps' && (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Reps List</h2>
-            <p className="text-gray-600">Coming soon...</p>
-          </div>
+          <AllReps
+            reps={trainerReps}
+            onRepClick={handleRepClick}
+            title={user.role === 'admin' ? 'All Reps' : 'My Reps'}
+          />
         )}
+
+        {/* Placeholder for other routes */}
       </div>
 
       {/* Show mobile nav only when not in rep profile or add rep screens */}

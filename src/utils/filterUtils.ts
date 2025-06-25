@@ -1,0 +1,60 @@
+
+import { Rep, Trainer } from "@/types";
+
+export type RepSortOption = 'name' | 'stage' | 'status' | 'lastActivity' | 'progress';
+export type RepFilterOption = 'all' | 'active' | 'stuck' | 'independent' | 'inactive';
+export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate';
+
+export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
+  return [...reps].sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'stage':
+        return b.stage - a.stage; // Higher stages first
+      case 'status':
+        const statusOrder = { 'Independent': 0, 'Active': 1, 'Stuck': 2, 'Inactive': 3 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      case 'lastActivity':
+        return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+      case 'progress':
+        return b.overallProgress - a.overallProgress;
+      default:
+        return 0;
+    }
+  });
+};
+
+export const filterReps = (reps: Rep[], filterBy: RepFilterOption): Rep[] => {
+  switch (filterBy) {
+    case 'all':
+      return reps;
+    case 'active':
+      return reps.filter(rep => rep.status === 'Active');
+    case 'stuck':
+      return reps.filter(rep => rep.status === 'Stuck');
+    case 'independent':
+      return reps.filter(rep => rep.status === 'Independent');
+    case 'inactive':
+      return reps.filter(rep => rep.status === 'Inactive');
+    default:
+      return reps;
+  }
+};
+
+export const sortTrainers = (trainers: Trainer[], sortBy: TrainerSortOption): Trainer[] => {
+  return [...trainers].sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'assignedReps':
+        return b.assignedReps - a.assignedReps;
+      case 'activeReps':
+        return b.activeReps - a.activeReps;
+      case 'successRate':
+        return b.successRate - a.successRate;
+      default:
+        return 0;
+    }
+  });
+};
