@@ -97,6 +97,7 @@ const Index = () => {
       trainerId={profile.trainer_id}
       currentPath={navigation.currentPath}
       selectedRepId={navigation.selectedRepId}
+      selectedTrainerId={navigation.selectedTrainerId}
       reps={reps}
       repsFilter={navigation.repsFilter}
       onSignOut={handleSignOut}
@@ -106,6 +107,7 @@ const Index = () => {
       onTrainerClick={navigation.handleTrainerClick}
       onStatCardClick={navigation.handleStatCardClick}
       onBackFromRep={navigation.handleBackFromRep}
+      onBackFromTrainer={navigation.handleBackFromTrainer}
       onBackFromAddRep={navigation.handleBackFromAddRep}
       onAddRep={handleAddRep}
       onUpdateRep={handleUpdateRep}

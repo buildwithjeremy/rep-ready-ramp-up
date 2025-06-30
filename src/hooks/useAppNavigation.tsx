@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Rep } from '@/types';
 import { RepFilterOption } from '@/utils/filterUtils';
@@ -10,6 +9,7 @@ interface UseAppNavigationProps {
 export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   const [currentPath, setCurrentPath] = useState('/dashboard');
   const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
+  const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
 
   // Set initial path based on user role
@@ -30,6 +30,9 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
     if (path !== '/rep-profile') {
       setSelectedRepId(null);
     }
+    if (path !== '/trainer-profile') {
+      setSelectedTrainerId(null);
+    }
     if (path === '/reps') {
       setRepsFilter('all');
     }
@@ -41,11 +44,17 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   };
 
   const handleTrainerClick = (trainerId: string) => {
-    console.log('Navigate to trainer:', trainerId);
+    setSelectedTrainerId(trainerId);
+    setCurrentPath('/trainer-profile');
   };
 
   const handleBackFromRep = () => {
     setSelectedRepId(null);
+    setCurrentPath(userRole === 'ADMIN' ? '/admin' : '/dashboard');
+  };
+
+  const handleBackFromTrainer = () => {
+    setSelectedTrainerId(null);
     setCurrentPath(userRole === 'ADMIN' ? '/admin' : '/dashboard');
   };
 
@@ -61,11 +70,13 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   return {
     currentPath,
     selectedRepId,
+    selectedTrainerId,
     repsFilter,
     handleNavigate,
     handleRepClick,
     handleTrainerClick,
     handleBackFromRep,
+    handleBackFromTrainer,
     handleBackFromAddRep,
     handleStatCardClick,
     setRepsFilter
