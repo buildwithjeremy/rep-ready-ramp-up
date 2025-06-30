@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Rep, ChecklistItem } from "@/types";
 import { RepContactCard } from "./rep-contact-card";
@@ -10,16 +11,14 @@ interface RepProfileProps {
 }
 
 export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
-  const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>({});
-  const [celebratingSteps, setCelebratingSteps] = useState<Record<string, boolean>>({});
+  const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
+  const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, boolean>>({});
   const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
 
-  const toggleStage = (stage: number) => {
-    if (stage > rep.stage) return;
-    
-    setExpandedStages(prev => ({
+  const toggleMilestone = (milestone: number) => {
+    setExpandedMilestones(prev => ({
       ...prev,
-      [stage]: !prev[stage]
+      [milestone]: !prev[milestone]
     }));
   };
 
@@ -48,9 +47,9 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
         };
 
         if (allSubtasksCompleted && wasIncomplete) {
-          setCelebratingSteps(prev => ({ ...prev, [item.id]: true }));
+          setCelebratingMilestones(prev => ({ ...prev, [item.id]: true }));
           setTimeout(() => {
-            setCelebratingSteps(prev => ({ ...prev, [item.id]: false }));
+            setCelebratingMilestones(prev => ({ ...prev, [item.id]: false }));
           }, 2000);
         }
 
@@ -64,12 +63,12 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
       sum + item.subtasks.filter(st => st.isCompleted).length, 0);
     const overallProgress = Math.round((completedSubtasks / totalSubtasks) * 100);
 
-    const completedStages = updatedChecklist.filter(item => item.isCompleted).length;
-    const currentStage = Math.min(completedStages + 1, 13);
+    const completedMilestones = updatedChecklist.filter(item => item.isCompleted).length;
+    const currentMilestone = Math.min(completedMilestones + 1, 10);
     
     let status: Rep['status'] = 'Active';
     const wasNotIndependent = rep.status !== 'Independent';
-    if (currentStage === 13 && overallProgress === 100) {
+    if (currentMilestone === 10 && overallProgress === 100) {
       status = 'Independent';
       // Trigger celebration if they just became independent
       if (wasNotIndependent) {
@@ -86,7 +85,7 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
       ...rep,
       checklist: updatedChecklist,
       overallProgress,
-      stage: currentStage,
+      milestone: currentMilestone,
       status,
       lastActivity: new Date().toISOString()
     };
@@ -130,9 +129,9 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
               key={item.id}
               item={item}
               rep={rep}
-              isExpanded={expandedStages[item.stage] || false}
-              isCelebrating={celebratingSteps[item.id] || false}
-              onToggle={() => toggleStage(item.stage)}
+              isExpanded={expandedMilestones[item.milestone] || false}
+              isCelebrating={celebratingMilestones[item.id] || false}
+              onToggle={() => toggleMilestone(item.milestone)}
               onSubtaskToggle={(subtaskId, isCompleted) => 
                 handleSubtaskToggle(item.id, subtaskId, isCompleted)
               }

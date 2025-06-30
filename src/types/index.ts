@@ -5,7 +5,7 @@ export interface Rep {
   email: string;
   phone: string;
   trainerId: string;
-  stage: number; // 1-13
+  milestone: number; // 1-10 (changed from stage)
   status: 'Active' | 'Independent' | 'Stuck' | 'Inactive';
   overallProgress: number; // 0-100
   dateAdded: string;
@@ -15,7 +15,7 @@ export interface Rep {
 
 export interface ChecklistItem {
   id: string;
-  stage: number;
+  milestone: number; // changed from stage
   title: string;
   description: string;
   subtasks: Subtask[];

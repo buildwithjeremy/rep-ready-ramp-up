@@ -1,135 +1,115 @@
+
 import { Rep, Trainer, ChecklistItem } from '@/types';
 
-// 13-step checklist template
+// 10-milestone checklist template based on the provided table
 export const checklistTemplate: Omit<ChecklistItem, 'id' | 'isCompleted' | 'completedDate'>[] = [
   {
-    stage: 1,
-    title: "Welcome & Onboarding",
+    milestone: 1,
+    title: "Orientation Kick-Off",
     description: "Initial setup and introduction to the program",
     subtasks: [
-      { id: '1-1', title: "Complete welcome call", isCompleted: false },
-      { id: '1-2', title: "Set up workspace", isCompleted: false },
-      { id: '1-3', title: "Review program materials", isCompleted: false }
+      { id: '1-1', title: 'Receive "A IBA Day" text', isCompleted: false },
+      { id: '1-2', title: 'Download Primerica app', isCompleted: false },
+      { id: '1-3', title: 'Create ExamFX login', isCompleted: false },
+      { id: '1-4', title: 'Watch orientation video', isCompleted: false },
+      { id: '1-5', title: 'Join Telegram and Facebook groups', isCompleted: false }
     ]
   },
   {
-    stage: 2,
-    title: "Basic Training",
-    description: "Learn fundamental skills and processes",
+    milestone: 2,
+    title: "Licensing Prep & Study",
+    description: "Prepare for licensing and study requirements",
     subtasks: [
-      { id: '2-1', title: "Complete training modules 1-3", isCompleted: false },
-      { id: '2-2', title: "Pass basic knowledge quiz", isCompleted: false },
-      { id: '2-3', title: "Practice role-play scenarios", isCompleted: false }
+      { id: '2-1', title: 'Read Success Plan', isCompleted: false },
+      { id: '2-2', title: 'Schedule ReferSecure.com appointment', isCompleted: false },
+      { id: '2-3', title: 'Pass ExamFX Quiz #1', isCompleted: false },
+      { id: '2-4', title: 'Join Pre-Licensing chat', isCompleted: false },
+      { id: '2-5', title: 'Add Team Tenacious calendar', isCompleted: false }
     ]
   },
   {
-    stage: 3,
-    title: "Product Knowledge",
-    description: "Master product features and benefits",
+    milestone: 3,
+    title: "Market Launch Setup",
+    description: "Set up marketing and social media presence",
     subtasks: [
-      { id: '3-1', title: "Study product catalog", isCompleted: false },
-      { id: '3-2', title: "Complete product quiz", isCompleted: false },
-      { id: '3-3', title: "Shadow experienced rep", isCompleted: false }
+      { id: '3-1', title: 'Share weekly open hours', isCompleted: false },
+      { id: '3-2', title: 'Watch Facebook marketing video', isCompleted: false },
+      { id: '3-3', title: 'Download Boards app', isCompleted: false },
+      { id: '3-4', title: 'Make first Facebook post', isCompleted: false }
     ]
   },
   {
-    stage: 4,
-    title: "Sales Fundamentals",
-    description: "Learn core sales techniques",
+    milestone: 4,
+    title: "Appointment Setting",
+    description: "Learn to set and manage appointments",
     subtasks: [
-      { id: '4-1', title: "Complete sales training", isCompleted: false },
-      { id: '4-2', title: "Practice pitch delivery", isCompleted: false },
-      { id: '4-3', title: "Learn objection handling", isCompleted: false }
+      { id: '4-1', title: 'Watch market appointment video', isCompleted: false },
+      { id: '4-2', title: 'Begin setting market appointments on own', isCompleted: false }
     ]
   },
   {
-    stage: 5,
-    title: "Field Practice",
-    description: "Apply skills in real scenarios",
+    milestone: 5,
+    title: "Personal Plan (MASTER COPY)",
+    description: "Complete personal insurance plan and analysis",
     subtasks: [
-      { id: '5-1', title: "Complete 5 practice calls", isCompleted: false },
-      { id: '5-2', title: "Receive feedback session", isCompleted: false },
-      { id: '5-3', title: "Improve based on feedback", isCompleted: false }
+      { id: '5-1', title: 'Close Personal Term Life Plan', isCompleted: false },
+      { id: '5-2', title: 'Review Financial Needs Analysis (FNA)', isCompleted: false },
+      { id: '5-3', title: 'Become Master Copy', isCompleted: false }
     ]
   },
   {
-    stage: 6,
-    title: "Client Interaction",
-    description: "Begin working with real clients",
+    milestone: 6,
+    title: "Team Tenacious Trainings",
+    description: "Attend all required team training sessions",
     subtasks: [
-      { id: '6-1', title: "Make first client contact", isCompleted: false },
-      { id: '6-2', title: "Complete needs assessment", isCompleted: false },
-      { id: '6-3', title: "Present initial proposal", isCompleted: false }
+      { id: '6-1', title: 'Attend TT Training #1', isCompleted: false },
+      { id: '6-2', title: 'Attend TT Training #2', isCompleted: false },
+      { id: '6-3', title: 'Attend TT Training #3', isCompleted: false }
     ]
   },
   {
-    stage: 7,
-    title: "Lead Generation",
-    description: "Learn to find and qualify prospects",
+    milestone: 7,
+    title: "Sprint to District — Observation Phase ★ Target (S2D)",
+    description: "Complete observation phase with trainer-run sessions",
     subtasks: [
-      { id: '7-1', title: "Set up lead sources", isCompleted: false },
-      { id: '7-2', title: "Complete 10 cold calls", isCompleted: false },
-      { id: '7-3', title: "Generate 5 qualified leads", isCompleted: false }
+      { id: '7-1', title: 'Interview Observation #1 (trainer-run)', isCompleted: false },
+      { id: '7-2', title: 'Interview Observation #2 (trainer-run)', isCompleted: false },
+      { id: '7-3', title: 'Interview Observation #3 (trainer-run)', isCompleted: false },
+      { id: '7-4', title: 'Client-Experience Observation #1 (trainer-run)', isCompleted: false },
+      { id: '7-5', title: 'Client-Experience Observation #2 (trainer-run)', isCompleted: false },
+      { id: '7-6', title: 'Client-Experience Observation #3 (trainer-run)', isCompleted: false },
+      { id: '7-7', title: '$3,000 in premiums reached', isCompleted: false }
     ]
   },
   {
-    stage: 8,
-    title: "Closing Techniques",
-    description: "Master the art of closing deals",
+    milestone: 8,
+    title: "Interview Closes (3) - Target INDEPENDENT",
+    description: "Complete interview closes independently to recruit new reps",
     subtasks: [
-      { id: '8-1', title: "Learn closing techniques", isCompleted: false },
-      { id: '8-2', title: "Practice with trainer", isCompleted: false },
-      { id: '8-3', title: "Close first deal", isCompleted: false }
+      { id: '8-1', title: 'Interview Close #1 (rep run)', isCompleted: false },
+      { id: '8-2', title: 'Interview Close #2 (rep run)', isCompleted: false },
+      { id: '8-3', title: 'Interview Close #3 (rep run)', isCompleted: false }
     ]
   },
   {
-    stage: 9,
-    title: "Pipeline Management",
-    description: "Organize and track opportunities",
+    milestone: 9,
+    title: "Client-Experience Closes & Premium - Target INDEPENDENT",
+    description: "Complete client experience closes independently",
     subtasks: [
-      { id: '9-1', title: "Set up CRM system", isCompleted: false },
-      { id: '9-2', title: "Track all prospects", isCompleted: false },
-      { id: '9-3', title: "Weekly pipeline review", isCompleted: false }
+      { id: '9-1', title: 'Close Client Experience #1', isCompleted: false },
+      { id: '9-2', title: 'Close Client Experience #2', isCompleted: false },
+      { id: '9-3', title: 'Close Client Experience #3', isCompleted: false }
     ]
   },
   {
-    stage: 10,
-    title: "Advanced Skills",
-    description: "Develop sophisticated techniques",
+    milestone: 10,
+    title: "Licensing/INDEPENDENT Field-Trainer Ready",
+    description: "Complete licensing and achieve independent status",
     subtasks: [
-      { id: '10-1', title: "Advanced negotiation training", isCompleted: false },
-      { id: '10-2', title: "Complex deal management", isCompleted: false },
-      { id: '10-3', title: "Team collaboration skills", isCompleted: false }
-    ]
-  },
-  {
-    stage: 11,
-    title: "Performance Metrics",
-    description: "Track and improve key metrics",
-    subtasks: [
-      { id: '11-1', title: "Set performance goals", isCompleted: false },
-      { id: '11-2', title: "Weekly metrics review", isCompleted: false },
-      { id: '11-3', title: "Improvement action plan", isCompleted: false }
-    ]
-  },
-  {
-    stage: 12,
-    title: "Independence Prep",
-    description: "Prepare for independent work",
-    subtasks: [
-      { id: '12-1', title: "Solo client management", isCompleted: false },
-      { id: '12-2', title: "Self-directed planning", isCompleted: false },
-      { id: '12-3', title: "Peer mentoring skills", isCompleted: false }
-    ]
-  },
-  {
-    stage: 13,
-    title: "Independent Status",
-    description: "Achieve full independence",
-    subtasks: [
-      { id: '13-1', title: "Final performance review", isCompleted: false },
-      { id: '13-2', title: "Independence certification", isCompleted: false },
-      { id: '13-3', title: "Transition to independent", isCompleted: false }
+      { id: '10-1', title: 'Complete ExamFX training', isCompleted: false },
+      { id: '10-2', title: 'Pass State Life Licensing Exam', isCompleted: false },
+      { id: '10-3', title: 'Submit licensing paperwork and background check', isCompleted: false },
+      { id: '10-4', title: 'Appointed by Primerica', isCompleted: false }
     ]
   }
 ];
@@ -170,17 +150,17 @@ export const mockTrainers: Trainer[] = [
   }
 ];
 
-// Helper function to generate a complete checklist for a rep at a specific stage
-const generateChecklist = (stage: number): ChecklistItem[] => {
+// Helper function to generate a complete checklist for a rep at a specific milestone
+const generateChecklist = (milestone: number): ChecklistItem[] => {
   return checklistTemplate.map((template, index) => ({
     ...template,
     id: `checklist-${index + 1}`,
-    isCompleted: index + 1 < stage,
-    completedDate: index + 1 < stage ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : undefined,
+    isCompleted: index + 1 < milestone,
+    completedDate: index + 1 < milestone ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : undefined,
     subtasks: template.subtasks.map(subtask => ({
       ...subtask,
-      isCompleted: index + 1 < stage || (index + 1 === stage && Math.random() > 0.5),
-      completedDate: index + 1 < stage ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : undefined
+      isCompleted: index + 1 < milestone || (index + 1 === milestone && Math.random() > 0.5),
+      completedDate: index + 1 < milestone ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : undefined
     }))
   }));
 };
@@ -192,12 +172,12 @@ export const mockReps: Rep[] = [
     email: 'john.smith@email.com',
     phone: '555-0101',
     trainerId: 'trainer-1',
-    stage: 8,
+    milestone: 6,
     status: 'Active',
-    overallProgress: 65,
+    overallProgress: 55,
     dateAdded: '2024-05-15',
     lastActivity: '2024-06-22',
-    checklist: generateChecklist(8)
+    checklist: generateChecklist(6)
   },
   {
     id: 'rep-2',
@@ -205,12 +185,12 @@ export const mockReps: Rep[] = [
     email: 'emily.davis@email.com',
     phone: '555-0102',
     trainerId: 'trainer-1',
-    stage: 4,
+    milestone: 3,
     status: 'Stuck',
     overallProgress: 25,
     dateAdded: '2024-04-20',
     lastActivity: '2024-06-20',
-    checklist: generateChecklist(4)
+    checklist: generateChecklist(3)
   },
   {
     id: 'rep-3',
@@ -218,12 +198,12 @@ export const mockReps: Rep[] = [
     email: 'alex.johnson@email.com',
     phone: '555-0103',
     trainerId: 'trainer-2',
-    stage: 13,
+    milestone: 10,
     status: 'Independent',
     overallProgress: 100,
     dateAdded: '2024-03-10',
     lastActivity: '2024-06-24',
-    checklist: generateChecklist(13)
+    checklist: generateChecklist(10)
   },
   {
     id: 'rep-4',
@@ -231,11 +211,11 @@ export const mockReps: Rep[] = [
     email: 'maria.garcia@email.com',
     phone: '555-0104',
     trainerId: 'trainer-3',
-    stage: 6,
+    milestone: 4,
     status: 'Active',
-    overallProgress: 45,
+    overallProgress: 35,
     dateAdded: '2024-05-01',
     lastActivity: '2024-06-24',
-    checklist: generateChecklist(6)
+    checklist: generateChecklist(4)
   }
 ];

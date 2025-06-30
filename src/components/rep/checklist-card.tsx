@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Check, Lock } from "lucide-react";
+import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import { ChecklistItem, Rep } from "@/types";
 
 interface ChecklistCardProps {
@@ -34,78 +34,57 @@ export function ChecklistCard({
     });
   };
 
-  const getStepStatus = () => {
+  const getMilestoneStatus = () => {
     if (item.isCompleted) return 'COMPLETED';
-    if (item.stage === rep.stage) return 'IN PROGRESS';
-    if (item.stage > rep.stage) return 'LOCKED';
+    if (item.milestone === rep.milestone) return 'IN PROGRESS';
     return 'AVAILABLE';
   };
 
-  const getStepStatusColor = (status: string) => {
+  const getMilestoneStatusColor = (status: string) => {
     switch (status) {
       case 'COMPLETED': return 'text-green-600';
       case 'IN PROGRESS': return 'text-orange-600';
-      case 'LOCKED': return 'text-gray-400';
       default: return 'text-gray-600';
     }
   };
 
-  const isStepLocked = () => {
-    return item.stage > rep.stage;
-  };
-
   const getCardClasses = () => {
-    let classes = "transition-all duration-200 ease-in-out rounded-lg ";
+    let classes = "transition-all duration-200 ease-in-out rounded-lg border border-gray-200 ";
     
-    if (item.stage === rep.stage && !item.isCompleted) {
+    if (item.milestone === rep.milestone && !item.isCompleted) {
       classes += "border-2 border-orange-300 ";
-    } else {
-      classes += "border border-gray-200 ";
     }
     
-    if (isStepLocked()) {
-      classes += "opacity-60 ";
-    } else {
-      classes += "hover:shadow-md hover:border-gray-300 ";
-    }
+    classes += "hover:shadow-md hover:border-gray-300 ";
     
     return classes;
   };
 
   const completedSubtasks = getCompletedSubtasks();
   const totalSubtasks = item.subtasks.length;
-  const stepStatus = getStepStatus();
-  const isLocked = isStepLocked();
+  const milestoneStatus = getMilestoneStatus();
 
   return (
     <Card className={getCardClasses()}>
       <Collapsible 
         open={isExpanded}
         onOpenChange={onToggle}
-        disabled={isLocked}
       >
         <CollapsibleTrigger asChild>
-          <CardHeader className={`cursor-pointer transition-colors p-4 rounded-lg ${!isLocked ? 'hover:bg-gray-50 active:bg-gray-100' : 'cursor-not-allowed'}`}>
+          <CardHeader className="cursor-pointer transition-colors p-4 rounded-lg hover:bg-gray-50 active:bg-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 relative ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
                   item.isCompleted 
                     ? 'bg-green-500 text-white' 
-                    : isLocked
-                      ? 'bg-gray-300 text-gray-500'
-                      : item.stage === rep.stage 
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
+                    : item.milestone === rep.milestone 
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-gray-200 text-gray-600'
                 }`}>
                   {item.isCompleted ? (
                     <Check className="w-4 h-4" />
-                  ) : isLocked ? (
-                    <>
-                      <span className="text-xs">{item.stage}</span>
-                      <Lock className="w-3 h-3 text-gray-400 absolute -top-1 -right-1" />
-                    </>
                   ) : (
-                    item.stage
+                    item.milestone
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -116,10 +95,10 @@ export function ChecklistCard({
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className={`text-xs font-normal ${getStepStatusColor(stepStatus)}`}>
-                      {stepStatus === 'LOCKED' ? 'Locked' : stepStatus.toLowerCase()}
+                    <span className={`text-xs font-normal ${getMilestoneStatusColor(milestoneStatus)}`}>
+                      {milestoneStatus.toLowerCase()}
                     </span>
-                    {!item.isCompleted && !isLocked && (
+                    {!item.isCompleted && (
                       <span className="text-xs text-gray-500 ml-auto">
                         {completedSubtasks}/{totalSubtasks}
                       </span>
@@ -128,11 +107,10 @@ export function ChecklistCard({
                 </div>
               </div>
               <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-                {!isLocked && (
-                  isExpanded ? 
-                    <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                )}
+                {isExpanded ? 
+                  <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                }
               </div>
             </div>
           </CardHeader>
