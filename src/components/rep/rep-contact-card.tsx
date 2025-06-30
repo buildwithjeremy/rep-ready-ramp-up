@@ -37,7 +37,7 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
           </Button>
           <div className="flex-1 min-w-0">
             <h1 className="font-bold text-lg truncate">{rep.name}</h1>
-            <p className="text-sm text-gray-600">Stage {rep.stage} of 13</p>
+            <p className="text-sm text-gray-600">Milestone {rep.milestone} of 10</p>
           </div>
         </div>
 

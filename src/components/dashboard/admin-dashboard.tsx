@@ -155,7 +155,7 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
               <div>
                 <p className="font-medium">{rep.name}</p>
                 <p className="text-sm text-gray-600">
-                  Stage {rep.stage} • {rep.overallProgress}% complete
+                  Milestone {rep.milestone} • {rep.overallProgress}% complete
                 </p>
               </div>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${

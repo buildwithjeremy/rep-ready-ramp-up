@@ -52,7 +52,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }:
   const getLastCompletedTask = (rep: Rep) => {
     // Find the last completed task
     const completedTasks = rep.checklist
-      .flatMap(stage => stage.subtasks.filter(task => task.isCompleted))
+      .flatMap(milestone => milestone.subtasks.filter(task => task.isCompleted))
       .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime());
     
     return completedTasks[0]?.title || 'No tasks completed';
@@ -81,7 +81,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }:
                   >
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{rep.name}</p>
-                      <p className="text-sm text-gray-600">Stage {rep.stage}</p>
+                      <p className="text-sm text-gray-600">Milestone {rep.milestone}</p>
                       <p className="text-xs text-gray-500">
                         {daysSinceLastActivity} days since last activity
                       </p>
@@ -129,7 +129,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }:
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h3 className="font-semibold text-gray-900">{rep.name}</h3>
-                    <p className="text-sm text-gray-600">Stage {rep.stage} of 13</p>
+                    <p className="text-sm text-gray-600">Milestone {rep.milestone} of 10</p>
                   </div>
                   <Badge className={getStatusColor(rep.status)}>
                     {rep.status}

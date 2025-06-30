@@ -1,7 +1,7 @@
 
 import { Rep, Trainer } from "@/types";
 
-export type RepSortOption = 'name' | 'stage' | 'status' | 'lastActivity' | 'progress';
+export type RepSortOption = 'name' | 'milestone' | 'status' | 'lastActivity' | 'progress';
 export type RepFilterOption = 'all' | 'active' | 'stuck' | 'independent' | 'inactive';
 export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate';
 
@@ -10,8 +10,8 @@ export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
     switch (sortBy) {
       case 'name':
         return a.name.localeCompare(b.name);
-      case 'stage':
-        return b.stage - a.stage; // Higher stages first
+      case 'milestone':
+        return b.milestone - a.milestone; // Higher milestones first
       case 'status':
         const statusOrder = { 'Independent': 0, 'Active': 1, 'Stuck': 2, 'Inactive': 3 };
         return statusOrder[a.status] - statusOrder[b.status];

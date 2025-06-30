@@ -23,7 +23,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
 
   const getLastCompletedTask = (rep: Rep) => {
     const completedTasks = rep.checklist
-      .flatMap(stage => stage.subtasks.filter(task => task.isCompleted))
+      .flatMap(milestone => milestone.subtasks.filter(task => task.isCompleted))
       .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime());
     
     return completedTasks[0]?.title || 'No tasks completed';
@@ -94,7 +94,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
                 <div key={rep.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium">{rep.name}</p>
-                    <p className="text-sm text-gray-600">Stage {rep.stage}</p>
+                    <p className="text-sm text-gray-600">Milestone {rep.milestone}</p>
                     <p className="text-xs text-gray-500">
                       {daysSinceLastActivity} days since last activity
                     </p>
@@ -127,7 +127,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="font-medium">{rep.name}</h3>
-                  <p className="text-sm text-gray-600">Stage {rep.stage} of 13</p>
+                  <p className="text-sm text-gray-600">Milestone {rep.milestone} of 10</p>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   rep.status === 'Active' ? 'bg-green-100 text-green-800' :

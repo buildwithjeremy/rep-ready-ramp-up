@@ -46,7 +46,7 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
       email: data.email,
       phone: data.phone,
       trainerId,
-      stage: 1,
+      milestone: 1,
       status: 'Active',
       overallProgress: 0,
       dateAdded: new Date().toISOString().split('T')[0],
@@ -192,7 +192,7 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
             <h3 className="font-medium text-blue-900 mb-2">What happens next?</h3>
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Rep will be assigned to your training pipeline</li>
-              <li>• They'll start at Stage 1 of the 13-step checklist</li>
+              <li>• They'll start at Milestone 1 of the 10-milestone checklist</li>
               <li>• You can track their progress in your dashboard</li>
               <li>• System will flag if they get stuck (no progress in 48hrs)</li>
             </ul>
