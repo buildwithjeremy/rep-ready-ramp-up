@@ -2,16 +2,28 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Trophy } from "lucide-react";
-import { Trainer } from "@/types";
+import { ProgressBar } from "@/components/common/progress-bar";
+import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Trainer, Rep } from "@/types";
 
 interface TrainerContactCardProps {
   trainer: Trainer;
+  reps: Rep[];
   onBack: () => void;
 }
 
-export function TrainerContactCard({ trainer, onBack }: TrainerContactCardProps) {
+export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+
+  // Calculate average progress of active reps
+  const activeReps = reps.filter(rep => rep.status === 'Active');
+  const averageProgress = activeReps.length > 0 
+    ? Math.round(activeReps.reduce((sum, rep) => sum + rep.overallProgress, 0) / activeReps.length)
+    : 0;
+
+  // Format dates (using mock data for now)
+  const dateAdded = "5/14/2024";
+  const lastActivity = "6/21/2024";
 
   return (
     <Card className="bg-white shadow-sm sticky top-0 z-10">
@@ -27,36 +39,36 @@ export function TrainerContactCard({ trainer, onBack }: TrainerContactCardProps)
           </div>
         </div>
 
-        {/* Main Profile Info */}
+        {/* Profile Section */}
         <div className="flex items-center space-x-4 mb-4">
           <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
             {trainer.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-center">
-                <p className="font-semibold text-lg text-blue-600">{trainer.successRate}%</p>
-                <p className="text-xs text-gray-600">Success Rate</p>
+            <div className="mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-gray-700">Team Average Progress</span>
+                <span className="text-sm font-bold text-blue-600">{averageProgress}%</span>
               </div>
-              <div className="text-center">
-                <p className="font-semibold text-lg text-green-600">{trainer.assignedReps}</p>
-                <p className="text-xs text-gray-600">Total Reps</p>
-              </div>
+              <ProgressBar progress={averageProgress} size="md" />
+              <p className="text-xs text-gray-500 mt-1">
+                Based on {activeReps.length} active rep{activeReps.length !== 1 ? 's' : ''}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Quick Stats Row */}
         <div className="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
-          <div>
+          <div className="bg-green-50 p-2 rounded-lg">
             <p className="font-semibold text-green-600">{trainer.activeReps}</p>
             <p className="text-xs text-gray-600">Active</p>
           </div>
-          <div>
+          <div className="bg-blue-50 p-2 rounded-lg">
             <p className="font-semibold text-blue-600">{trainer.independentReps}</p>
             <p className="text-xs text-gray-600">Independent</p>
           </div>
-          <div>
+          <div className="bg-red-50 p-2 rounded-lg">
             <p className="font-semibold text-red-600">{trainer.stuckReps}</p>
             <p className="text-xs text-gray-600">Stuck</p>
           </div>
@@ -84,8 +96,20 @@ export function TrainerContactCard({ trainer, onBack }: TrainerContactCardProps)
                 <span className="truncate">{trainer.email}</span>
               </div>
               <div className="flex items-center">
-                <Trophy className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Avg. Time to Independent: {trainer.averageTimeToIndependent} days</span>
+                <Phone className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">555-0101</span>
+              </div>
+              <div className="flex items-center">
+                <User className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">Presenter: Sarah Johnson</span>
+              </div>
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">Added {dateAdded}</span>
+              </div>
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <span className="truncate">Last activity: {lastActivity}</span>
               </div>
             </div>
           </div>

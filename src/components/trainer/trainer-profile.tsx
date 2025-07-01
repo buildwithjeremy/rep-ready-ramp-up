@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, Calendar, Users, Trophy, TrendingUp, Target } from "lucide-react";
+import { ArrowLeft, Users, Trophy } from "lucide-react";
 import { Trainer, Rep } from "@/types";
 import { TrainerContactCard } from "./trainer-contact-card";
 import { TrainerScorecard } from "./trainer-scorecard";
@@ -23,8 +22,8 @@ export function TrainerProfile({ trainer, reps, onBack, onRepClick, onUpdateTrai
   const trainerReps = reps.filter(rep => rep.trainerId === trainer.id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TrainerContactCard trainer={trainer} onBack={onBack} />
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <TrainerContactCard trainer={trainer} reps={trainerReps} onBack={onBack} />
       
       <div className="px-4 py-4 space-y-4">
         {/* Tab Navigation */}
@@ -54,17 +53,19 @@ export function TrainerProfile({ trainer, reps, onBack, onRepClick, onUpdateTrai
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'scorecard' && (
-          <TrainerScorecard trainer={trainer} />
-        )}
+        <div className="pb-4">
+          {activeTab === 'scorecard' && (
+            <TrainerScorecard trainer={trainer} />
+          )}
 
-        {activeTab === 'reps' && (
-          <AllReps
-            reps={trainerReps}
-            onRepClick={onRepClick}
-            title={`${trainer.name}'s Reps`}
-          />
-        )}
+          {activeTab === 'reps' && (
+            <AllReps
+              reps={trainerReps}
+              onRepClick={onRepClick}
+              title={`${trainer.name}'s Reps`}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
