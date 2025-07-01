@@ -1,13 +1,13 @@
 
-import { useState, useEffect } from "react";
-import { Rep } from "@/types";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ProgressBar } from "@/components/common/progress-bar";
+import { Button } from "@/components/ui/button";
 import { FilterControls } from "@/components/common/filter-controls";
-import { sortReps, filterReps, RepSortOption, RepFilterOption } from "@/utils/filterUtils";
-import { AlertTriangle } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { ProgressBar } from "@/components/common/progress-bar";
+import { Users, UserPlus } from "lucide-react";
+import { Rep } from "@/types";
+import { RepSortOption, RepFilterOption, sortReps, filterReps } from "@/utils/filterUtils";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 
 interface AllRepsProps {
   reps: Rep[];
@@ -16,91 +16,37 @@ interface AllRepsProps {
   initialFilter?: RepFilterOption;
 }
 
-export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }: AllRepsProps) {
+export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'all' }: AllRepsProps) {
   const [sortBy, setSortBy] = useState<RepSortOption>('name');
-  const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter || 'all');
+  const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter);
 
-  // Update filter when initialFilter changes
-  useEffect(() => {
-    if (initialFilter) {
-      setFilterBy(initialFilter);
-    }
-  }, [initialFilter]);
+  const filteredReps = filterReps(reps, filterBy);
+  const sortedReps = sortReps(filteredReps, sortBy);
 
-  const filteredAndSortedReps = sortReps(filterReps(reps, filterBy), sortBy);
-  const stuckReps = reps.filter(rep => rep.status === 'Stuck');
-
-  const getStatusColor = (status: Rep['status']) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Independent':
-        return 'bg-blue-100 text-blue-800';
-      case 'Stuck':
-        return 'bg-red-100 text-red-800';
-      case 'Inactive':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getDaysSinceLastActivity = (lastActivity: string) => {
-    return differenceInDays(new Date(), new Date(lastActivity));
-  };
-
-  const getLastCompletedTask = (rep: Rep) => {
-    // Find the last completed task
-    const completedTasks = rep.checklist
-      .flatMap(milestone => milestone.subtasks.filter(task => task.isCompleted))
-      .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime());
-    
-    return completedTasks[0]?.title || 'No tasks completed';
+  const handleAddRep = () => {
+    // Navigate to add rep form
+    window.location.hash = '/add-rep';
   };
 
   return (
-    <div className="space-y-4 pb-24 max-h-screen overflow-y-auto">
-      {/* Stuck Reps Alert */}
-      {stuckReps.length > 0 && (
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-red-700 mb-3">
-              <AlertTriangle className="w-5 h-5" />
-              <h3 className="font-semibold">Stuck Reps Require Attention</h3>
-            </div>
-            <div className="space-y-2">
-              {stuckReps.map((rep) => {
-                const daysSinceLastActivity = getDaysSinceLastActivity(rep.lastActivity);
-                const lastTask = getLastCompletedTask(rep);
-                
-                return (
-                  <div
-                    key={rep.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50"
-                    onClick={() => onRepClick(rep.id)}
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{rep.name}</p>
-                      <p className="text-sm text-gray-600">Milestone {rep.milestone}</p>
-                      <p className="text-xs text-gray-500">
-                        {daysSinceLastActivity} days since last activity
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Last task: {lastTask}
-                      </p>
-                    </div>
-                    <button className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800">
-                      View
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+    <div className="space-y-4 pb-20">
+      {/* Header with Add Rep Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{title}</h1>
+          <span className="text-sm text-gray-500">{sortedReps.length} reps</span>
+        </div>
+        <Button 
+          onClick={handleAddRep}
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="w-4 h-4" />
+          Add Rep
+        </Button>
+      </div>
 
-      {/* Filter Controls */}
+      {/* Filters */}
       <FilterControls
         sortBy={sortBy}
         filterBy={filterBy}
@@ -110,45 +56,58 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter }:
 
       {/* Reps List */}
       <div className="space-y-3">
-        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-        
-        {filteredAndSortedReps.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-gray-500">No reps found matching your filters.</p>
+        {sortedReps.map(rep => (
+          <Card 
+            key={rep.id}
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onRepClick(rep.id)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {rep.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{rep.name}</h3>
+                    <p className="text-sm text-gray-600">{rep.email}</p>
+                  </div>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  rep.status === 'Active' ? 'bg-green-100 text-green-800' :
+                  rep.status === 'Stuck' ? 'bg-red-100 text-red-800' :
+                  rep.status === 'Independent' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {rep.status}
+                </span>
+              </div>
+              
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700">
+                    Milestone {rep.milestone}
+                  </span>
+                  <span className="text-sm font-bold text-blue-600">{rep.overallProgress}%</span>
+                </div>
+                <ProgressBar progress={rep.overallProgress} size="sm" />
+              </div>
+              
+              <div className="flex justify-between items-center text-sm text-gray-600">
+                <span>Stage: {rep.stage}</span>
+                <span>Last activity: {rep.lastActivity}</span>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          filteredAndSortedReps.map((rep) => (
-            <Card
-              key={rep.id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => onRepClick(rep.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{rep.name}</h3>
-                    <p className="text-sm text-gray-600">Milestone {rep.milestone} of 10</p>
-                  </div>
-                  <Badge className={getStatusColor(rep.status)}>
-                    {rep.status}
-                  </Badge>
-                </div>
-                
-                <ProgressBar 
-                  progress={rep.overallProgress} 
-                  className="mb-2"
-                />
-                
-                <p className="text-sm text-gray-500">
-                  Last activity: {format(new Date(rep.lastActivity), 'M/d/yyyy')}
-                </p>
-              </CardContent>
-            </Card>
-          ))
-        )}
+        ))}
       </div>
+
+      {sortedReps.length === 0 && (
+        <div className="text-center py-8">
+          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No reps found matching your criteria</p>
+        </div>
+      )}
     </div>
   );
 }

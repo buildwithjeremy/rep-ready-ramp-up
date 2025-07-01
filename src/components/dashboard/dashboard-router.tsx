@@ -1,8 +1,10 @@
+
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
 import { RepProfile } from "@/components/rep/rep-profile";
 import { AddRepForm } from "@/components/rep/add-rep-form";
 import { AllReps } from "@/components/rep/all-reps";
+import { AllTrainers } from "@/components/trainer/all-trainers";
 import { mockTrainers } from "@/data/mockData";
 import { Rep, Trainer } from "@/types";
 import { RepFilterOption } from "@/utils/filterUtils";
@@ -107,6 +109,16 @@ export function DashboardRouter({
         reps={reps}
         onBack={onBackFromTrainer}
         onRepClick={onRepClick}
+      />
+    );
+  }
+
+  if (currentPath === '/trainers' && userRole === 'ADMIN') {
+    return (
+      <AllTrainers
+        trainers={mockTrainers}
+        onTrainerClick={onTrainerClick}
+        title="All Trainers"
       />
     );
   }

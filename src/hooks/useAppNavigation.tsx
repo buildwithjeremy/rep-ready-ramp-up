@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Rep } from '@/types';
 import { RepFilterOption } from '@/utils/filterUtils';
@@ -59,7 +60,7 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   };
 
   const handleBackFromAddRep = () => {
-    setCurrentPath('/dashboard');
+    setCurrentPath('/reps');
   };
 
   const handleStatCardClick = (filter: 'all' | 'active' | 'stuck' | 'independent') => {

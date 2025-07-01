@@ -1,5 +1,5 @@
 
-import { Home, Users, UserPlus, BarChart3 } from "lucide-react";
+import { Home, Users, UserPlus, BarChart3, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -20,7 +20,7 @@ export function MobileNav({ currentPath, userRole, onNavigate }: MobileNavProps)
     ? [
         { icon: BarChart3, label: 'Admin', href: '/admin', active: currentPath === '/admin' },
         { icon: Users, label: 'Reps', href: '/reps', active: currentPath === '/reps' },
-        { icon: UserPlus, label: 'Add Rep', href: '/add-rep', active: currentPath === '/add-rep' }
+        { icon: UserCheck, label: 'Trainers', href: '/trainers', active: currentPath === '/trainers' }
       ]
     : [
         { icon: Home, label: 'Dashboard', href: '/dashboard', active: currentPath === '/dashboard' },
