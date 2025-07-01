@@ -13,6 +13,7 @@ interface AppLayoutProps {
   trainerId: string | null;
   currentPath: string;
   selectedRepId: string | null;
+  selectedTrainerId: string | null;
   reps: Rep[];
   repsFilter: RepFilterOption;
   onSignOut: () => Promise<void>;
@@ -22,6 +23,7 @@ interface AppLayoutProps {
   onTrainerClick: (trainerId: string) => void;
   onStatCardClick: (filter: 'all' | 'active' | 'stuck' | 'independent') => void;
   onBackFromRep: () => void;
+  onBackFromTrainer: () => void;
   onBackFromAddRep: () => void;
   onAddRep: (rep: Rep) => void;
   onUpdateRep: (rep: Rep) => void;
@@ -35,6 +37,7 @@ export function AppLayout({
   trainerId,
   currentPath,
   selectedRepId,
+  selectedTrainerId,
   reps,
   repsFilter,
   onSignOut,
@@ -44,6 +47,7 @@ export function AppLayout({
   onTrainerClick,
   onStatCardClick,
   onBackFromRep,
+  onBackFromTrainer,
   onBackFromAddRep,
   onAddRep,
   onUpdateRep
@@ -65,12 +69,14 @@ export function AppLayout({
           userId={userId}
           trainerId={trainerId}
           selectedRepId={selectedRepId}
+          selectedTrainerId={selectedTrainerId}
           reps={reps}
           repsFilter={repsFilter}
           onRepClick={onRepClick}
           onTrainerClick={onTrainerClick}
           onStatCardClick={onStatCardClick}
           onBackFromRep={onBackFromRep}
+          onBackFromTrainer={onBackFromTrainer}
           onBackFromAddRep={onBackFromAddRep}
           onAddRep={onAddRep}
           onUpdateRep={onUpdateRep}
