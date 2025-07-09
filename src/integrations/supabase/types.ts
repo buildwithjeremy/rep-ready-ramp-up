@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_template_subtasks: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          template_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          template_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_template_subtasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_templates: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          milestone: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          milestone: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          milestone?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      milestone_subtasks: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          milestone_id: string
+          notes: string | null
+          template_subtask_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          milestone_id: string
+          notes?: string | null
+          template_subtask_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          milestone_id?: string
+          notes?: string | null
+          template_subtask_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_subtasks_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_subtasks_template_subtask_id_fkey"
+            columns: ["template_subtask_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_template_subtasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestones: {
         Row: {
           completed: boolean
@@ -23,8 +127,7 @@ export type Database = {
           id: string
           rep_id: string
           step_number: number
-          step_title: string
-          sub_task: string
+          template_id: string | null
         }
         Insert: {
           completed?: boolean
@@ -34,8 +137,7 @@ export type Database = {
           id?: string
           rep_id: string
           step_number: number
-          step_title: string
-          sub_task: string
+          template_id?: string | null
         }
         Update: {
           completed?: boolean
@@ -45,8 +147,7 @@ export type Database = {
           id?: string
           rep_id?: string
           step_number?: number
-          step_title?: string
-          sub_task?: string
+          template_id?: string | null
         }
         Relationships: [
           {
@@ -61,6 +162,13 @@ export type Database = {
             columns: ["rep_id"]
             isOneToOne: false
             referencedRelation: "reps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -105,9 +213,13 @@ export type Database = {
           full_name: string
           id: string
           join_date: string
+          last_activity: string
+          milestone: number
+          overall_progress: number
           phone: string | null
           promotion_date: string | null
           stage: Database["public"]["Enums"]["rep_stage"]
+          status: string
           trainer_id: string
           updated_at: string
         }
@@ -118,9 +230,13 @@ export type Database = {
           full_name: string
           id?: string
           join_date?: string
+          last_activity?: string
+          milestone?: number
+          overall_progress?: number
           phone?: string | null
           promotion_date?: string | null
           stage?: Database["public"]["Enums"]["rep_stage"]
+          status?: string
           trainer_id: string
           updated_at?: string
         }
@@ -131,9 +247,13 @@ export type Database = {
           full_name?: string
           id?: string
           join_date?: string
+          last_activity?: string
+          milestone?: number
+          overall_progress?: number
           phone?: string | null
           promotion_date?: string | null
           stage?: Database["public"]["Enums"]["rep_stage"]
+          status?: string
           trainer_id?: string
           updated_at?: string
         }
@@ -147,11 +267,63 @@ export type Database = {
           },
         ]
       }
+      trainers: {
+        Row: {
+          active_reps: number
+          assigned_reps: number
+          avatar_url: string | null
+          average_time_to_independent: number
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          independent_reps: number
+          stuck_reps: number
+          success_rate: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_reps?: number
+          assigned_reps?: number
+          avatar_url?: string | null
+          average_time_to_independent?: number
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          independent_reps?: number
+          stuck_reps?: number
+          success_rate?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_reps?: number
+          assigned_reps?: number
+          avatar_url?: string | null
+          average_time_to_independent?: number
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          independent_reps?: number
+          stuck_reps?: number
+          success_rate?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_rep_progress: {
+        Args: { rep_id: string }
+        Returns: number
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }
         Returns: string
