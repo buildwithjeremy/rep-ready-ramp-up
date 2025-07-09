@@ -94,7 +94,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
               </div>
               
               <div className="flex justify-between items-center text-sm text-gray-600">
-                <span>Stage: {rep.stage}</span>
+                <span>Milestone: {rep.milestone}</span>
                 <span>Last activity: {rep.lastActivity}</span>
               </div>
             </CardContent>
