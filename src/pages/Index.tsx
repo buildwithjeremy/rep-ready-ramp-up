@@ -111,6 +111,7 @@ const Index = () => {
       onBackFromAddRep={navigation.handleBackFromAddRep}
       onAddRep={handleAddRep}
       onUpdateRep={handleUpdateRep}
+      onAddRepClick={navigation.handleAddRepClick}
     />
   );
 };

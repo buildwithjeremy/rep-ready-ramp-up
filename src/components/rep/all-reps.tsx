@@ -14,9 +14,10 @@ interface AllRepsProps {
   onRepClick: (repId: string) => void;
   title?: string;
   initialFilter?: RepFilterOption;
+  onAddRep?: () => void;
 }
 
-export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'all' }: AllRepsProps) {
+export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'all', onAddRep }: AllRepsProps) {
   const [sortBy, setSortBy] = useState<RepSortOption>('name');
   const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter);
 
@@ -24,8 +25,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
   const sortedReps = sortReps(filteredReps, sortBy);
 
   const handleAddRep = () => {
-    // Navigate to add rep form
-    window.location.hash = '/add-rep';
+    onAddRep?.();
   };
 
   return (
@@ -36,14 +36,16 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
           <h1 className="text-2xl font-bold">{title}</h1>
           <span className="text-sm text-gray-500">{sortedReps.length} reps</span>
         </div>
-        <Button 
-          onClick={handleAddRep}
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <UserPlus className="w-4 h-4" />
-          Add Rep
-        </Button>
+        {onAddRep && (
+          <Button 
+            onClick={handleAddRep}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add Rep
+          </Button>
+        )}
       </div>
 
       {/* Filters */}

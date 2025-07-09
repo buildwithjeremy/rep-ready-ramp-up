@@ -64,6 +64,9 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
 
     onAddRep(newRep);
     setIsSubmitting(false);
+    
+    // Navigate back to reps page after successful submission
+    onBack();
   };
 
   return (

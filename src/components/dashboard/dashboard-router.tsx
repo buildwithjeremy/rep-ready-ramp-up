@@ -27,6 +27,7 @@ interface DashboardRouterProps {
   onBackFromAddRep: () => void;
   onAddRep: (rep: Rep) => void;
   onUpdateRep: (rep: Rep) => void;
+  onAddRepClick: () => void;
 }
 
 export function DashboardRouter({
@@ -45,7 +46,8 @@ export function DashboardRouter({
   onBackFromTrainer,
   onBackFromAddRep,
   onAddRep,
-  onUpdateRep
+  onUpdateRep,
+  onAddRepClick
 }: DashboardRouterProps) {
   // Get current rep for profile view
   const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
@@ -140,6 +142,7 @@ export function DashboardRouter({
         onRepClick={onRepClick}
         title={userRole === 'ADMIN' ? 'All Reps' : 'My Reps'}
         initialFilter={repsFilter}
+        onAddRep={onAddRepClick}
       />
     );
   }

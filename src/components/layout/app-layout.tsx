@@ -27,6 +27,7 @@ interface AppLayoutProps {
   onBackFromAddRep: () => void;
   onAddRep: (rep: Rep) => void;
   onUpdateRep: (rep: Rep) => void;
+  onAddRepClick: () => void;
 }
 
 export function AppLayout({
@@ -50,7 +51,8 @@ export function AppLayout({
   onBackFromTrainer,
   onBackFromAddRep,
   onAddRep,
-  onUpdateRep
+  onUpdateRep,
+  onAddRepClick
 }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,6 +82,7 @@ export function AppLayout({
           onBackFromAddRep={onBackFromAddRep}
           onAddRep={onAddRep}
           onUpdateRep={onUpdateRep}
+          onAddRepClick={onAddRepClick}
         />
       </div>
 

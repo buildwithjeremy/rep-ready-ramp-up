@@ -68,6 +68,10 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
     setCurrentPath('/reps');
   };
 
+  const handleAddRepClick = () => {
+    setCurrentPath('/add-rep');
+  };
+
   return {
     currentPath,
     selectedRepId,
@@ -80,6 +84,7 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
     handleBackFromTrainer,
     handleBackFromAddRep,
     handleStatCardClick,
+    handleAddRepClick,
     setRepsFilter
   };
 }
