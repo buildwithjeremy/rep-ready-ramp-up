@@ -2,7 +2,7 @@
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { AppHeader } from "@/components/layout/app-header";
 import { DashboardRouter } from "@/components/dashboard/dashboard-router";
-import { Rep } from "@/types";
+import { Rep, Trainer } from "@/types";
 import { RepFilterOption } from "@/utils/filterUtils";
 
 interface AppLayoutProps {
@@ -15,6 +15,7 @@ interface AppLayoutProps {
   selectedRepId: string | null;
   selectedTrainerId: string | null;
   reps: Rep[];
+  trainers: Trainer[];
   repsFilter: RepFilterOption;
   onSignOut: () => Promise<void>;
   onSignIn: () => void;
@@ -40,6 +41,7 @@ export function AppLayout({
   selectedRepId,
   selectedTrainerId,
   reps,
+  trainers,
   repsFilter,
   onSignOut,
   onSignIn,
@@ -73,6 +75,7 @@ export function AppLayout({
           selectedRepId={selectedRepId}
           selectedTrainerId={selectedTrainerId}
           reps={reps}
+          trainers={trainers}
           repsFilter={repsFilter}
           onRepClick={onRepClick}
           onTrainerClick={onTrainerClick}

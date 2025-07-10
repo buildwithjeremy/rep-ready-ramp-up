@@ -5,7 +5,6 @@ import { RepProfile } from "@/components/rep/rep-profile";
 import { AddRepForm } from "@/components/rep/add-rep-form";
 import { AllReps } from "@/components/rep/all-reps";
 import { AllTrainers } from "@/components/trainer/all-trainers";
-import { mockTrainers } from "@/data/mockData";
 import { Rep, Trainer } from "@/types";
 import { RepFilterOption } from "@/utils/filterUtils";
 import { TrainerProfile } from "@/components/trainer/trainer-profile";
@@ -18,6 +17,7 @@ interface DashboardRouterProps {
   selectedRepId: string | null;
   selectedTrainerId: string | null;
   reps: Rep[];
+  trainers: Trainer[];
   repsFilter: RepFilterOption;
   onRepClick: (repId: string) => void;
   onTrainerClick: (trainerId: string) => void;
@@ -38,6 +38,7 @@ export function DashboardRouter({
   selectedRepId,
   selectedTrainerId,
   reps,
+  trainers,
   repsFilter,
   onRepClick,
   onTrainerClick,
@@ -53,10 +54,10 @@ export function DashboardRouter({
   const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
   
   // Get current trainer for profile view
-  const selectedTrainer = selectedTrainerId ? mockTrainers.find(trainer => trainer.id === selectedTrainerId) : null;
+  const selectedTrainer = selectedTrainerId ? trainers.find(trainer => trainer.id === selectedTrainerId) : null;
 
   // Get trainer-specific data
-  const currentTrainer = mockTrainers.find(t => t.id === trainerId || t.id === userId);
+  const currentTrainer = trainers.find(t => t.id === trainerId || t.id === userId);
   const trainerReps = userRole === 'TRAINER' || userRole === 'ADMIN'
     ? (userRole === 'ADMIN' ? reps : reps.filter(rep => rep.trainerId === userId))
     : [];
@@ -85,7 +86,7 @@ export function DashboardRouter({
   if (currentPath === '/admin' && userRole === 'ADMIN') {
     return (
       <AdminDashboard 
-        trainers={mockTrainers}
+        trainers={trainers}
         reps={reps}
         onTrainerClick={onTrainerClick}
         onRepClick={onRepClick}
@@ -118,7 +119,7 @@ export function DashboardRouter({
   if (currentPath === '/trainers' && userRole === 'ADMIN') {
     return (
       <AllTrainers
-        trainers={mockTrainers}
+        trainers={trainers}
         onTrainerClick={onTrainerClick}
         title="All Trainers"
       />

@@ -2,16 +2,18 @@
 import { useState } from "react";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { AppLayout } from "@/components/layout/app-layout";
-import { mockReps } from "@/data/mockData";
 import { Rep } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
+import { useReps } from "@/hooks/useReps";
+import { useTrainers } from "@/hooks/useTrainers";
 
 const Index = () => {
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
-  const [reps, setReps] = useState(mockReps);
+  const { reps, loading: repsLoading, addRep: addRepToDb, updateRep: updateRepInDb } = useReps();
+  const { trainers, loading: trainersLoading } = useTrainers();
 
   console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user:', user?.email, 'profile:', profile);
 
@@ -20,7 +22,7 @@ const Index = () => {
   });
 
   // Show loading screen while checking authentication
-  if (authLoading || (user && profileLoading)) {
+  if (authLoading || (user && profileLoading) || repsLoading || trainersLoading) {
     console.log('Showing loading screen');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -72,16 +74,22 @@ const Index = () => {
 
   console.log('Rendering main app with profile:', profile);
 
-  const handleAddRep = (newRep: Rep) => {
-    setReps(prev => [...prev, newRep]);
-    navigation.handleNavigate('/dashboard');
-    console.log('New rep added:', newRep);
+  const handleAddRep = async (newRep: Rep) => {
+    try {
+      await addRepToDb(newRep);
+      navigation.handleNavigate('/dashboard');
+      console.log('New rep added:', newRep);
+    } catch (error) {
+      console.error('Error adding rep:', error);
+    }
   };
 
-  const handleUpdateRep = (updatedRep: Rep) => {
-    setReps(prev => prev.map(rep => 
-      rep.id === updatedRep.id ? updatedRep : rep
-    ));
+  const handleUpdateRep = async (updatedRep: Rep) => {
+    try {
+      await updateRepInDb(updatedRep);
+    } catch (error) {
+      console.error('Error updating rep:', error);
+    }
   };
 
   const handleSignOut = async () => {
@@ -99,6 +107,7 @@ const Index = () => {
       selectedRepId={navigation.selectedRepId}
       selectedTrainerId={navigation.selectedTrainerId}
       reps={reps}
+      trainers={trainers}
       repsFilter={navigation.repsFilter}
       onSignOut={handleSignOut}
       onSignIn={signInWithGoogle}
