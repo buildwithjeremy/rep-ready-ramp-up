@@ -14,6 +14,7 @@ export function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -25,7 +26,19 @@ export function AuthScreen() {
     setMessage(null);
 
     try {
-      if (isSignUp) {
+      if (isResetMode) {
+        const redirectUrl = `${window.location.origin}/reset-password`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
+        });
+
+        if (error) {
+          setError(error.message);
+        } else {
+          setMessage('Check your email for the password reset link!');
+          setEmail('');
+        }
+      } else if (isSignUp) {
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
@@ -77,7 +90,7 @@ export function AuthScreen() {
             Team Tenacious
           </CardTitle>
           <p className="text-gray-600">
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
+            {isResetMode ? 'Reset your password' : (isSignUp ? 'Create your account' : 'Sign in to your account')}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -108,60 +121,92 @@ export function AuthScreen() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                minLength={6}
-              />
-            </div>
+            {!isResetMode && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  minLength={6}
+                />
+              </div>
+            )}
 
             <Button
               type="submit"
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+              {loading ? 'Loading...' : (isResetMode ? 'Send Reset Email' : (isSignUp ? 'Sign Up' : 'Sign In'))}
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+          {!isResetMode && !isSignUp && (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsResetMode(true)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot your password?
+              </button>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
+          )}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full"
-          >
-            <LogIn className="w-4 h-4 mr-2" />
-            {loading ? 'Loading...' : 'Sign in with Google'}
-          </Button>
+          {!isResetMode && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                {loading ? 'Loading...' : 'Sign in with Google'}
+              </Button>
+            </>
+          )}
 
           <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              {isSignUp
-                ? 'Already have an account? Sign in'
-                : "Don't have an account? Sign up"}
-            </button>
+            {isResetMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsResetMode(false);
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Back to sign in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {isSignUp
+                  ? 'Already have an account? Sign in'
+                  : "Don't have an account? Sign up"}
+              </button>
+            )}
           </div>
         </CardContent>
       </Card>
