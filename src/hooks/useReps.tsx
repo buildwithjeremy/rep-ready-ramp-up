@@ -202,6 +202,13 @@ export function useReps() {
     try {
       console.log('Updating rep:', updatedRep);
 
+      // Optimistically update the local state first for immediate UI feedback
+      setReps(prevReps => 
+        prevReps.map(rep => 
+          rep.id === updatedRep.id ? updatedRep : rep
+        )
+      );
+
       // Update the rep basic info
       const { error: repError } = await supabase
         .from('reps')
@@ -218,6 +225,8 @@ export function useReps() {
 
       if (repError) {
         console.error('Error updating rep:', repError);
+        // Revert optimistic update on error
+        await fetchReps();
         throw repError;
       }
 
@@ -236,13 +245,13 @@ export function useReps() {
 
           if (subtaskError) {
             console.error('Error updating subtask:', subtaskError);
+            // Revert optimistic update on error
+            await fetchReps();
             throw subtaskError;
           }
         }
       }
 
-      // Refresh the reps list
-      await fetchReps();
       console.log('Rep updated successfully');
     } catch (error) {
       console.error('Error updating rep:', error);
