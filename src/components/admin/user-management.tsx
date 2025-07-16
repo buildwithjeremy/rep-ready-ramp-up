@@ -15,6 +15,8 @@ interface UserProfile {
   created_at: string;
   rep_progress?: number;
   rep_status?: string;
+  is_legacy?: boolean;
+  email?: string;
 }
 
 interface UserManagementProps {
@@ -35,7 +37,7 @@ export function UserManagement({ onBack }: UserManagementProps) {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -45,30 +47,56 @@ export function UserManagement({ onBack }: UserManagementProps) {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        setError('Failed to load users: ' + error.message);
-      } else {
-        // Get rep progress for REP users
-        const usersWithProgress = await Promise.all(
-          (data || []).map(async (profile) => {
-            if (profile.role === 'REP') {
-              const { data: repData } = await supabase
-                .from('reps')
-                .select('overall_progress, status')
-                .eq('user_id', profile.id)
-                .single();
-              
-              return {
-                ...profile,
-                rep_progress: repData?.overall_progress || 0,
-                rep_status: repData?.status || 'Active'
-              };
-            }
-            return profile;
-          })
-        );
-        setUsers(usersWithProgress);
+      if (profilesError) {
+        setError('Failed to load users: ' + profilesError.message);
+        return;
       }
+
+      // Also get reps that don't have user accounts yet (legacy data)
+      const { data: repsData, error: repsError } = await supabase
+        .from('reps')
+        .select('id, full_name, email, overall_progress, status, created_at, user_id')
+        .is('user_id', null)
+        .order('created_at', { ascending: false });
+
+      if (repsError) {
+        console.error('Error loading legacy reps:', repsError);
+      }
+
+      // Get rep progress for REP users with accounts
+      const profilesWithProgress = await Promise.all(
+        (profilesData || []).map(async (profile) => {
+          if (profile.role === 'REP') {
+            const { data: repData } = await supabase
+              .from('reps')
+              .select('overall_progress, status')
+              .eq('user_id', profile.id)
+              .maybeSingle();
+            
+            return {
+              ...profile,
+              rep_progress: repData?.overall_progress || 0,
+              rep_status: repData?.status || 'Active'
+            };
+          }
+          return profile;
+        })
+      );
+
+      // Combine profiles with legacy reps (those without user accounts)
+      const legacyReps = (repsData || []).map(rep => ({
+        id: rep.id,
+        full_name: rep.full_name,
+        role: 'REP' as const,
+        created_at: rep.created_at,
+        rep_progress: rep.overall_progress || 0,
+        rep_status: rep.status || 'Active',
+        is_legacy: true,
+        email: rep.email
+      }));
+
+      const allUsers = [...profilesWithProgress, ...legacyReps];
+      setUsers(allUsers);
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
@@ -218,11 +246,23 @@ export function UserManagement({ onBack }: UserManagementProps) {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">
                       {userProfile.full_name || 'Unnamed User'}
+                      {userProfile.is_legacy && (
+                        <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                          Legacy Rep
+                        </span>
+                      )}
                     </h3>
-                    <p className="text-sm text-gray-600">{userProfile.id}</p>
+                    <p className="text-sm text-gray-600">
+                      {userProfile.email || userProfile.id}
+                    </p>
                     <p className="text-xs text-gray-500">
                       Joined: {new Date(userProfile.created_at).toLocaleDateString()}
                     </p>
+                    {userProfile.is_legacy && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        No user account - needs migration
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant={getRoleBadgeVariant(userProfile.role)}>
@@ -255,7 +295,7 @@ export function UserManagement({ onBack }: UserManagementProps) {
                 )}
 
                 {/* Role Management */}
-                {userProfile.id !== user?.id && (
+                {userProfile.id !== user?.id && !userProfile.is_legacy && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium">Promote to:</span>
                     <Select
@@ -278,6 +318,15 @@ export function UserManagement({ onBack }: UserManagementProps) {
                         <SelectItem value="ADMIN">ADMIN</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+
+                {userProfile.is_legacy && (
+                  <div className="bg-orange-50 border border-orange-200 p-3 rounded text-sm">
+                    <p className="text-orange-800 font-medium">Migration Needed</p>
+                    <p className="text-orange-700 text-xs mt-1">
+                      This rep doesn't have a user account yet. They'll need to sign up through the normal flow to access the app.
+                    </p>
                   </div>
                 )}
 

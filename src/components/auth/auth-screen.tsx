@@ -38,10 +38,7 @@ export function AuthScreen() {
         console.error('Error loading trainers:', error);
       } else {
         setTrainers(data || []);
-        // Auto-select trainer with least reps
-        if (data && data.length > 0) {
-          setSelectedTrainer(data[0].id);
-        }
+        // Don't auto-select - let user choose their trainer
       }
     } catch (err) {
       console.error('Error in loadTrainers:', err);
