@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LogIn, Mail, AlertCircle } from 'lucide-react';
 
 export function AuthScreen() {
+  console.log('AuthScreen component loaded successfully');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -72,7 +73,7 @@ export function AuthScreen() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md">{/* AuthScreen component refreshed */}
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900">
             Team Tenacious
