@@ -16,36 +16,55 @@ export function useReps() {
       setLoading(true);
       console.log('Fetching reps for user:', user.id);
 
-      // Fetch reps with their milestones and subtasks
-      const { data: repsData, error: repsError } = await supabase
-        .from('reps')
-        .select(`
-          *,
-          milestones (
+      // Get the current user's role to determine what data to fetch
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        setError(profileError.message);
+        return;
+      }
+
+      let repsQuery = supabase.from('reps').select(`
+        *,
+        milestones (
+          id,
+          step_number,
+          completed,
+          completed_at,
+          template_id,
+          checklist_templates (
+            milestone,
+            title,
+            description
+          ),
+          milestone_subtasks (
             id,
-            step_number,
             completed,
             completed_at,
-            template_id,
-            checklist_templates (
-              milestone,
-              title,
-              description
-            ),
-            milestone_subtasks (
+            notes,
+            checklist_template_subtasks (
               id,
-              completed,
-              completed_at,
-              notes,
-              checklist_template_subtasks (
-                id,
-                title,
-                order_index
-              )
+              title,
+              order_index
             )
           )
-        `)
-        .order('created_at', { ascending: false });
+        )
+      `);
+
+      // If user is a REP, only fetch their own data
+      if (profileData.role === 'REP') {
+        repsQuery = repsQuery.eq('user_id', user.id);
+      } else {
+        // For trainers and admins, fetch based on their assigned reps
+        repsQuery = repsQuery.order('created_at', { ascending: false });
+      }
+
+      const { data: repsData, error: repsError } = await repsQuery;
 
       if (repsError) {
         console.error('Error fetching reps:', repsError);
