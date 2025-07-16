@@ -15,15 +15,15 @@ const Index = () => {
   const { reps, loading: repsLoading, addRep: addRepToDb, updateRep: updateRepInDb } = useReps();
   const { trainers, loading: trainersLoading } = useTrainers();
 
-  console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user:', user?.email, 'profile:', profile);
+  console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user email:', user?.email, 'profile role:', profile?.role);
 
   const navigation = useAppNavigation({ 
     userRole: profile?.role || 'REP' 
   });
 
   // Show loading screen while checking authentication
-  if (authLoading || (user && profileLoading) || repsLoading || trainersLoading) {
-    console.log('Showing loading screen');
+  if (authLoading) {
+    console.log('Showing loading screen - auth loading');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -38,6 +38,19 @@ const Index = () => {
   if (!user) {
     console.log('No user, showing auth screen');
     return <AuthScreen />;
+  }
+
+  // Show loading while profile is loading
+  if (profileLoading || repsLoading || trainersLoading) {
+    console.log('Showing loading screen - data loading');
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your data...</p>
+        </div>
+      </div>
+    );
   }
 
   // If user exists but no profile, show error message
