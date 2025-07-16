@@ -62,76 +62,48 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
-    
+    setError('');
+    setSuccess('');
+
     try {
-      // Create user account first
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: data.email,
-        password: data.password,
-        user_metadata: {
-          full_name: data.name
-        },
-        email_confirm: true // Auto-confirm email for admin-created users
-      });
+      console.log('Creating rep with email:', data.email);
 
-      if (authError) {
-        setError('Failed to create user account: ' + authError.message);
-        return;
-      }
-
-      if (!authData.user) {
-        setError('Failed to create user account');
-        return;
-      }
-
-      // Create rep record
-      const { error: repError } = await supabase
-        .from('reps')
-        .insert({
-          user_id: authData.user.id,
-          trainer_id: data.trainerId,
-          full_name: data.name,
+      // Call the secure edge function to create the rep
+      const { data: result, error: createError } = await supabase.functions.invoke('create-rep', {
+        body: {
+          name: data.name,
           email: data.email,
           phone: data.phone || null,
-        });
+          password: data.password,
+          trainerId: data.trainerId,
+        },
+      });
 
-      if (repError) {
-        setError('Failed to create rep record: ' + repError.message);
-        return;
+      if (createError) {
+        console.error('Error from edge function:', createError);
+        throw new Error(createError.message || 'Failed to create rep');
       }
 
-      // Initialize milestones for the new rep
-      const milestones = Array.from({ length: 10 }, (_, index) => ({
-        rep_id: authData.user.id,
-        step_number: index + 1,
-        completed: false
-      }));
-
-      const { error: milestoneError } = await supabase
-        .from('milestones')
-        .insert(milestones);
-
-      if (milestoneError) {
-        console.error('Error creating milestones:', milestoneError);
-        // Don't fail the whole process for milestone creation
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create rep');
       }
 
-      setSuccess(`Rep ${data.name} created successfully! They can now log in with their email and password.`);
+      console.log('Rep created successfully:', result.rep);
+
+      setSuccess('Rep added successfully! They will be notified via email.');
       
-      // Create mock rep object for UI update
-      const newRep: Rep = {
-        id: authData.user.id,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        trainerId: data.trainerId,
-        milestone: 1,
-        status: 'Active',
-        overallProgress: 0,
-        dateAdded: new Date().toISOString().split('T')[0],
-        lastActivity: new Date().toISOString(),
+      // Call the callback to update the UI
+      onAddRep({
+        id: result.rep.id,
+        name: result.rep.full_name,
+        email: result.rep.email,
+        phone: result.rep.phone,
+        trainerId: result.rep.trainer_id,
+        milestone: result.rep.milestone,
+        status: result.rep.status,
+        overallProgress: result.rep.overall_progress,
+        dateAdded: result.rep.join_date.split('T')[0],
+        lastActivity: result.rep.last_activity,
         checklist: checklistTemplate.map((template, index) => ({
           ...template,
           id: `checklist-${Date.now()}-${index + 1}`,
@@ -141,17 +113,16 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
             isCompleted: false
           }))
         }))
-      };
+      });
 
-      onAddRep(newRep);
-
-      // Auto-navigate back after success
+      // Navigate back after a delay
       setTimeout(() => {
         onBack();
       }, 2000);
 
     } catch (err: any) {
-      setError('An unexpected error occurred: ' + err.message);
+      console.error('Form submission error:', err);
+      setError(err.message || 'Failed to add rep. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
