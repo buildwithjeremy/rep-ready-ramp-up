@@ -222,6 +222,7 @@ export type Database = {
           status: string
           trainer_id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -239,6 +240,7 @@ export type Database = {
           status?: string
           trainer_id: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -256,11 +258,19 @@ export type Database = {
           status?: string
           trainer_id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "reps_trainer_id_fkey"
             columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reps_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -363,9 +373,25 @@ export type Database = {
         Args: { rep_id: string }
         Returns: number
       }
+      get_available_trainers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          full_name: string
+          assigned_reps: number
+        }[]
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      promote_user_role: {
+        Args: {
+          target_user_id: string
+          new_role: Database["public"]["Enums"]["user_role"]
+          promoted_by_user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

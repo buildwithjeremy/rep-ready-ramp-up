@@ -1,12 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, User, Mail, Phone } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, User, Mail, Phone, AlertCircle, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
 import { Rep } from "@/types";
 import { checklistTemplate } from "@/data/mockData";
 
@@ -20,53 +23,138 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
+  password: string;
+  trainerId: string;
 }
 
 export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [trainers, setTrainers] = useState<{id: string, full_name: string, assigned_reps: number}[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadTrainers();
+  }, []);
+
+  const loadTrainers = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_available_trainers');
+      if (error) {
+        console.error('Error loading trainers:', error);
+      } else {
+        setTrainers(data || []);
+      }
+    } catch (err) {
+      console.error('Error in loadTrainers:', err);
+    }
+  };
 
   const form = useForm<FormData>({
     defaultValues: {
       name: '',
       email: '',
-      phone: ''
+      phone: '',
+      password: '',
+      trainerId: trainerId || ''
     }
   });
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Create user account first
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        user_metadata: {
+          full_name: data.name
+        },
+        email_confirm: true // Auto-confirm email for admin-created users
+      });
 
-    // Create new rep with fresh checklist
-    const newRep: Rep = {
-      id: `rep-${Date.now()}`,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      trainerId,
-      milestone: 1,
-      status: 'Active',
-      overallProgress: 0,
-      dateAdded: new Date().toISOString().split('T')[0],
-      lastActivity: new Date().toISOString(),
-      checklist: checklistTemplate.map((template, index) => ({
-        ...template,
-        id: `checklist-${Date.now()}-${index + 1}`,
-        isCompleted: false,
-        subtasks: template.subtasks.map(subtask => ({
-          ...subtask,
-          isCompleted: false
+      if (authError) {
+        setError('Failed to create user account: ' + authError.message);
+        return;
+      }
+
+      if (!authData.user) {
+        setError('Failed to create user account');
+        return;
+      }
+
+      // Create rep record
+      const { error: repError } = await supabase
+        .from('reps')
+        .insert({
+          user_id: authData.user.id,
+          trainer_id: data.trainerId,
+          full_name: data.name,
+          email: data.email,
+          phone: data.phone || null,
+        });
+
+      if (repError) {
+        setError('Failed to create rep record: ' + repError.message);
+        return;
+      }
+
+      // Initialize milestones for the new rep
+      const milestones = Array.from({ length: 10 }, (_, index) => ({
+        rep_id: authData.user.id,
+        step_number: index + 1,
+        completed: false
+      }));
+
+      const { error: milestoneError } = await supabase
+        .from('milestones')
+        .insert(milestones);
+
+      if (milestoneError) {
+        console.error('Error creating milestones:', milestoneError);
+        // Don't fail the whole process for milestone creation
+      }
+
+      setSuccess(`Rep ${data.name} created successfully! They can now log in with their email and password.`);
+      
+      // Create mock rep object for UI update
+      const newRep: Rep = {
+        id: authData.user.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        trainerId: data.trainerId,
+        milestone: 1,
+        status: 'Active',
+        overallProgress: 0,
+        dateAdded: new Date().toISOString().split('T')[0],
+        lastActivity: new Date().toISOString(),
+        checklist: checklistTemplate.map((template, index) => ({
+          ...template,
+          id: `checklist-${Date.now()}-${index + 1}`,
+          isCompleted: false,
+          subtasks: template.subtasks.map(subtask => ({
+            ...subtask,
+            isCompleted: false
+          }))
         }))
-      }))
-    };
+      };
 
-    onAddRep(newRep);
-    setIsSubmitting(false);
-    
-    // Navigate back to reps page after successful submission
-    onBack();
+      onAddRep(newRep);
+
+      // Auto-navigate back after success
+      setTimeout(() => {
+        onBack();
+      }, 2000);
+
+    } catch (err: any) {
+      setError('An unexpected error occurred: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -92,9 +180,23 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
               Rep Information
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert className="mb-4">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="name"
@@ -149,18 +251,11 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
                 <FormField
                   control={form.control}
                   name="phone"
-                  rules={{ 
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^[\d\s\-\(\)\+]+$/,
-                      message: "Invalid phone number"
-                    }
-                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center">
                         <Phone className="w-4 h-4 mr-2" />
-                        Phone Number
+                        Phone Number (Optional)
                       </FormLabel>
                       <FormControl>
                         <Input 
@@ -170,6 +265,58 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
                           className="h-12"
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  rules={{ 
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters"
+                    }
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Initial Password</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password"
+                          placeholder="Enter initial password" 
+                          {...field}
+                          className="h-12"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="trainerId"
+                  rules={{ required: "Please select a trainer" }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assigned Trainer</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select trainer" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {trainers.map((trainer) => (
+                            <SelectItem key={trainer.id} value={trainer.id}>
+                              {trainer.full_name} ({trainer.assigned_reps} reps)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

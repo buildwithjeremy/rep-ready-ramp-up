@@ -1,7 +1,10 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/stat-card";
-import { Users, TrendingUp, Clock, AlertTriangle, UserCheck } from "lucide-react";
+import { UserManagement } from "@/components/admin/user-management";
+import { Users, TrendingUp, Clock, AlertTriangle, UserCheck, Settings } from "lucide-react";
 import { Rep, Trainer } from "@/types";
 
 interface AdminDashboardProps {
@@ -13,6 +16,7 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onStatCardClick }: AdminDashboardProps) {
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const totalReps = reps.length;
   const activeReps = reps.filter(rep => rep.status === 'Active').length;
   const independentReps = reps.filter(rep => rep.status === 'Independent').length;
@@ -21,12 +25,29 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
     trainers.reduce((sum, trainer) => sum + trainer.averageTimeToIndependent, 0) / trainers.length
   );
 
+  if (showUserManagement) {
+    return <UserManagement onBack={() => setShowUserManagement(false)} />;
+  }
+
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600">Overall funnel metrics and trainer performance</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600">Overall funnel metrics and trainer performance</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowUserManagement(true)}
+            className="flex items-center"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            User Management
+          </Button>
+        </div>
       </div>
 
       {/* Overall Metrics */}
