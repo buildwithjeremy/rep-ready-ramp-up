@@ -12,6 +12,7 @@ interface ChecklistCardProps {
   isCelebrating: boolean;
   onToggle: () => void;
   onSubtaskToggle: (subtaskId: string, isCompleted: boolean) => void;
+  viewOnly?: boolean;
 }
 
 export function ChecklistCard({ 
@@ -20,7 +21,8 @@ export function ChecklistCard({
   isExpanded, 
   isCelebrating, 
   onToggle, 
-  onSubtaskToggle 
+  onSubtaskToggle,
+  viewOnly = false
 }: ChecklistCardProps) {
   const getCompletedSubtasks = () => {
     return item.subtasks.filter(st => st.isCompleted).length;
@@ -132,9 +134,10 @@ export function ChecklistCard({
                 <div key={subtask.id} className="flex items-start space-x-3 p-3 border rounded-lg bg-white">
                   <Checkbox
                     checked={subtask.isCompleted}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={viewOnly ? undefined : (checked) => 
                       onSubtaskToggle(subtask.id, checked === true)
                     }
+                    disabled={viewOnly}
                     className="mt-0.5 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">

@@ -2,6 +2,7 @@
 import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
 import { RepProfile } from "@/components/rep/rep-profile";
+import { RepDashboard } from "@/components/rep/rep-dashboard";
 import { AddRepForm } from "@/components/rep/add-rep-form";
 import { AllReps } from "@/components/rep/all-reps";
 import { AllTrainers } from "@/components/trainer/all-trainers";
@@ -74,13 +75,25 @@ export function DashboardRouter({
   }
 
   if (currentPath === '/dashboard' && userRole === 'REP') {
-    return (
-      <div className="text-center py-8">
-        <h2 className="text-xl font-semibold mb-4">Welcome to Team Tenacious!</h2>
-        <p className="text-gray-600 mb-4">Your trainer will guide you through your onboarding process.</p>
-        <p className="text-sm text-gray-500">Contact your trainer for next steps.</p>
-      </div>
-    );
+    // Find the rep record for this user
+    const currentRep = reps.find(rep => rep.userId === userId);
+    
+    if (currentRep) {
+      return (
+        <RepDashboard 
+          rep={currentRep}
+          onUpdateRep={onUpdateRep}
+        />
+      );
+    } else {
+      return (
+        <div className="text-center py-8">
+          <h2 className="text-xl font-semibold mb-4">Welcome to Team Tenacious!</h2>
+          <p className="text-gray-600 mb-4">Your trainer will guide you through your onboarding process.</p>
+          <p className="text-sm text-gray-500">Contact your trainer for next steps.</p>
+        </div>
+      );
+    }
   }
   
   if (currentPath === '/admin' && userRole === 'ADMIN') {

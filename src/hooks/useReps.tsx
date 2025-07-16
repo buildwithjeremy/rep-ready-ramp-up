@@ -56,6 +56,7 @@ export function useReps() {
       // Transform the data to match our frontend interface
       const transformedReps: Rep[] = repsData?.map(rep => ({
         id: rep.id,
+        userId: rep.user_id, // Add this field to track the linked user
         name: rep.full_name,
         email: rep.email,
         phone: rep.phone || '',

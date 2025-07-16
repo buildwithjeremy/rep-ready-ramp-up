@@ -1,6 +1,7 @@
 
 export interface Rep {
   id: string;
+  userId?: string; // Link to auth user
   name: string;
   email: string;
   phone: string;
