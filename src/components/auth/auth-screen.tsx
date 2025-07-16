@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/hooks/useAuth';
+
 import { supabase } from '@/integrations/supabase/client';
 import { LogIn, Mail, AlertCircle } from 'lucide-react';
 
 export function AuthScreen() {
-  const { signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -70,17 +69,6 @@ export function AuthScreen() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError(null);
-    
-    const { error } = await signInWithGoogle();
-    
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -157,31 +145,6 @@ export function AuthScreen() {
             </div>
           )}
 
-          {!isResetMode && (
-            <>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="w-full"
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                {loading ? 'Loading...' : 'Sign in with Google'}
-              </Button>
-            </>
-          )}
 
           <div className="text-center">
             {isResetMode ? (

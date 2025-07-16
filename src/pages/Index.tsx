@@ -10,7 +10,7 @@ import { useReps } from "@/hooks/useReps";
 import { useTrainers } from "@/hooks/useTrainers";
 
 const Index = () => {
-  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { reps, loading: repsLoading, addRep: addRepToDb, updateRep: updateRepInDb } = useReps();
   const { trainers, loading: trainersLoading } = useTrainers();
@@ -123,7 +123,7 @@ const Index = () => {
       trainers={trainers}
       repsFilter={navigation.repsFilter}
       onSignOut={handleSignOut}
-      onSignIn={signInWithGoogle}
+      onSignIn={() => {}}
       onNavigate={navigation.handleNavigate}
       onRepClick={navigation.handleRepClick}
       onTrainerClick={navigation.handleTrainerClick}
