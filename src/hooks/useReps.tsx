@@ -86,7 +86,9 @@ export function useReps() {
           })) || []
       })) || [];
 
-      console.log('Transformed reps:', transformedReps);
+      console.log('Raw reps data from Supabase:', repsData);
+      console.log('Transformed reps with checklists:', transformedReps);
+      console.log('First rep checklist length:', transformedReps[0]?.checklist?.length);
       setReps(transformedReps);
       setError(null);
     } catch (err) {
