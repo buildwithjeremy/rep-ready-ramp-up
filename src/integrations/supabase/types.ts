@@ -366,11 +366,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_metrics: {
+        Row: {
+          active_reps: number | null
+          avg_time_to_independent: number | null
+          conversion_rate: number | null
+          independent_reps: number | null
+          stuck_reps_by_activity: number | null
+          stuck_reps_by_status: number | null
+          total_reps: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_rep_progress: {
         Args: { rep_id: string }
+        Returns: number
+      }
+      get_activity_rate: {
+        Args: { trainer_id_param: string }
         Returns: number
       }
       get_available_trainers: {
@@ -380,6 +395,26 @@ export type Database = {
           full_name: string
           assigned_reps: number
         }[]
+      }
+      get_avg_progress_per_rep: {
+        Args: { trainer_id_param: string }
+        Returns: number
+      }
+      get_avg_time_to_independent: {
+        Args: { trainer_id_param?: string }
+        Returns: number
+      }
+      get_conversion_rate: {
+        Args: { trainer_id_param?: string }
+        Returns: number
+      }
+      get_stuck_reps_count: {
+        Args: { trainer_id_param?: string }
+        Returns: number
+      }
+      get_trainer_performance_rank: {
+        Args: { trainer_id_param: string }
+        Returns: number
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }

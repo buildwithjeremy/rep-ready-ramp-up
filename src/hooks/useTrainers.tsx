@@ -19,7 +19,7 @@ export function useTrainers() {
       const { data: trainersData, error: trainersError } = await supabase
         .from('trainers')
         .select('*')
-        .order('full_name');
+        .order('success_rate', { ascending: false });
 
       if (trainersError) {
         console.error('Error fetching trainers:', trainersError);

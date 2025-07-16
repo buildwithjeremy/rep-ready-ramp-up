@@ -1,5 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTrainerMetrics } from "@/hooks/useTrainerMetrics";
 import { Trophy, Users, Target, TrendingUp, Clock, Star } from "lucide-react";
 import { Trainer } from "@/types";
 
@@ -8,6 +9,8 @@ interface TrainerScorecardProps {
 }
 
 export function TrainerScorecard({ trainer }: TrainerScorecardProps) {
+  const { metrics, loading: metricsLoading } = useTrainerMetrics(trainer.id);
+  
   const performanceMetrics = [
     {
       title: "Success Rate",
@@ -89,14 +92,14 @@ export function TrainerScorecard({ trainer }: TrainerScorecardProps) {
           <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
             <span className="text-sm font-medium text-green-800">Conversion Rate</span>
             <span className="text-lg font-bold text-green-600">
-              {Math.round((trainer.independentReps / trainer.assignedReps) * 100)}%
+              {metrics.conversionRate}%
             </span>
           </div>
           
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
             <span className="text-sm font-medium text-blue-800">Activity Rate</span>
             <span className="text-lg font-bold text-blue-600">
-              {Math.round(((trainer.activeReps + trainer.independentReps) / trainer.assignedReps) * 100)}%
+              {metrics.activityRate}%
             </span>
           </div>
 
@@ -113,12 +116,14 @@ export function TrainerScorecard({ trainer }: TrainerScorecardProps) {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Average Progress per Rep</span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {Math.round((trainer.activeReps > 0 ? (trainer.activeReps * 65) / trainer.activeReps : 0))}%
+                  {metrics.averageProgressPerRep}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Team Performance Rank</span>
-                <span className="text-sm font-semibold text-gray-900">Top 15%</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  #{metrics.performanceRank} of {metrics.totalTrainers}
+                </span>
               </div>
             </div>
           </div>

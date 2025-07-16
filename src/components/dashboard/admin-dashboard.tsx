@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/stat-card";
 import { UserManagement } from "@/components/admin/user-management";
+import { useAdminMetrics } from "@/hooks/useAdminMetrics";
 import { Users, TrendingUp, Clock, AlertTriangle, UserCheck, Settings } from "lucide-react";
 import { Rep, Trainer } from "@/types";
 
@@ -17,13 +18,15 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onStatCardClick }: AdminDashboardProps) {
   const [showUserManagement, setShowUserManagement] = useState(false);
-  const totalReps = reps.length;
-  const activeReps = reps.filter(rep => rep.status === 'Active').length;
-  const independentReps = reps.filter(rep => rep.status === 'Independent').length;
-  const stuckReps = reps.filter(rep => rep.status === 'Stuck').length;
-  const avgTimeToIndependent = Math.round(
-    trainers.reduce((sum, trainer) => sum + trainer.averageTimeToIndependent, 0) / trainers.length
-  );
+  const { metrics, loading: metricsLoading, error: metricsError } = useAdminMetrics();
+  
+  // Use real-time metrics from database functions
+  const totalReps = metrics.totalReps;
+  const activeReps = metrics.activeReps;
+  const independentReps = metrics.independentReps;
+  const stuckReps = metrics.stuckReps; // Now based on 48-hour activity rule
+  const conversionRate = metrics.conversionRate;
+  const avgTimeToIndependent = Math.round(metrics.avgTimeToIndependent);
 
   if (showUserManagement) {
     return <UserManagement onBack={() => setShowUserManagement(false)} />;
@@ -96,7 +99,7 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Conversion Rate</span>
               <span className="text-lg font-bold text-blue-600">
-                {Math.round((independentReps / totalReps) * 100)}%
+                {conversionRate}%
               </span>
             </div>
             <div className="flex justify-between items-center">
