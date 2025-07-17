@@ -21,6 +21,17 @@ const Index = () => {
     userRole: profile?.role || 'REP' 
   });
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
   // Show loading screen while checking authentication
   if (authLoading) {
     console.log('Showing loading screen - auth loading');
@@ -62,7 +73,7 @@ const Index = () => {
           <h2 className="text-xl font-semibold mb-4">Profile not found</h2>
           <p className="text-gray-600 mb-4">There was an issue loading your profile.</p>
           <button 
-            onClick={() => signOut()}
+            onClick={handleSignOut}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Sign Out
@@ -103,10 +114,6 @@ const Index = () => {
     } catch (error) {
       console.error('Error updating rep:', error);
     }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
   };
 
   return (
