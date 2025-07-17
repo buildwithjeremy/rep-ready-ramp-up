@@ -1,25 +1,39 @@
 
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
+import { useState } from "react";
 
 interface AuthButtonProps {
   isAuthenticated: boolean;
   onSignIn: () => void;
-  onSignOut: () => void;
+  onSignOut: () => void | Promise<void>;
   isLoading?: boolean;
 }
 
 export function AuthButton({ isAuthenticated, onSignIn, onSignOut, isLoading }: AuthButtonProps) {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await onSignOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   if (isAuthenticated) {
     return (
       <Button 
-        onClick={onSignOut} 
+        onClick={handleSignOut} 
         variant="outline" 
         size="sm"
-        disabled={isLoading}
+        disabled={isLoading || isSigningOut}
       >
         <LogOut className="w-4 h-4 mr-2" />
-        Sign Out
+        {isSigningOut ? 'Signing out...' : 'Sign Out'}
       </Button>
     );
   }
