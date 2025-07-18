@@ -5,4 +5,4 @@ const SignUpPage = () => {
   return <AuthScreen initialMode="signup" />;
 };
 
-export default { SignUpPage };
+export default SignUpPage;
