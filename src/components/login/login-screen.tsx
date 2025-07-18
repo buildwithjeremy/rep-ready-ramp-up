@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthButton } from "@/components/ui/auth-button";
-import teamTenaciousLogo from "@/assets/team-tenacious-logo.png";
+import teamTenaciousLogo from "/lovable-uploads/3ce7a3f1-dd01-4603-9a0f-e8c0f9a0f114.png";
 
 interface LoginScreenProps {
   onSignIn: () => void;
