@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthButton } from "@/components/ui/auth-button";
+import teamTenaciousLogo from "@/assets/team-tenacious-logo.png";
 
 interface LoginScreenProps {
   onSignIn: () => void;
@@ -12,10 +13,14 @@ export function LoginScreen({ onSignIn, isLoading }: LoginScreenProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-2xl">TT</span>
+          <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
+            <img 
+              src={teamTenaciousLogo} 
+              alt="Team Tenacious 2.0 Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">Team Tenacious</CardTitle>
+          <CardTitle className="text-2xl font-bold">Team Tenacious 2.0</CardTitle>
           <CardDescription>Field Trainer Dashboard</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
