@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LogIn, Mail, AlertCircle, User } from 'lucide-react';
+import teamTenaciousLogo from "/lovable-uploads/3ce7a3f1-dd01-4603-9a0f-e8c0f9a0f114.png";
 
 export function AuthScreen() {
   console.log('AuthScreen component loaded successfully');
@@ -135,8 +136,15 @@ export function AuthScreen() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">{/* AuthScreen component refreshed */}
         <CardHeader className="text-center">
+          <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
+            <img 
+              src={teamTenaciousLogo} 
+              alt="Team Tenacious 2.0 Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Team Tenacious
+            Team Tenacious 2.0
           </CardTitle>
           <p className="text-gray-600">
             {isResetMode ? 'Reset your password' : (isSignUp ? 'Create your account' : 'Sign in to your account')}
