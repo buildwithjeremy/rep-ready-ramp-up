@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,15 +12,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { LogIn, Mail, AlertCircle, User } from 'lucide-react';
 import teamTenaciousLogo from "/lovable-uploads/3ce7a3f1-dd01-4603-9a0f-e8c0f9a0f114.png";
 
-export function AuthScreen() {
+interface AuthScreenProps {
+  initialMode?: 'signin' | 'signup';
+}
+
+export function AuthScreen({ initialMode }: AuthScreenProps) {
   console.log('AuthScreen component loaded successfully');
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [selectedTrainer, setSelectedTrainer] = useState('');
   const [trainers, setTrainers] = useState<{id: string, full_name: string, assigned_reps: number}[]>([]);
-  const [isSignUp, setIsSignUp] = useState(false);
+  
+  // Determine initial mode based on URL or prop
+  const getInitialMode = () => {
+    if (initialMode) return initialMode === 'signup';
+    return location.pathname === '/signup';
+  };
+  
+  const [isSignUp, setIsSignUp] = useState(getInitialMode);
   const [isResetMode, setIsResetMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,10 +54,22 @@ export function AuthScreen() {
         console.error('Error loading trainers:', error);
       } else {
         setTrainers(data || []);
-        // Don't auto-select - let user choose their trainer
       }
     } catch (err) {
       console.error('Error in loadTrainers:', err);
+    }
+  };
+
+  const handleModeToggle = (newIsSignUp: boolean) => {
+    setIsSignUp(newIsSignUp);
+    setError(null);
+    setMessage(null);
+    
+    // Update URL to match the mode
+    if (newIsSignUp) {
+      navigate('/signup', { replace: true });
+    } else {
+      navigate('/', { replace: true });
     }
   };
 
@@ -131,10 +158,9 @@ export function AuthScreen() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">{/* AuthScreen component refreshed */}
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
             <img 
@@ -260,7 +286,6 @@ export function AuthScreen() {
             </div>
           )}
 
-
           <div className="text-center">
             {isResetMode ? (
               <button
@@ -277,7 +302,7 @@ export function AuthScreen() {
             ) : (
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => handleModeToggle(!isSignUp)}
                 className="text-sm text-blue-600 hover:underline"
               >
                 {isSignUp
