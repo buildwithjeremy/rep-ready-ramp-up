@@ -8,7 +8,8 @@ const corsHeaders = {
 interface CreateRepRequest {
   name: string
   email: string
-  phone?: string
+  phone: string
+  birthday?: string
   password: string
   trainerId: string
 }
@@ -78,12 +79,12 @@ Deno.serve(async (req) => {
     }
 
     // Parse request body
-    const { name, email, phone, password, trainerId }: CreateRepRequest = await req.json()
+    const { name, email, phone, birthday, password, trainerId }: CreateRepRequest = await req.json()
 
     // Validate required fields
-    if (!name || !email || !password || !trainerId) {
+    if (!name || !email || !phone || !password || !trainerId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: name, email, password, trainerId' }),
+        JSON.stringify({ error: 'Missing required fields: name, email, phone, password, trainerId' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
@@ -97,15 +98,13 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Validate phone format if provided
-    if (phone) {
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-      if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid phone format' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        )
-      }
+    // Validate phone format (now required)
+    const phoneRegex = /^[\+]?[1]?[\s]?[\(]?[0-9]{3}[\)]?[\s\-]?[0-9]{3}[\s\-]?[0-9]{4}$/
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid phone format. Please use format: (555) 123-4567' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
     // Validate trainer exists and user has permission to assign to this trainer
@@ -184,6 +183,7 @@ Deno.serve(async (req) => {
       .from('reps')
       .update({
         phone: phone || null,
+        birthday: birthday || null,
         email: email // Ensure email is properly set
       })
       .eq('user_id', newUser.user.id)

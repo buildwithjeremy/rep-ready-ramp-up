@@ -23,6 +23,7 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
+  birthday?: string;
   password: string;
   trainerId: string;
 }
@@ -55,6 +56,7 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
       name: '',
       email: '',
       phone: '',
+      birthday: '',
       password: '',
       trainerId: trainerId || ''
     }
@@ -73,7 +75,8 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
         body: {
           name: data.name,
           email: data.email,
-          phone: data.phone || null,
+          phone: data.phone,
+          birthday: data.birthday || null,
           password: data.password,
           trainerId: data.trainerId,
         },
@@ -222,20 +225,47 @@ export function AddRepForm({ onBack, onAddRep, trainerId }: AddRepFormProps) {
                 <FormField
                   control={form.control}
                   name="phone"
+                  rules={{ 
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[\+]?[1]?[\s]?[\(]?[0-9]{3}[\)]?[\s\-]?[0-9]{3}[\s\-]?[0-9]{4}$/,
+                      message: "Please enter a valid phone number"
+                    }
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center">
                         <Phone className="w-4 h-4 mr-2" />
-                        Phone Number (Optional)
+                        Phone Number *
                       </FormLabel>
                       <FormControl>
                         <Input 
                           type="tel"
-                          placeholder="Enter phone number" 
+                          placeholder="(555) 123-4567" 
                           {...field}
                           className="h-12"
                         />
                       </FormControl>
+                      <p className="text-xs text-gray-500">Format: (555) 123-4567 or 555-123-4567</p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date"
+                          {...field}
+                          className="h-12"
+                        />
+                      </FormControl>
+                      <p className="text-xs text-gray-500">Format: MM/DD/YYYY</p>
                       <FormMessage />
                     </FormItem>
                   )}

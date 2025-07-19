@@ -25,6 +25,7 @@ export function AuthScreen({ initialMode }: AuthScreenProps) {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [selectedTrainer, setSelectedTrainer] = useState('');
   const [trainers, setTrainers] = useState<{id: string, full_name: string, assigned_reps: number}[]>([]);
   
@@ -97,6 +98,18 @@ export function AuthScreen({ initialMode }: AuthScreenProps) {
           setError('Full name is required');
           return;
         }
+        if (!phone.trim()) {
+          setError('Phone number is required');
+          return;
+        }
+        
+        // Basic phone validation
+        const phoneRegex = /^[\+]?[1]?[\s]?[\(]?[0-9]{3}[\)]?[\s\-]?[0-9]{3}[\s\-]?[0-9]{4}$/;
+        if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+          setError('Please enter a valid phone number');
+          return;
+        }
+        
         if (!selectedTrainer) {
           setError('Please select a trainer');
           return;
@@ -130,6 +143,7 @@ export function AuthScreen({ initialMode }: AuthScreenProps) {
                   full_name: fullName,
                   email: email,
                   phone: phone || null,
+                  birthday: birthday || null,
                 });
 
               if (repError) {
@@ -234,14 +248,28 @@ export function AuthScreen({ initialMode }: AuthScreenProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number (Optional)</Label>
+                  <Label htmlFor="phone">Phone Number *</Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter your phone number"
+                    required
+                    placeholder="(555) 123-4567"
                   />
+                  <p className="text-xs text-gray-500">Format: (555) 123-4567 or 555-123-4567</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="birthday">Birthday (Optional)</Label>
+                  <Input
+                    id="birthday"
+                    type="date"
+                    value={birthday}
+                    onChange={(e) => setBirthday(e.target.value)}
+                    placeholder="mm/dd/yyyy"
+                  />
+                  <p className="text-xs text-gray-500">Format: MM/DD/YYYY</p>
                 </div>
 
                 <div className="space-y-2">

@@ -208,6 +208,7 @@ export type Database = {
       reps: {
         Row: {
           address: string | null
+          birthday: string | null
           created_at: string
           email: string
           full_name: string
@@ -226,6 +227,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          birthday?: string | null
           created_at?: string
           email: string
           full_name: string
@@ -244,6 +246,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          birthday?: string | null
           created_at?: string
           email?: string
           full_name?: string
