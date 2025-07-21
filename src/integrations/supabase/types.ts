@@ -431,6 +431,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      refresh_all_rep_statuses: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       rep_stage: "board_a" | "board_b" | "board_c" | "independent"
