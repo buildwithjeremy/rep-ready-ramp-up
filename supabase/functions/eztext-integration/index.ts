@@ -332,8 +332,11 @@ Deno.serve(async (req) => {
       console.log('WARNING: Contact ID matches phone number - this typically indicates the contact was NOT created')
       console.log('This might be due to API limitations, duplicate detection, or formatting issues')
       
-      // Let's try to verify if the contact actually exists by searching for it
-      const searchResponse = await fetch(`https://a.eztexting.com/v1/contacts?phoneNumber=${ezTextFormat}`, {
+      // Let's verify by searching through the contacts list manually
+      console.log('Searching for phone number in existing contacts:', ezTextFormat)
+      
+      // Get the first page of contacts to check if our number exists
+      const verifyResponse = await fetch('https://a.eztexting.com/v1/contacts?size=50', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -341,33 +344,48 @@ Deno.serve(async (req) => {
         }
       })
       
-      if (searchResponse.ok) {
-        const searchData = await searchResponse.json()
-        console.log('Contact search result:', JSON.stringify(searchData, null, 2))
+      if (verifyResponse.ok) {
+        const verifyData = await verifyResponse.json()
+        console.log('Checking contacts for our phone number...')
         
-        if (searchData.content && searchData.content.length > 0) {
-          console.log('Contact found in search - using existing contact')
-          const existingContact = searchData.content[0]
+        // Look for our specific phone number in the results
+        const foundContact = verifyData.content?.find((contact: any) => 
+          contact.phoneNumber === ezTextFormat
+        )
+        
+        if (foundContact) {
+          console.log('Contact found in verification search:', foundContact)
           
           return new Response(
             JSON.stringify({ 
               success: true,
-              eztext_contact_id: existingContact.phoneNumber,
+              eztext_contact_id: foundContact.phoneNumber,
               message: 'Contact already exists in EZ Text',
-              existing_contact: true
+              existing_contact: true,
+              contact_details: foundContact
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         } else {
-          console.log('Contact not found in search - creation may have failed silently')
+          console.log('Contact NOT found in verification search - creation likely failed')
+          
+          return new Response(
+            JSON.stringify({ 
+              success: false,
+              error: 'Contact creation failed - phone number returned as ID but contact not found in system',
+              attempted_phone: ezTextFormat,
+              suggestion: 'The EZ Text API may have validation rules preventing this contact creation'
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+          )
         }
       } else {
-        console.error('Failed to search for contact:', await searchResponse.text())
+        console.error('Failed to verify contact creation:', await verifyResponse.text())
       }
     }
 
-    // For now, assume success but warn about potential issues
-    console.log('Proceeding with contact creation response, but may need manual verification')
+    // If we get here, the contact was actually created with a proper ID
+    console.log('Contact successfully created with valid ID:', contactData.id)
 
     // Skip group assignment since the contact creation is questionable
     console.log('Skipping group assignment due to uncertain contact creation status')
