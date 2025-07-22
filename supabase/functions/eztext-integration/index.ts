@@ -157,20 +157,24 @@ Deno.serve(async (req) => {
     const digitsOnly = phone.replace(/\D/g, '')
     console.log('Phone digits only:', digitsOnly)
     
-    // Ensure we have a 10-digit US number
+    // Format as (XXX)-XXX-XXXX for EZ Text API
     let formattedPhone = ''
     if (digitsOnly.length === 10) {
-      // Add +1 for US numbers
-      formattedPhone = `+1${digitsOnly}`
+      // Format 10-digit US number as (XXX)-XXX-XXXX
+      formattedPhone = `(${digitsOnly.slice(0, 3)})-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`
     } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
-      // Already has country code
-      formattedPhone = `+${digitsOnly}`
-    } else if (phone.startsWith('+')) {
-      // Already formatted
-      formattedPhone = phone
+      // Remove leading 1 and format as (XXX)-XXX-XXXX
+      const tenDigits = digitsOnly.slice(1)
+      formattedPhone = `(${tenDigits.slice(0, 3)})-${tenDigits.slice(3, 6)}-${tenDigits.slice(6)}`
     } else {
-      // Default: assume US and add +1
-      formattedPhone = `+1${digitsOnly}`
+      // If it's already formatted correctly, use as-is
+      if (phone.match(/^\(\d{3}\)-\d{3}-\d{4}$/)) {
+        formattedPhone = phone
+      } else {
+        // Default: assume 10 digits and format
+        const cleanDigits = digitsOnly.slice(-10) // Take last 10 digits
+        formattedPhone = `(${cleanDigits.slice(0, 3)})-${cleanDigits.slice(3, 6)}-${cleanDigits.slice(6)}`
+      }
     }
     
     console.log('Formatted phone number:', formattedPhone)
