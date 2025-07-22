@@ -153,6 +153,47 @@ Deno.serve(async (req) => {
 
     // Get valid access token
     const accessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
+    
+    // First, let's test the API connection by fetching account info
+    console.log('Testing EZ Text API connection...')
+    const accountTestResponse = await fetch('https://a.eztexting.com/v1/account', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
+      }
+    })
+    
+    if (accountTestResponse.ok) {
+      const accountData = await accountTestResponse.json()
+      console.log('EZ Text account data:', JSON.stringify(accountData, null, 2))
+    } else {
+      const accountError = await accountTestResponse.text()
+      console.error('EZ Text account test failed:', accountTestResponse.status, accountError)
+    }
+    
+    // Test if we can fetch groups to verify Group ID
+    if (ezTextGroupId) {
+      console.log('Testing EZ Text Group ID...')
+      const groupTestResponse = await fetch(`https://a.eztexting.com/v1/groups/${ezTextGroupId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      })
+      
+      if (groupTestResponse.ok) {
+        const groupData = await groupTestResponse.json()
+        console.log('EZ Text group data:', JSON.stringify(groupData, null, 2))
+      } else {
+        const groupError = await groupTestResponse.text()
+        console.error('EZ Text group test failed:', groupTestResponse.status, groupError)
+      }
+    }
+    
+    // Test with the simplest CSV format first: just digits
+    const csvFormatPhone = phone.replace(/\D/g, '') // 2127846500 format
 
     // Format phone number properly for EZ Text
     // Remove all non-digit characters first
