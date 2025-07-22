@@ -152,6 +152,29 @@ Deno.serve(async (req) => {
     // Get valid access token
     const accessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
 
+    // Format phone number properly for EZ Text
+    // Remove all non-digit characters first
+    const digitsOnly = phone.replace(/\D/g, '')
+    console.log('Phone digits only:', digitsOnly)
+    
+    // Ensure we have a 10-digit US number
+    let formattedPhone = ''
+    if (digitsOnly.length === 10) {
+      // Add +1 for US numbers
+      formattedPhone = `+1${digitsOnly}`
+    } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
+      // Already has country code
+      formattedPhone = `+${digitsOnly}`
+    } else if (phone.startsWith('+')) {
+      // Already formatted
+      formattedPhone = phone
+    } else {
+      // Default: assume US and add +1
+      formattedPhone = `+1${digitsOnly}`
+    }
+    
+    console.log('Formatted phone number:', formattedPhone)
+
     // Step 1: Create contact in EZ Text
     const createContactResponse = await fetch('https://a.eztexting.com/v1/contacts', {
       method: 'POST',
@@ -163,7 +186,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         first_name: name.split(' ')[0] || name,
         last_name: name.split(' ').slice(1).join(' ') || '',
-        phone_number: phone.startsWith('+') ? phone : `+1${phone.replace(/\D/g, '')}`, // Format as international
+        phone_number: formattedPhone,
         email: email
       })
     })
@@ -188,7 +211,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             first_name: name.split(' ')[0] || name,
             last_name: name.split(' ').slice(1).join(' ') || '',
-            phone_number: phone.startsWith('+') ? phone : `+1${phone.replace(/\D/g, '')}`,
+            phone_number: formattedPhone,
             email: email
           })
         })
