@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         first_name: name.split(' ')[0] || name,
         last_name: name.split(' ').slice(1).join(' ') || '',
-        phone_number: phone.replace(/\D/g, ''), // Remove non-digits
+        phone_number: phone.startsWith('+') ? phone : `+1${phone.replace(/\D/g, '')}`, // Format as international
         email: email
       })
     })
@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             first_name: name.split(' ')[0] || name,
             last_name: name.split(' ').slice(1).join(' ') || '',
-            phone_number: phone.replace(/\D/g, ''),
+            phone_number: phone.startsWith('+') ? phone : `+1${phone.replace(/\D/g, '')}`,
             email: email
           })
         })
