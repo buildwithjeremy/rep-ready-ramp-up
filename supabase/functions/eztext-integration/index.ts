@@ -154,9 +154,9 @@ Deno.serve(async (req) => {
     // Get valid access token
     const accessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
     
-    // First, let's test the API connection by fetching account info
-    console.log('Testing EZ Text API connection...')
-    const accountTestResponse = await fetch('https://a.eztexting.com/v1/account', {
+    // First, let's test if we can fetch contacts to verify API connection
+    console.log('Testing EZ Text API connection with contacts endpoint...')
+    const contactsTestResponse = await fetch('https://a.eztexting.com/v1/contacts', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -164,18 +164,30 @@ Deno.serve(async (req) => {
       }
     })
     
-    if (accountTestResponse.ok) {
-      const accountData = await accountTestResponse.json()
-      console.log('EZ Text account data:', JSON.stringify(accountData, null, 2))
+    if (contactsTestResponse.ok) {
+      const contactsData = await contactsTestResponse.json()
+      console.log('EZ Text contacts API working. Contact count:', contactsData?.items?.length || 'unknown')
     } else {
-      const accountError = await accountTestResponse.text()
-      console.error('EZ Text account test failed:', accountTestResponse.status, accountError)
+      const contactsError = await contactsTestResponse.text()
+      console.error('EZ Text contacts API test failed:', contactsTestResponse.status, contactsError)
+      
+      // If contacts endpoint fails, the credentials might be wrong
+      if (contactsTestResponse.status === 401 || contactsTestResponse.status === 403) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'EZ Text API authentication failed. Please check your App Key and App Secret.',
+            status: contactsTestResponse.status,
+            details: contactsError 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+        )
+      }
     }
     
-    // Test if we can fetch groups to verify Group ID
+    // Test if we can fetch groups if Group ID is provided
     if (ezTextGroupId) {
-      console.log('Testing EZ Text Group ID...')
-      const groupTestResponse = await fetch(`https://a.eztexting.com/v1/groups/${ezTextGroupId}`, {
+      console.log('Testing EZ Text Group ID with groups endpoint...')
+      const groupsTestResponse = await fetch('https://a.eztexting.com/v1/groups', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -183,17 +195,26 @@ Deno.serve(async (req) => {
         }
       })
       
-      if (groupTestResponse.ok) {
-        const groupData = await groupTestResponse.json()
-        console.log('EZ Text group data:', JSON.stringify(groupData, null, 2))
+      if (groupsTestResponse.ok) {
+        const groupsData = await groupsTestResponse.json()
+        console.log('Available groups:', JSON.stringify(groupsData, null, 2))
+        
+        // Check if our group ID exists in the response
+        const groups = groupsData?.items || []
+        const groupExists = groups.some((group: any) => group.id === ezTextGroupId || group.id === parseInt(ezTextGroupId))
+        
+        if (!groupExists) {
+          console.warn(`Group ID ${ezTextGroupId} not found in available groups`)
+          console.log('Available group IDs:', groups.map((g: any) => g.id))
+        }
       } else {
-        const groupError = await groupTestResponse.text()
-        console.error('EZ Text group test failed:', groupTestResponse.status, groupError)
+        const groupsError = await groupsTestResponse.text()
+        console.error('EZ Text groups API test failed:', groupsTestResponse.status, groupsError)
       }
     }
-    
-    // Test with the simplest CSV format first: just digits
-    const csvFormatPhone = phone.replace(/\D/g, '') // 2127846500 format
+
+    // Use the simplest phone format based on CSV template: just digits
+    const csvFormatPhone = phone.replace(/\D/g, '') // e.g., "2173411638"
 
     // Format phone number properly for EZ Text
     // Remove all non-digit characters first
