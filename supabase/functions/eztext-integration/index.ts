@@ -199,7 +199,73 @@ Deno.serve(async (req) => {
 
     if (!createContactResponse.ok) {
       const errorText = await createContactResponse.text()
-      console.error('EZ Text contact creation failed:', createContactResponse.status, errorText)
+      console.error('EZ Text contact creation failed with format1:', createContactResponse.status, errorText)
+      
+      // If phone validation failed, try other formats automatically
+      if (createContactResponse.status === 400 && errorText.includes('Phone number is not valid')) {
+        console.log('Phone validation failed, trying alternative formats...')
+        
+        const formatsToTry = [
+          { name: 'format2', value: formats.format2 }, // (317) 341-1638
+          { name: 'format3', value: formats.format3 }, // +13173411638  
+          { name: 'format4', value: formats.format4 }, // 3173411638
+          { name: 'format5', value: formats.format5 }  // 317-341-1638
+        ]
+        
+        for (const format of formatsToTry) {
+          console.log(`Trying ${format.name}: ${format.value}`)
+          
+          const retryResponse = await fetch('https://a.eztexting.com/v1/contacts', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              first_name: name.split(' ')[0] || name,
+              last_name: name.split(' ').slice(1).join(' ') || '',
+              phone_number: format.value,
+              email: email
+            })
+          })
+          
+          if (retryResponse.ok) {
+            const contactData = await retryResponse.json()
+            console.log(`SUCCESS with ${format.name}:`, contactData)
+            
+            // Add to group if specified
+            const targetGroupId = groupId || ezTextGroupId
+            if (targetGroupId && contactData.id) {
+              await addContactToGroup(accessToken, targetGroupId, contactData.id)
+            }
+            
+            return new Response(
+              JSON.stringify({ 
+                success: true,
+                eztext_contact_id: contactData.id,
+                phone_format_used: format.name,
+                message: `Contact created in EZ Text successfully using ${format.name}`
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          } else {
+            const retryErrorText = await retryResponse.text()
+            console.log(`Failed with ${format.name}:`, retryResponse.status, retryErrorText)
+          }
+        }
+        
+        // If all formats failed
+        console.error('All phone number formats failed')
+        return new Response(
+          JSON.stringify({ 
+            error: 'All phone number formats rejected by EZ Text',
+            formats_tried: formatsToTry.map(f => f.value),
+            last_error: errorText 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
+      }
       
       // If it's a 401, the token might be invalid - clear cache and retry once
       if (createContactResponse.status === 401) {
@@ -214,12 +280,7 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          body: JSON.stringify({
-            first_name: name.split(' ')[0] || name,
-            last_name: name.split(' ').slice(1).join(' ') || '',
-            phone_number: formattedPhone,
-            email: email
-          })
+          body: JSON.stringify(requestBody)
         })
         
         if (!retryResponse.ok) {
