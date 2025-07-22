@@ -166,7 +166,13 @@ Deno.serve(async (req) => {
     
     if (contactsTestResponse.ok) {
       const contactsData = await contactsTestResponse.json()
-      console.log('EZ Text contacts API working. Contact count:', contactsData?.items?.length || 'unknown')
+      console.log('EZ Text contacts API working. Full response:', JSON.stringify(contactsData, null, 2))
+      
+      // Try to find any existing contacts to see what phone format they use
+      if (contactsData?.items && contactsData.items.length > 0) {
+        const sampleContact = contactsData.items[0]
+        console.log('Sample existing contact phone format:', sampleContact?.phone_number || sampleContact?.phoneNumber)
+      }
     } else {
       const contactsError = await contactsTestResponse.text()
       console.error('EZ Text contacts API test failed:', contactsTestResponse.status, contactsError)
