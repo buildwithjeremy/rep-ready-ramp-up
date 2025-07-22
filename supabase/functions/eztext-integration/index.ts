@@ -326,10 +326,23 @@ Deno.serve(async (req) => {
     const contactData = await createContactResponse.json()
     console.log('EZ Text contact created:', contactData)
 
+    // Check if this is a duplicate (when ID matches phone number, it might indicate existing contact)
+    if (contactData.id === ezTextFormat) {
+      console.log('Contact ID matches phone number - this might be a duplicate contact')
+      console.log('Contact may already exist in EZ Text system')
+    }
+
     // Step 2: Add contact to group (if groupId provided)
+    // Skip group assignment for now since the groups API endpoints seem to be different
     const targetGroupId = groupId || ezTextGroupId
-    if (targetGroupId && contactData.id) {
+    if (targetGroupId && contactData.id && contactData.id !== ezTextFormat) {
+      console.log('Attempting to add contact to group:', targetGroupId)
+      console.log('Contact ID for group assignment:', contactData.id)
+      
+      // Try different group assignment approaches
       await addContactToGroup(accessToken, targetGroupId, contactData.id)
+    } else {
+      console.log('Skipping group assignment - contact might be duplicate or invalid ID')
     }
 
     return new Response(
