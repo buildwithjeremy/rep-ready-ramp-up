@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Users, Shield, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ArrowLeft, Users, Shield, TrendingUp, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -29,6 +31,7 @@ export function UserManagement({ onBack }: UserManagementProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -123,6 +126,33 @@ export function UserManagement({ onBack }: UserManagementProps) {
       }
     } catch (err: any) {
       setError(err.message || 'Failed to update user role');
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!user) return;
+
+    try {
+      setDeleting(userId);
+      setError(null);
+      setSuccess(null);
+      
+      // Call the database function to delete user completely
+      const { error } = await supabase.rpc('delete_user_completely', {
+        target_user_id: userId
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success('User deleted successfully');
+      await loadUsers(); // Refresh the list
+    } catch (err: any) {
+      toast.error(`Failed to delete user: ${err.message}`);
+      setError(err.message);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -264,14 +294,55 @@ export function UserManagement({ onBack }: UserManagementProps) {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant={getRoleBadgeVariant(userProfile.role)}>
-                      {userProfile.role}
-                    </Badge>
-                    {userProfile.role === 'REP' && userProfile.rep_progress !== undefined && (
-                      getProgressBadge(userProfile.rep_progress, userProfile.rep_status || 'Active')
-                    )}
-                  </div>
+                   <div className="flex items-center space-x-2">
+                     <Badge variant={getRoleBadgeVariant(userProfile.role)}>
+                       {userProfile.role}
+                     </Badge>
+                     {userProfile.role === 'REP' && userProfile.rep_progress !== undefined && (
+                       getProgressBadge(userProfile.rep_progress, userProfile.rep_status || 'Active')
+                     )}
+                     
+                     {/* Delete User Button - Only show for non-current users */}
+                     {userProfile.id !== user?.id && (
+                       <AlertDialog>
+                         <AlertDialogTrigger asChild>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             className="text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
+                             disabled={deleting === userProfile.id}
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                         </AlertDialogTrigger>
+                         <AlertDialogContent>
+                           <AlertDialogHeader>
+                             <AlertDialogTitle>Delete User</AlertDialogTitle>
+                             <AlertDialogDescription>
+                               Are you sure you want to delete "{userProfile.full_name || 'this user'}"? 
+                               This will permanently remove:
+                               <ul className="list-disc list-inside mt-2 space-y-1">
+                                 <li>User account and profile</li>
+                                 <li>All rep records and progress</li>
+                                 <li>All milestones and subtasks</li>
+                                 <li>All associated timestamps and notes</li>
+                               </ul>
+                               <strong className="text-destructive">This action cannot be undone.</strong>
+                             </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                             <AlertDialogCancel>Cancel</AlertDialogCancel>
+                             <AlertDialogAction
+                               onClick={() => deleteUser(userProfile.id)}
+                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                             >
+                               {deleting === userProfile.id ? 'Deleting...' : 'Delete Permanently'}
+                             </AlertDialogAction>
+                           </AlertDialogFooter>
+                         </AlertDialogContent>
+                       </AlertDialog>
+                     )}
+                   </div>
                 </div>
 
                 {userProfile.role === 'REP' && (
