@@ -241,15 +241,16 @@ Deno.serve(async (req) => {
     // Based on existing contacts in EZ Text, they use simple format: just digits with country code
     const ezTextFormat = phoneWithCountryCode // e.g., "13173411638"
 
-    // Step 1: Create contact in EZ Text using the correct phone format
+    // Step 1: Create contact in EZ Text using the exact same field structure as existing contacts
+    // Let's try both possible field names that might be expected
     const requestBody = {
-      first_name: name.split(' ')[0] || name,
-      last_name: name.split(' ').slice(1).join(' ') || '',
-      phone_number: ezTextFormat,
+      firstName: name.split(' ')[0] || name,  // Try camelCase like existing contacts
+      lastName: name.split(' ').slice(1).join(' ') || '',
+      phoneNumber: ezTextFormat,  // Try camelCase like existing contacts
       email: email
     }
     
-    console.log('Request body for EZ Text:', JSON.stringify(requestBody, null, 2))
+    console.log('Request body for EZ Text (camelCase format):', JSON.stringify(requestBody, null, 2))
 
     const createContactResponse = await fetch('https://a.eztexting.com/v1/contacts', {
       method: 'POST',
