@@ -196,6 +196,30 @@ Deno.serve(async (req) => {
 
     console.log('Rep record updated successfully')
 
+    // Create contact in EZ Text
+    try {
+      const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          email: email
+        })
+      });
+
+      if (!ezTextResponse.ok) {
+        console.error('EZ Text integration failed:', await ezTextResponse.text());
+      } else {
+        console.log('EZ Text contact created successfully');
+      }
+    } catch (ezTextError) {
+      console.error('Error calling EZ Text integration:', ezTextError);
+    }
+
     // Return the created rep data
     const { data: finalRep, error: repFetchError } = await supabase
       .from('reps')

@@ -1,1 +1,4 @@
 project_id = "wpinbiwlbsyqtayqixea"
+
+[functions.eztext-integration]
+verify_jwt = false

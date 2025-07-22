@@ -152,6 +152,22 @@ export function AuthScreen({
               if (repError) {
                 console.error('Error creating rep record:', repError);
               }
+
+              // Create contact in EZ Text
+              try {
+                const { error: ezTextError } = await supabase.functions.invoke('eztext-integration', {
+                  body: {
+                    name: fullName,
+                    phone: phone,
+                    email: email
+                  }
+                });
+                if (ezTextError) {
+                  console.error('Error creating EZ Text contact:', ezTextError);
+                }
+              } catch (ezTextErr) {
+                console.error('Error in EZ Text integration:', ezTextErr);
+              }
             } catch (repErr) {
               console.error('Error in rep creation:', repErr);
             }
