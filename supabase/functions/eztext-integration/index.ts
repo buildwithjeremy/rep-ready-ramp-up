@@ -169,9 +169,10 @@ Deno.serve(async (req) => {
       console.log('EZ Text contacts API working. Full response:', JSON.stringify(contactsData, null, 2))
       
       // Try to find any existing contacts to see what phone format they use
-      if (contactsData?.items && contactsData.items.length > 0) {
-        const sampleContact = contactsData.items[0]
-        console.log('Sample existing contact phone format:', sampleContact?.phone_number || sampleContact?.phoneNumber)
+      if (contactsData?.content && contactsData.content.length > 0) {
+        const sampleContact = contactsData.content[0]
+        console.log('Sample existing contact phone format:', sampleContact?.phoneNumber)
+        console.log('Found existing groups in contacts:', contactsData.content.filter(c => c.groups?.length > 0).map(c => c.groups).flat())
       }
     } else {
       const contactsError = await contactsTestResponse.text()
@@ -219,39 +220,32 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use the simplest phone format based on CSV template: just digits
-    const csvFormatPhone = phone.replace(/\D/g, '') // e.g., "2173411638"
-
-    // Format phone number properly for EZ Text
-    // Remove all non-digit characters first
+    // Based on the existing contacts, EZ Text expects: 11 digits starting with 1 (e.g., "14148651615")
     const digitsOnly = phone.replace(/\D/g, '')
     console.log('Phone digits only:', digitsOnly)
     
-    // Try multiple formats to see what EZ Text accepts
-    const formats = {
-      // Based on EZ Text UI format you mentioned: (262)-567-0570
-      format1: `(${digitsOnly.slice(0, 3)})-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`,
-      // Standard US format: (317) 341-1638
-      format2: `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`,
-      // E.164 international: +13173411638
-      format3: `+1${digitsOnly}`,
-      // Just digits: 3173411638
-      format4: digitsOnly,
-      // Dashed format: 317-341-1638
-      format5: `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`
+    // Ensure we have US format with country code
+    let phoneWithCountryCode = digitsOnly
+    if (digitsOnly.length === 10) {
+      phoneWithCountryCode = '1' + digitsOnly // Add US country code
+    } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
+      phoneWithCountryCode = digitsOnly // Already has country code
+    } else {
+      console.warn('Unexpected phone number length:', digitsOnly.length)
+      // Try to force US format anyway
+      phoneWithCountryCode = '1' + digitsOnly.slice(-10)
     }
     
-    console.log('Testing phone formats:', formats)
+    console.log('Phone with country code:', phoneWithCountryCode)
     
-    // Start with the format you mentioned from EZ Text UI
-    let formattedPhone = formats.format1
-    console.log('Using phone format:', formattedPhone)
+    // Based on existing contacts in EZ Text, they use simple format: just digits with country code
+    const ezTextFormat = phoneWithCountryCode // e.g., "13173411638"
 
-    // Step 1: Create contact in EZ Text
+    // Step 1: Create contact in EZ Text using the correct phone format
     const requestBody = {
       first_name: name.split(' ')[0] || name,
       last_name: name.split(' ').slice(1).join(' ') || '',
-      phone_number: formattedPhone,
+      phone_number: ezTextFormat,
       email: email
     }
     
@@ -269,73 +263,7 @@ Deno.serve(async (req) => {
 
     if (!createContactResponse.ok) {
       const errorText = await createContactResponse.text()
-      console.error('EZ Text contact creation failed with format1:', createContactResponse.status, errorText)
-      
-      // If phone validation failed, try other formats automatically
-      if (createContactResponse.status === 400 && errorText.includes('Phone number is not valid')) {
-        console.log('Phone validation failed, trying alternative formats...')
-        
-        const formatsToTry = [
-          { name: 'format2', value: formats.format2 }, // (317) 341-1638
-          { name: 'format3', value: formats.format3 }, // +13173411638  
-          { name: 'format4', value: formats.format4 }, // 3173411638
-          { name: 'format5', value: formats.format5 }  // 317-341-1638
-        ]
-        
-        for (const format of formatsToTry) {
-          console.log(`Trying ${format.name}: ${format.value}`)
-          
-          const retryResponse = await fetch('https://a.eztexting.com/v1/contacts', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              first_name: name.split(' ')[0] || name,
-              last_name: name.split(' ').slice(1).join(' ') || '',
-              phone_number: format.value,
-              email: email
-            })
-          })
-          
-          if (retryResponse.ok) {
-            const contactData = await retryResponse.json()
-            console.log(`SUCCESS with ${format.name}:`, contactData)
-            
-            // Add to group if specified
-            const targetGroupId = groupId || ezTextGroupId
-            if (targetGroupId && contactData.id) {
-              await addContactToGroup(accessToken, targetGroupId, contactData.id)
-            }
-            
-            return new Response(
-              JSON.stringify({ 
-                success: true,
-                eztext_contact_id: contactData.id,
-                phone_format_used: format.name,
-                message: `Contact created in EZ Text successfully using ${format.name}`
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            )
-          } else {
-            const retryErrorText = await retryResponse.text()
-            console.log(`Failed with ${format.name}:`, retryResponse.status, retryErrorText)
-          }
-        }
-        
-        // If all formats failed
-        console.error('All phone number formats failed')
-        return new Response(
-          JSON.stringify({ 
-            error: 'All phone number formats rejected by EZ Text',
-            formats_tried: formatsToTry.map(f => f.value),
-            last_error: errorText 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        )
-      }
+      console.error('EZ Text contact creation failed:', createContactResponse.status, errorText)
       
       // If it's a 401, the token might be invalid - clear cache and retry once
       if (createContactResponse.status === 401) {
@@ -387,7 +315,8 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create contact in EZ Text',
-          details: errorText 
+          details: errorText,
+          phone_format_tried: ezTextFormat
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
