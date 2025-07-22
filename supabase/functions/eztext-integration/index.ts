@@ -157,29 +157,36 @@ Deno.serve(async (req) => {
     const digitsOnly = phone.replace(/\D/g, '')
     console.log('Phone digits only:', digitsOnly)
     
-    // Format as (XXX)-XXX-XXXX for EZ Text API
-    let formattedPhone = ''
-    if (digitsOnly.length === 10) {
-      // Format 10-digit US number as (XXX)-XXX-XXXX
-      formattedPhone = `(${digitsOnly.slice(0, 3)})-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`
-    } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
-      // Remove leading 1 and format as (XXX)-XXX-XXXX
-      const tenDigits = digitsOnly.slice(1)
-      formattedPhone = `(${tenDigits.slice(0, 3)})-${tenDigits.slice(3, 6)}-${tenDigits.slice(6)}`
-    } else {
-      // If it's already formatted correctly, use as-is
-      if (phone.match(/^\(\d{3}\)-\d{3}-\d{4}$/)) {
-        formattedPhone = phone
-      } else {
-        // Default: assume 10 digits and format
-        const cleanDigits = digitsOnly.slice(-10) // Take last 10 digits
-        formattedPhone = `(${cleanDigits.slice(0, 3)})-${cleanDigits.slice(3, 6)}-${cleanDigits.slice(6)}`
-      }
+    // Try multiple formats to see what EZ Text accepts
+    const formats = {
+      // Based on EZ Text UI format you mentioned: (262)-567-0570
+      format1: `(${digitsOnly.slice(0, 3)})-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`,
+      // Standard US format: (317) 341-1638
+      format2: `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`,
+      // E.164 international: +13173411638
+      format3: `+1${digitsOnly}`,
+      // Just digits: 3173411638
+      format4: digitsOnly,
+      // Dashed format: 317-341-1638
+      format5: `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`
     }
     
-    console.log('Formatted phone number:', formattedPhone)
+    console.log('Testing phone formats:', formats)
+    
+    // Start with the format you mentioned from EZ Text UI
+    let formattedPhone = formats.format1
+    console.log('Using phone format:', formattedPhone)
 
     // Step 1: Create contact in EZ Text
+    const requestBody = {
+      first_name: name.split(' ')[0] || name,
+      last_name: name.split(' ').slice(1).join(' ') || '',
+      phone_number: formattedPhone,
+      email: email
+    }
+    
+    console.log('Request body for EZ Text:', JSON.stringify(requestBody, null, 2))
+
     const createContactResponse = await fetch('https://a.eztexting.com/v1/contacts', {
       method: 'POST',
       headers: {
@@ -187,12 +194,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        first_name: name.split(' ')[0] || name,
-        last_name: name.split(' ').slice(1).join(' ') || '',
-        phone_number: formattedPhone,
-        email: email
-      })
+      body: JSON.stringify(requestBody)
     })
 
     if (!createContactResponse.ok) {
