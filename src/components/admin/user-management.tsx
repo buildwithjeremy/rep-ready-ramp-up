@@ -137,16 +137,20 @@ export function UserManagement({ onBack }: UserManagementProps) {
       setError(null);
       setSuccess(null);
       
-      // Call the database function to delete user completely
-      const { error } = await supabase.rpc('delete_user_completely', {
-        target_user_id: userId
+      // Call the Edge Function to delete user completely (including from auth)
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { target_user_id: userId }
       });
 
       if (error) {
         throw new Error(error.message);
       }
 
-      toast.success('User deleted successfully');
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      toast.success('User deleted completely from both database and authentication');
       await loadUsers(); // Refresh the list
     } catch (err: any) {
       toast.error(`Failed to delete user: ${err.message}`);
