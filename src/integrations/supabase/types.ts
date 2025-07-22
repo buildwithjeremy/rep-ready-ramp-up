@@ -387,6 +387,10 @@ export type Database = {
         Args: { rep_id: string }
         Returns: number
       }
+      delete_user_completely: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       get_activity_rate: {
         Args: { trainer_id_param: string }
         Returns: number
