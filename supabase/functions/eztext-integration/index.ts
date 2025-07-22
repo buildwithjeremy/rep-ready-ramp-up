@@ -148,6 +148,8 @@ Deno.serve(async (req) => {
     }
 
     console.log('Creating EZ Text contact for:', { name, phone, email })
+    console.log('EZ Text App Key (first 10 chars):', ezTextAppKey?.substring(0, 10))
+    console.log('EZ Text Group ID:', ezTextGroupId)
 
     // Get valid access token
     const accessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
