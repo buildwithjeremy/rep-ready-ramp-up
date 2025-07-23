@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Trainer, Rep } from "@/types";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 interface TrainerContactCardProps {
   trainer: Trainer;
@@ -14,6 +17,12 @@ interface TrainerContactCardProps {
 
 export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const [avatarUrl, setAvatarUrl] = useState(trainer.avatar);
+
+  const isCurrentUser = user?.id === trainer.id;
+  const isAdmin = profile?.role === 'ADMIN';
 
   // Calculate average progress of active reps
   const activeReps = reps.filter(rep => rep.status === 'Active');
@@ -41,8 +50,15 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
 
         {/* Profile Section */}
         <div className="flex items-center space-x-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-            {trainer.name.charAt(0).toUpperCase()}
+          <div className="flex-shrink-0">
+            <AvatarUpload
+              currentAvatarUrl={avatarUrl}
+              userId={trainer.id}
+              userName={trainer.name}
+              isCurrentUser={isCurrentUser}
+              isAdmin={isAdmin}
+              onAvatarUpdate={setAvatarUrl}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="mb-2">

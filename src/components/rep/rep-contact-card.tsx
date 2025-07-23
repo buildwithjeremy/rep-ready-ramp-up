@@ -6,6 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Rep } from "@/types";
 import { mockTrainers } from "@/data/mockData";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 interface RepContactCardProps {
   rep: Rep;
@@ -14,6 +17,12 @@ interface RepContactCardProps {
 
 export function RepContactCard({ rep, onBack }: RepContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+
+  const isCurrentUser = user?.id === rep.userId;
+  const isAdmin = profile?.role === 'ADMIN';
 
   const getStatusColor = (status: Rep['status']) => {
     switch (status) {
@@ -43,8 +52,15 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
 
         {/* Main Profile Info */}
         <div className="flex items-center space-x-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-            {rep.name.charAt(0).toUpperCase()}
+          <div className="flex-shrink-0">
+            <AvatarUpload
+              currentAvatarUrl={avatarUrl}
+              userId={rep.userId || ''}
+              userName={rep.name}
+              isCurrentUser={isCurrentUser}
+              isAdmin={isAdmin}
+              onAvatarUpdate={setAvatarUrl}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mt-1">

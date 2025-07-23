@@ -5,10 +5,14 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { ChecklistCard } from "./checklist-card";
 import { Rep } from "@/types";
 import { ArrowLeft, Mail, Phone, Calendar, User, Users, Edit, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 interface RepDashboardProps {
   rep: Rep;
@@ -17,15 +21,21 @@ interface RepDashboardProps {
 
 export function RepDashboard({ rep, onUpdateRep }: RepDashboardProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
   const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, boolean>>({});
   const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
   const [editedRep, setEditedRep] = useState({
     name: rep.name,
     email: rep.email,
     phone: rep.phone || ''
   });
+
+  const isCurrentUser = user?.id === rep.userId;
+  const isAdmin = profile?.role === 'ADMIN';
 
   const toggleMilestone = (milestone: number) => {
     setExpandedMilestones(prev => ({
@@ -94,9 +104,11 @@ export function RepDashboard({ rep, onUpdateRep }: RepDashboardProps) {
 
           {/* Profile Overview */}
           <div className="flex items-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-              {rep.name.charAt(0).toUpperCase()}
-            </div>
+            <UserAvatar 
+              avatarUrl={avatarUrl}
+              userName={rep.name}
+              size="lg"
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(rep.status)}`}>
@@ -178,6 +190,18 @@ export function RepDashboard({ rep, onUpdateRep }: RepDashboardProps) {
                       </Button>
                     </div>
                   )}
+                </div>
+
+                {/* Profile Picture Section */}
+                <div className="flex justify-center mb-6">
+                  <AvatarUpload
+                    currentAvatarUrl={avatarUrl}
+                    userId={rep.userId || ''}
+                    userName={rep.name}
+                    isCurrentUser={isCurrentUser}
+                    isAdmin={isAdmin}
+                    onAvatarUpdate={setAvatarUrl}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
