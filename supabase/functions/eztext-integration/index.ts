@@ -9,6 +9,7 @@ interface EZTextContact {
   name: string
   phone: string
   email: string
+  birthday?: string
   groupId?: string
 }
 
@@ -138,30 +139,27 @@ function formatPhoneNumber(phone: string): string {
   }
 }
 
-// Helper function to add contact to group using phone number (correct EZ Text API)
+// Helper function to add contact to group using phone number (using working API format)
 async function addContactToGroup(accessToken: string, groupId: string, phoneNumber: string): Promise<void> {
   try {
-    // Use the correct EZ Text API endpoint format from documentation
-    const groupResponse = await fetch(`https://a.eztexting.com/v1/contact-groups/${groupId}/contacts`, {
+    // Use query parameter format as per working example - remove country code for the API call
+    const phoneForGroup = phoneNumber.startsWith('1') ? phoneNumber.substring(1) : phoneNumber;
+    const groupResponse = await fetch(`https://a.eztexting.com/v1/contact-groups/${groupId}/contacts?phoneNumbers=${phoneForGroup}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        phoneNumbers: [phoneNumber] // EZ Text expects phone numbers, not contact IDs
-      })
+        'Accept': '*/*'
+      }
     });
 
     if (!groupResponse.ok) {
       const errorText = await groupResponse.text();
       console.error(`Failed to add contact to group: ${groupResponse.status} ${errorText}`);
-      throw new Error(`Failed to add contact ${phoneNumber} to group ${groupId}: ${groupResponse.status}`);
+      throw new Error(`Failed to add contact ${phoneForGroup} to group ${groupId}: ${groupResponse.status}`);
     }
 
     const groupResult = await groupResponse.json();
-    console.log(`Successfully added contact ${phoneNumber} to group ${groupId}:`, groupResult);
+    console.log(`Successfully added contact ${phoneForGroup} to group ${groupId}:`, groupResult);
   } catch (error) {
     console.error('Error adding contact to group:', error);
     throw error;
@@ -188,7 +186,7 @@ Deno.serve(async (req) => {
     }
 
     // Parse request body
-    const { name, phone, email, groupId }: EZTextContact = await req.json()
+    const { name, phone, email, birthday, groupId }: EZTextContact = await req.json()
 
     // Validate required fields
     if (!name || !phone || !email) {
@@ -241,7 +239,8 @@ Deno.serve(async (req) => {
       firstName: name.split(' ')[0] || name,
       lastName: name.split(' ').slice(1).join(' ') || '',
       phoneNumber: formattedPhone,
-      email: email
+      email: email,
+      ...(birthday && { birthday: birthday }) // Add birthday as custom field if provided
     }
     
     console.log('Request body for EZ Text:', JSON.stringify(requestBody, null, 2))
@@ -360,8 +359,8 @@ Deno.serve(async (req) => {
       console.error('Error during contact verification:', error);
     }
 
-    // Add to group if groupId is provided and contact was created successfully
-    if (ezTextGroupId && contactFound) {
+    // Add to group - always attempt if group ID is provided since contact creation succeeded
+    if (ezTextGroupId) {
       try {
         console.log(`Attempting to add contact ${formattedPhone} to group ${ezTextGroupId}`);
         await addContactToGroup(accessToken, ezTextGroupId, formattedPhone);
@@ -370,8 +369,6 @@ Deno.serve(async (req) => {
         console.error('Failed to add contact to group, but contact was created successfully:', groupError);
         // Don't throw here - contact creation was successful, group assignment failed
       }
-    } else if (ezTextGroupId && !contactFound) {
-      console.log('⚠️ Skipping group assignment - contact verification failed');
     }
 
     // Return detailed response
