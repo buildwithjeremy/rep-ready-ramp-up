@@ -149,6 +149,40 @@ export function useReps() {
 
       console.log('Rep inserted successfully:', newRep);
 
+      // Call EZ Text integration
+      try {
+        const eztextResult = await supabase.functions.invoke('eztext-integration', {
+          body: {
+            name: repData.name,
+            phone: repData.phone,
+            email: repData.email
+          }
+        });
+
+        if (eztextResult.error) {
+          console.error('EZ Text integration error:', eztextResult.error);
+          console.warn('Failed to add contact to EZ Text system. Rep was still created in the database.');
+        } else if (eztextResult.data?.success) {
+          console.log('✅ EZ Text integration successful:', eztextResult.data);
+          console.log(`✅ Contact added to EZ Text: ${eztextResult.data.phoneNumber}`);
+          
+          if (eztextResult.data.verified) {
+            console.log('✅ Contact creation verified in EZ Text');
+          } else {
+            console.log('⚠️ Contact creation could not be verified');
+          }
+          
+          if (eztextResult.data.groupAssigned) {
+            console.log('✅ Contact added to Team Tenacious group');
+          } else {
+            console.log('⚠️ Contact created but not added to group');
+          }
+        }
+      } catch (eztextError) {
+        console.error('EZ Text integration failed:', eztextError);
+        console.warn('Rep was created in database but could not be added to EZ Text system');
+      }
+
       // Get checklist templates
       const { data: templates, error: templatesError } = await supabase
         .from('checklist_templates')
