@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterControls } from "@/components/common/filter-controls";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { Users, Trophy, TrendingUp, AlertTriangle } from "lucide-react";
 import { Trainer } from "@/types";
 
@@ -95,11 +94,9 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <UserAvatar 
-                    avatarUrl={trainer.avatar}
-                    userName={trainer.name}
-                    size="md"
-                  />
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {trainer.name.charAt(0).toUpperCase()}
+                  </div>
                   <div>
                     <h3 className="font-medium">{trainer.name}</h3>
                     <p className="text-sm text-gray-600">{trainer.email}</p>

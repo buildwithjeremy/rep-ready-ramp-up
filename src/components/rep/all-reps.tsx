@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterControls } from "@/components/common/filter-controls";
 import { ProgressBar } from "@/components/common/progress-bar";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { Users, UserPlus } from "lucide-react";
 import { Rep } from "@/types";
 import { RepSortOption, RepFilterOption, sortReps, filterReps } from "@/utils/filterUtils";
@@ -68,10 +67,9 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <UserAvatar 
-                    userName={rep.name}
-                    size="md"
-                  />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {rep.name.charAt(0).toUpperCase()}
+                  </div>
                   <div>
                     <h3 className="font-medium">{rep.name}</h3>
                     <p className="text-sm text-gray-600">{rep.email}</p>
