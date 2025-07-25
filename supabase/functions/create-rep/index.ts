@@ -207,7 +207,8 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           name: name,
           phone: phone,
-          email: email
+          email: email,
+          birthday: birthday
         })
       });
 
