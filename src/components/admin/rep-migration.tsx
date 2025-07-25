@@ -79,6 +79,40 @@ export function RepMigration() {
     }
   };
 
+  const updatePhoneNumbers = async () => {
+    if (!csvData.trim()) {
+      toast({
+        title: "Error",
+        description: "Please paste CSV data first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('update-phone-numbers', {
+        body: { csvData: csvData.trim() }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Phone Numbers Updated",
+        description: `Updated ${data.updated} phone numbers successfully`,
+      });
+    } catch (error) {
+      console.error('Phone number update error:', error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update phone numbers",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const regenerateCredentials = async () => {
     setIsRegenerating(true);
     try {
@@ -225,11 +259,21 @@ Zariah Clay,clayzariah1@gmail.com,14706596035,Jennifer Stylinski,2/22/2001,7/3/2
 
           <div className="border-t pt-4">
             <h3 className="font-semibold mb-2">Credential Management</h3>
-            <div className="flex gap-2">
+            <div className="space-y-2">
+              <Button 
+                onClick={updatePhoneNumbers}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full"
+              >
+                {isLoading ? 'Updating...' : 'Update Phone Numbers'}
+              </Button>
+              
               <Button 
                 onClick={regenerateCredentials}
                 disabled={isRegenerating}
                 variant="secondary"
+                className="w-full"
               >
                 {isRegenerating ? 'Regenerating...' : 'Regenerate All Credentials'}
               </Button>
@@ -238,13 +282,14 @@ Zariah Clay,clayzariah1@gmail.com,14706596035,Jennifer Stylinski,2/22/2001,7/3/2
                 <Button 
                   onClick={downloadCredentials}
                   variant="outline"
+                  className="w-full"
                 >
                   Download Credentials CSV
                 </Button>
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Regenerate credentials for all migrated users and download CSV for bulk email distribution.
+              First update phone numbers from CSV, then regenerate credentials and download CSV for bulk email distribution.
             </p>
           </div>
         </CardContent>

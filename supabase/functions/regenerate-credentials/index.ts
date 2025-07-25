@@ -84,8 +84,19 @@ Deno.serve(async (req) => {
 
     for (const user of migratedUsers) {
       try {
-        // Generate new temporary password
-        const tempPassword = `TT${Math.random().toString(36).slice(2, 8).toUpperCase()}!`;
+        // Generate strong temporary password that meets Supabase requirements
+        const upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowerChars = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        
+        const randomUpper = upperChars[Math.floor(Math.random() * upperChars.length)] + 
+                           upperChars[Math.floor(Math.random() * upperChars.length)];
+        const randomLower = lowerChars[Math.floor(Math.random() * lowerChars.length)] + 
+                           lowerChars[Math.floor(Math.random() * lowerChars.length)];
+        const randomNumbers = numbers[Math.floor(Math.random() * numbers.length)] + 
+                             numbers[Math.floor(Math.random() * numbers.length)];
+        
+        const tempPassword = `TT${randomUpper}${randomLower}${randomNumbers}!`;
 
         // Update user password and metadata
         const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
