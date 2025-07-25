@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { RepMigration } from './rep-migration';
+import { RepAssignmentSection } from './rep-assignment-section';
+import { Rep } from '@/types';
 
 interface UserProfile {
   id: string;
@@ -30,6 +32,8 @@ interface UserManagementProps {
 export function UserManagement({ onBack }: UserManagementProps) {
   const { user } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [reps, setReps] = useState<Rep[]>([]);
+  const [trainers, setTrainers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -37,6 +41,7 @@ export function UserManagement({ onBack }: UserManagementProps) {
 
   useEffect(() => {
     loadUsers();
+    loadRepsAndTrainers();
   }, []);
 
   const loadUsers = async () => {
@@ -106,6 +111,62 @@ export function UserManagement({ onBack }: UserManagementProps) {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRepsAndTrainers = async () => {
+    try {
+      // Load reps data
+      const { data: repsData, error: repsError } = await supabase
+        .from('reps')
+        .select(`
+          id,
+          full_name,
+          email,
+          trainer_id,
+          status,
+          overall_progress,
+          milestone
+        `)
+        .order('full_name');
+
+      if (repsError) {
+        console.error('Error loading reps:', repsError);
+      } else {
+        // Transform to match Rep interface
+        const transformedReps: Rep[] = (repsData || []).map(rep => ({
+          id: rep.id,
+          name: rep.full_name,
+          email: rep.email,
+          phone: '', // Not available in this query
+          trainerId: rep.trainer_id,
+          milestone: rep.milestone,
+          status: rep.status as 'Active' | 'Independent' | 'Stuck' | 'Inactive',
+          overallProgress: rep.overall_progress,
+          dateAdded: '', // Not available in this query
+          lastActivity: '', // Not available in this query
+          checklist: [] // Not needed for assignment view
+        }));
+        setReps(transformedReps);
+      }
+
+      // Load trainers data
+      const { data: trainersData, error: trainersError } = await supabase
+        .from('trainers')
+        .select(`
+          user_id,
+          full_name,
+          assigned_reps
+        `)
+        .order('full_name');
+
+      if (trainersError) {
+        console.error('Error loading trainers:', trainersError);
+      } else {
+        setTrainers(trainersData || []);
+      }
+    } catch (err) {
+      console.error('Error loading reps and trainers:', err);
     }
   };
 
@@ -235,8 +296,9 @@ export function UserManagement({ onBack }: UserManagementProps) {
         )}
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="assignment">Rep Assignment</TabsTrigger>
             <TabsTrigger value="migration">Rep Migration</TabsTrigger>
           </TabsList>
           
@@ -441,6 +503,17 @@ export function UserManagement({ onBack }: UserManagementProps) {
                 </ul>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="assignment" className="space-y-4">
+            <RepAssignmentSection 
+              reps={reps} 
+              trainers={trainers} 
+              onRepReassigned={() => {
+                loadRepsAndTrainers();
+                loadUsers(); // Refresh user list as well since trainer stats may have changed
+              }} 
+            />
           </TabsContent>
           
           <TabsContent value="migration" className="space-y-4">

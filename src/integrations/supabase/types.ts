@@ -438,6 +438,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      reassign_rep_to_trainer: {
+        Args: {
+          target_rep_id: string
+          new_trainer_id: string
+          admin_user_id: string
+        }
+        Returns: boolean
+      }
       refresh_all_rep_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined
