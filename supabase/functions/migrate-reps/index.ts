@@ -122,45 +122,67 @@ serve(async (req) => {
           throw new Error(`Trainer not found: ${rep.trainerName}`);
         }
 
-        // Create user account
-        const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-          email: rep.email,
-          password: tempPassword,
-          email_confirm: true, // Auto-confirm email
-          user_metadata: {
-            full_name: rep.fullName,
-            is_migrated: true,
-            temp_password: true
-          }
-        });
+        // Check if user already exists
+        const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
+        const userExists = existingUser.users.find(u => u.email === rep.email);
+        
+        let userId: string;
+        
+        if (userExists) {
+          console.log(`User already exists: ${rep.email}, updating records`);
+          userId = userExists.id;
+          
+          // Update user metadata
+          await supabaseAdmin.auth.admin.updateUserById(userId, {
+            user_metadata: {
+              full_name: rep.fullName,
+              is_migrated: true,
+              temp_password: false // Don't overwrite if they've already changed password
+            }
+          });
+        } else {
+          // Create new user account
+          const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
+            email: rep.email,
+            password: tempPassword,
+            email_confirm: true,
+            user_metadata: {
+              full_name: rep.fullName,
+              is_migrated: true,
+              temp_password: true
+            }
+          });
 
-        if (createUserError) {
-          console.error(`Failed to create user for ${rep.email}:`, createUserError);
-          results.push({ email: rep.email, status: 'failed', error: createUserError.message });
-          continue;
+          if (createUserError) {
+            console.error(`Failed to create user for ${rep.email}:`, createUserError);
+            results.push({ email: rep.email, status: 'failed', error: createUserError.message });
+            continue;
+          }
+          
+          userId = newUser.user!.id;
         }
 
-        // Create profile
+        // Create or update profile
         const { error: profileError } = await supabaseAdmin
           .from('profiles')
-          .insert({
-            id: newUser.user!.id,
+          .upsert({
+            id: userId,
             full_name: rep.fullName,
             role: 'REP',
             trainer_id: trainerId
           });
 
         if (profileError) {
-          console.error(`Failed to create profile for ${rep.email}:`, profileError);
+          console.error(`Failed to upsert profile for ${rep.email}:`, profileError);
           results.push({ email: rep.email, status: 'failed', error: profileError.message });
           continue;
         }
 
-        // Create/update rep record
+        // Create or update rep record
         const { error: repError } = await supabaseAdmin
           .from('reps')
-          .insert({
-            user_id: newUser.user!.id,
+          .upsert({
+            user_id: userId,
             full_name: rep.fullName,
             email: rep.email,
             phone: rep.phone,
@@ -174,7 +196,7 @@ serve(async (req) => {
           });
 
         if (repError) {
-          console.error(`Failed to create rep record for ${rep.email}:`, repError);
+          console.error(`Failed to upsert rep record for ${rep.email}:`, repError);
           results.push({ email: rep.email, status: 'failed', error: repError.message });
           continue;
         }
