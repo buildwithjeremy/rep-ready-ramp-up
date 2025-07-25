@@ -450,6 +450,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      refresh_all_trainer_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_trainer_stats_for_trainer: {
+        Args: { target_trainer_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       rep_stage: "board_a" | "board_b" | "board_c" | "independent"
