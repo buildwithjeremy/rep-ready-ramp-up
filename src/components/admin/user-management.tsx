@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Users, Shield, TrendingUp, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { RepMigration } from './rep-migration';
 
 interface UserProfile {
   id: string;
@@ -232,38 +234,45 @@ export function UserManagement({ onBack }: UserManagementProps) {
           </Alert>
         )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="text-center">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-center mb-2">
-                <Shield className="w-5 h-5 text-red-600 mr-2" />
-                <span className="text-2xl font-bold">{users.filter(u => u.role === 'ADMIN').length}</span>
-              </div>
-              <p className="text-sm text-gray-600">Admins</p>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="migration">Rep Migration</TabsTrigger>
+          </TabsList>
           
-          <Card className="text-center">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-center mb-2">
-                <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
-                <span className="text-2xl font-bold">{users.filter(u => u.role === 'TRAINER').length}</span>
-              </div>
-              <p className="text-sm text-gray-600">Trainers</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="text-center">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-center mb-2">
-                <Users className="w-5 h-5 text-green-600 mr-2" />
-                <span className="text-2xl font-bold">{users.filter(u => u.role === 'REP').length}</span>
-              </div>
-              <p className="text-sm text-gray-600">Reps</p>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="users" className="space-y-4">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center mb-2">
+                    <Shield className="w-5 h-5 text-red-600 mr-2" />
+                    <span className="text-2xl font-bold">{users.filter(u => u.role === 'ADMIN').length}</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Admins</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center mb-2">
+                    <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
+                    <span className="text-2xl font-bold">{users.filter(u => u.role === 'TRAINER').length}</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Trainers</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center mb-2">
+                    <Users className="w-5 h-5 text-green-600 mr-2" />
+                    <span className="text-2xl font-bold">{users.filter(u => u.role === 'REP').length}</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Reps</p>
+                </CardContent>
+              </Card>
+            </div>
 
         {/* User List */}
         <Card>
@@ -420,18 +429,24 @@ export function UserManagement({ onBack }: UserManagementProps) {
           </CardContent>
         </Card>
 
-        {/* Business Rules Info */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <h3 className="font-medium text-blue-900 mb-2">Business Rules</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Only Admins can promote users</li>
-              <li>• Reps must reach Independent status (100% complete) before becoming Trainers</li>
-              <li>• New signups default to REP role and are assigned to available trainers</li>
-              <li>• All role changes are logged for security auditing</li>
-            </ul>
-          </CardContent>
-        </Card>
+            {/* Business Rules Info */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <h3 className="font-medium text-blue-900 mb-2">Business Rules</h3>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Only Admins can promote users</li>
+                  <li>• Reps must reach Independent status (100% complete) before becoming Trainers</li>
+                  <li>• New signups default to REP role and are assigned to available trainers</li>
+                  <li>• All role changes are logged for security auditing</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="migration" className="space-y-4">
+            <RepMigration />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
