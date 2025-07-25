@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { LogIn, Mail, AlertCircle, User, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Mail, AlertCircle, User, Eye, EyeOff, Shield } from 'lucide-react';
 import teamTenaciousLogo from "/lovable-uploads/3ce7a3f1-dd01-4603-9a0f-e8c0f9a0f114.png";
+import { validatePasswordStrength, validateEmail, validatePhoneNumber, sanitizeText, RateLimiter } from '@/utils/security';
 interface AuthScreenProps {
   initialMode?: 'signin' | 'signup';
 }
@@ -41,6 +43,10 @@ export function AuthScreen({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({ isValid: false, score: 0, feedback: [] });
+  
+  // Rate limiter for authentication attempts
+  const rateLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 minutes
 
   // Load available trainers when switching to signup mode
   useEffect(() => {
@@ -84,6 +90,26 @@ export function AuthScreen({
     setLoading(true);
     setError(null);
     setMessage(null);
+    
+    // Rate limiting check
+    const userKey = `auth_${email}`;
+    if (!rateLimiter.isAllowed(userKey)) {
+      setError(`Too many attempts. Please wait ${Math.ceil(rateLimiter.getRemainingAttempts(userKey))} minutes.`);
+      setLoading(false);
+      return;
+    }
+    
+    // Input validation
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+    
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeText(email.toLowerCase().trim());
+    const sanitizedFullName = sanitizeText(fullName.trim());
+    
     try {
       if (isResetMode) {
         const redirectUrl = `${window.location.origin}/reset-password`;
@@ -99,23 +125,37 @@ export function AuthScreen({
           setEmail('');
         }
       } else if (isSignUp) {
-        if (!fullName.trim()) {
+        if (!sanitizedFullName) {
           setError('Full name is required');
+          setLoading(false);
           return;
         }
+        
         if (!phone.trim()) {
           setError('Phone number is required');
+          setLoading(false);
           return;
         }
 
-        // Basic phone validation
-        const phoneRegex = /^[\+]?[1]?[\s]?[\(]?[0-9]{3}[\)]?[\s\-]?[0-9]{3}[\s\-]?[0-9]{4}$/;
-        if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-          setError('Please enter a valid phone number');
+        // Enhanced phone validation
+        const phoneValidation = validatePhoneNumber(phone);
+        if (!phoneValidation.isValid) {
+          setError('Please enter a valid phone number (10 digits)');
+          setLoading(false);
           return;
         }
+        
+        // Password strength validation
+        const strength = validatePasswordStrength(password);
+        if (!strength.isValid) {
+          setError(`Password requirements: ${strength.feedback.join(', ')}`);
+          setLoading(false);
+          return;
+        }
+        
         if (!selectedTrainer) {
           setError('Please select a trainer');
+          setLoading(false);
           return;
         }
         const redirectUrl = `${window.location.origin}/`;
@@ -123,13 +163,13 @@ export function AuthScreen({
           data,
           error
         } = await supabase.auth.signUp({
-          email,
+          email: sanitizedEmail,
           password,
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              full_name: fullName,
-              phone: phone,
+              full_name: sanitizedFullName,
+              phone: phoneValidation.formatted,
               assigned_trainer: selectedTrainer
             }
           }
@@ -145,9 +185,9 @@ export function AuthScreen({
               } = await supabase.from('reps').insert({
                 user_id: data.user.id,
                 trainer_id: selectedTrainer,
-                full_name: fullName,
-                email: email,
-                phone: phone || null,
+                full_name: sanitizedFullName,
+                email: sanitizedEmail,
+                phone: phoneValidation.formatted || null,
                 birthday: birthday || null
               });
               if (repError) {
@@ -158,9 +198,9 @@ export function AuthScreen({
               try {
                 const { error: ezTextError } = await supabase.functions.invoke('eztext-integration', {
                   body: {
-                    name: fullName,
-                    phone: phone,
-                    email: email
+                    name: sanitizedFullName,
+                    phone: phoneValidation.formatted,
+                    email: sanitizedEmail
                   }
                 });
                 if (ezTextError) {
@@ -179,17 +219,28 @@ export function AuthScreen({
         const {
           error
         } = await supabase.auth.signInWithPassword({
-          email,
+          email: sanitizedEmail,
           password
         });
         if (error) {
+          rateLimiter.recordAttempt(userKey);
           setError(error.message);
         }
       }
     } catch (err) {
+      rateLimiter.recordAttempt(userKey);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Handle password input change with strength validation
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (isSignUp) {
+      const strength = validatePasswordStrength(value);
+      setPasswordStrength(strength);
     }
   };
   return <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -229,10 +280,10 @@ export function AuthScreen({
                     id="password" 
                     type={showPassword ? "text" : "password"} 
                     value={password} 
-                    onChange={e => setPassword(e.target.value)} 
+                    onChange={e => handlePasswordChange(e.target.value)} 
                     required 
                     placeholder="Enter your password" 
-                    minLength={6}
+                    minLength={8}
                     className="pr-10"
                   />
                   <button
@@ -247,6 +298,25 @@ export function AuthScreen({
                     )}
                   </button>
                 </div>
+                
+                {/* Password strength indicator for signup */}
+                {isSignUp && password && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      <span className="text-sm font-medium">Password Strength</span>
+                    </div>
+                    <Progress value={(passwordStrength.score / 5) * 100} className="h-2" />
+                    <div className="text-xs space-y-1">
+                      {passwordStrength.feedback.map((feedback, index) => (
+                        <div key={index} className="text-red-600">• {feedback}</div>
+                      ))}
+                      {passwordStrength.isValid && (
+                        <div className="text-green-600 font-medium">✓ Password meets security requirements</div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>}
 
             {isSignUp && !isResetMode && <>
