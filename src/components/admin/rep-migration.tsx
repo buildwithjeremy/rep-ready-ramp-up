@@ -24,6 +24,7 @@ interface Credential {
 export function RepMigration() {
   const [csvData, setCsvData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [results, setResults] = useState<MigrationResult[]>([]);
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [summary, setSummary] = useState<{ total: number; successful: number; failed: number } | null>(null);
@@ -78,6 +79,35 @@ export function RepMigration() {
     }
   };
 
+  const regenerateCredentials = async () => {
+    setIsRegenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('regenerate-credentials');
+      
+      if (error) {
+        throw error;
+      }
+
+      setCredentials(data.credentials || []);
+      setSummary(data.summary);
+      setResults(data.results || []);
+      
+      toast({
+        title: "Credentials Regenerated",
+        description: `Generated new passwords for ${data.summary.successful} users`,
+      });
+    } catch (error) {
+      console.error('Credential regeneration error:', error);
+      toast({
+        title: "Regeneration Failed",
+        description: error.message || "Failed to regenerate credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   const downloadCredentials = () => {
     if (credentials.length === 0) return;
 
@@ -92,7 +122,7 @@ export function RepMigration() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'rep-credentials.csv';
+    a.download = `rep-credentials-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -192,6 +222,31 @@ Zariah Clay,clayzariah1@gmail.com,14706596035,Jennifer Stylinski,2/22/2001,7/3/2
           >
             {isLoading ? 'Migrating...' : 'Start Migration'}
           </Button>
+
+          <div className="border-t pt-4">
+            <h3 className="font-semibold mb-2">Credential Management</h3>
+            <div className="flex gap-2">
+              <Button 
+                onClick={regenerateCredentials}
+                disabled={isRegenerating}
+                variant="secondary"
+              >
+                {isRegenerating ? 'Regenerating...' : 'Regenerate All Credentials'}
+              </Button>
+              
+              {credentials.length > 0 && (
+                <Button 
+                  onClick={downloadCredentials}
+                  variant="outline"
+                >
+                  Download Credentials CSV
+                </Button>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Regenerate credentials for all migrated users and download CSV for bulk email distribution.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
