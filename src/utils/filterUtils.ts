@@ -25,6 +25,12 @@ export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
   });
 };
 
+const isRepStuck = (rep: Rep): boolean => {
+  const lastActivityDate = new Date(rep.lastActivity);
+  const hoursSinceActivity = (Date.now() - lastActivityDate.getTime()) / (1000 * 60 * 60);
+  return hoursSinceActivity >= 48 && rep.status !== 'Independent';
+};
+
 export const filterReps = (reps: Rep[], filterBy: RepFilterOption): Rep[] => {
   switch (filterBy) {
     case 'all':
@@ -32,7 +38,7 @@ export const filterReps = (reps: Rep[], filterBy: RepFilterOption): Rep[] => {
     case 'active':
       return reps.filter(rep => rep.status === 'Active');
     case 'stuck':
-      return reps.filter(rep => rep.status === 'Stuck');
+      return reps.filter(rep => isRepStuck(rep));
     case 'independent':
       return reps.filter(rep => rep.status === 'Independent');
     case 'inactive':
