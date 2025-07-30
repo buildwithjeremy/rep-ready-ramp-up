@@ -171,7 +171,8 @@ export function AuthScreen({
               full_name: sanitizedFullName,
               phone: phoneValidation.formatted,
               birthday: birthday,
-              trainer_id: selectedTrainer
+              trainer_id: selectedTrainer,
+              role: 'REP'
             }
           }
         });
