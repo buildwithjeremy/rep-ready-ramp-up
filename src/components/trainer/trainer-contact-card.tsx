@@ -21,9 +21,9 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
     ? Math.round(activeReps.reduce((sum, rep) => sum + rep.overallProgress, 0) / activeReps.length)
     : 0;
 
-  // Format dates (using mock data for now)
-  const dateAdded = "5/14/2024";
-  const lastActivity = "6/21/2024";
+  // Format trainer creation date and last activity from database
+  const dateAdded = new Date(trainer.created_at || Date.now()).toLocaleDateString();
+  const lastActivity = new Date(trainer.updated_at || Date.now()).toLocaleDateString();
 
   return (
     <Card className="bg-white shadow-sm sticky top-0 z-10">
@@ -97,15 +97,15 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
               </div>
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">555-0101</span>
+                <span className="truncate">{trainer.phone || 'Not provided'}</span>
               </div>
               <div className="flex items-center">
                 <User className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Presenter: Sarah Johnson</span>
+                <span className="truncate">Trainer: {trainer.name}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Added {dateAdded}</span>
+                <span className="truncate">Became trainer: {dateAdded}</span>
               </div>
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />

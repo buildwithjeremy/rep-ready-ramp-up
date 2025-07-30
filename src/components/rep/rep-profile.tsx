@@ -1,16 +1,17 @@
 
 import { useState, useEffect } from "react";
-import { Rep, ChecklistItem } from "@/types";
+import { Rep, ChecklistItem, Trainer } from "@/types";
 import { RepContactCard } from "./rep-contact-card";
 import { ChecklistCard } from "./checklist-card";
 
 interface RepProfileProps {
   rep: Rep;
+  trainer?: Trainer;
   onBack: () => void;
   onUpdateRep: (updatedRep: Rep) => void;
 }
 
-export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
+export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProps) {
   const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
   const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, boolean>>({});
   const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
@@ -121,7 +122,7 @@ export function RepProfile({ rep, onBack, onUpdateRep }: RepProfileProps) {
       )}
 
       <div className="p-4 space-y-4">
-        <RepContactCard rep={rep} onBack={onBack} />
+        <RepContactCard rep={rep} trainer={trainer} onBack={onBack} />
 
         <div className="space-y-3">
           {rep.checklist.map((item) => (

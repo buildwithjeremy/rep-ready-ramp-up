@@ -109,9 +109,11 @@ export function DashboardRouter({
   }
 
   if (currentPath === '/rep-profile' && selectedRep) {
+    const repTrainer = trainers.find(t => t.id === selectedRep.trainerId);
     return (
       <RepProfile
         rep={selectedRep}
+        trainer={repTrainer}
         onBack={onBackFromRep}
         onUpdateRep={onUpdateRep}
       />

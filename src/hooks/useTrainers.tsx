@@ -31,13 +31,16 @@ export function useTrainers() {
         id: trainer.user_id,
         name: trainer.full_name,
         email: trainer.email,
+        phone: trainer.phone,
         avatar: trainer.avatar_url,
         assignedReps: trainer.assigned_reps,
         activeReps: trainer.active_reps,
         independentReps: trainer.independent_reps,
         stuckReps: trainer.stuck_reps,
         averageTimeToIndependent: trainer.average_time_to_independent,
-        successRate: trainer.success_rate
+        successRate: trainer.success_rate,
+        created_at: trainer.created_at,
+        updated_at: trainer.updated_at
       })) || [];
 
       console.log('Transformed trainers:', transformedTrainers);

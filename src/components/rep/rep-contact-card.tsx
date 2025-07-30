@@ -4,15 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
-import { Rep } from "@/types";
-import { mockTrainers } from "@/data/mockData";
+import { Rep, Trainer } from "@/types";
 
 interface RepContactCardProps {
   rep: Rep;
+  trainer?: Trainer;
   onBack: () => void;
 }
 
-export function RepContactCard({ rep, onBack }: RepContactCardProps) {
+export function RepContactCard({ rep, trainer, onBack }: RepContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   const getStatusColor = (status: Rep['status']) => {
@@ -23,9 +23,6 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
-  // Find the trainer for this rep
-  const trainer = mockTrainers.find(t => t.id === rep.trainerId);
 
   return (
     <Card className="bg-white shadow-sm sticky top-0 z-10">
@@ -92,10 +89,6 @@ export function RepContactCard({ rep, onBack }: RepContactCardProps) {
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
                 <span className="truncate">Trainer: {trainer?.name || 'Not assigned'}</span>
-              </div>
-              <div className="flex items-center">
-                <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Presenter: {trainer?.name || 'Not assigned'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
