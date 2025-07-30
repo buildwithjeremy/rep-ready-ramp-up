@@ -170,47 +170,31 @@ export function AuthScreen({
             data: {
               full_name: sanitizedFullName,
               phone: phoneValidation.formatted,
-              assigned_trainer: selectedTrainer
+              birthday: birthday,
+              trainer_id: selectedTrainer
             }
           }
         });
         if (error) {
           setError(error.message);
         } else {
-          // Create rep record after successful signup
+          // Rep record will be created automatically by database trigger
+          // Just handle EZ Text integration for self-signups
           if (data.user) {
             try {
-              const {
-                error: repError
-              } = await supabase.from('reps').insert({
-                user_id: data.user.id,
-                trainer_id: selectedTrainer,
-                full_name: sanitizedFullName,
-                email: sanitizedEmail,
-                phone: phoneValidation.formatted || null,
-                birthday: birthday || null
-              });
-              if (repError) {
-                console.error('Error creating rep record:', repError);
-              }
-
               // Create contact in EZ Text
-              try {
-                const { error: ezTextError } = await supabase.functions.invoke('eztext-integration', {
-                  body: {
-                    name: sanitizedFullName,
-                    phone: phoneValidation.formatted,
-                    email: sanitizedEmail
-                  }
-                });
-                if (ezTextError) {
-                  console.error('Error creating EZ Text contact:', ezTextError);
+              const { error: ezTextError } = await supabase.functions.invoke('eztext-integration', {
+                body: {
+                  name: sanitizedFullName,
+                  phone: phoneValidation.formatted,
+                  email: sanitizedEmail
                 }
-              } catch (ezTextErr) {
-                console.error('Error in EZ Text integration:', ezTextErr);
+              });
+              if (ezTextError) {
+                console.error('Error creating EZ Text contact:', ezTextError);
               }
-            } catch (repErr) {
-              console.error('Error in rep creation:', repErr);
+            } catch (ezTextErr) {
+              console.error('Error in EZ Text integration:', ezTextErr);
             }
           }
           setMessage('Check your email for the confirmation link!');
