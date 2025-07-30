@@ -325,14 +325,17 @@ export type Database = {
       trainers: {
         Row: {
           active_reps: number
+          address: string | null
           assigned_reps: number
           avatar_url: string | null
           average_time_to_independent: number
+          birthday: string | null
           created_at: string
           email: string
           full_name: string
           id: string
           independent_reps: number
+          phone: string | null
           stuck_reps: number
           success_rate: number
           updated_at: string
@@ -340,14 +343,17 @@ export type Database = {
         }
         Insert: {
           active_reps?: number
+          address?: string | null
           assigned_reps?: number
           avatar_url?: string | null
           average_time_to_independent?: number
+          birthday?: string | null
           created_at?: string
           email: string
           full_name: string
           id?: string
           independent_reps?: number
+          phone?: string | null
           stuck_reps?: number
           success_rate?: number
           updated_at?: string
@@ -355,14 +361,17 @@ export type Database = {
         }
         Update: {
           active_reps?: number
+          address?: string | null
           assigned_reps?: number
           avatar_url?: string | null
           average_time_to_independent?: number
+          birthday?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
           independent_reps?: number
+          phone?: string | null
           stuck_reps?: number
           success_rate?: number
           updated_at?: string
