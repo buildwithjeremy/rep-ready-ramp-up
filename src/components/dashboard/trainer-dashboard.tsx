@@ -7,6 +7,7 @@ import { ProgressBar } from "@/components/common/progress-bar";
 import { Users, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import { Rep, Trainer } from "@/types";
 import { differenceInDays } from "date-fns";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface TrainerDashboardProps {
   trainer: Trainer;
@@ -140,7 +141,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
               </div>
               <ProgressBar progress={rep.overallProgress} size="sm" />
               <p className="text-xs text-gray-500 mt-2">
-                Last activity: {new Date(rep.lastActivity).toLocaleDateString()}
+                Last activity: {formatDisplayDate(rep.lastActivity)}
               </p>
             </div>
           ))}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Rep, Trainer } from "@/types";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface RepContactCardProps {
   rep: Rep;
@@ -92,11 +93,11 @@ export function RepContactCard({ rep, trainer, onBack }: RepContactCardProps) {
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Added {new Date(rep.dateAdded).toLocaleDateString()}</span>
+                <span className="truncate">Added {formatDisplayDate(rep.dateAdded)}</span>
               </div>
               <div className="flex items-center">
                 <User className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Last activity: {new Date(rep.lastActivity).toLocaleDateString()}</span>
+                <span className="truncate">Last activity: {formatDisplayDate(rep.lastActivity)}</span>
               </div>
             </div>
           </div>

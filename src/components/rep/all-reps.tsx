@@ -8,6 +8,7 @@ import { Users, UserPlus } from "lucide-react";
 import { Rep } from "@/types";
 import { RepSortOption, RepFilterOption, sortReps, filterReps } from "@/utils/filterUtils";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface AllRepsProps {
   reps: Rep[];
@@ -97,7 +98,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
               
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <span>Milestone: {rep.milestone}</span>
-                <span>Last activity: {rep.lastActivity}</span>
+                <span>Last activity: {formatDisplayDate(rep.lastActivity)}</span>
               </div>
             </CardContent>
           </Card>

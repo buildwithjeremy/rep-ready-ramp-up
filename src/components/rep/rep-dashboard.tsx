@@ -9,6 +9,7 @@ import { ChecklistCard } from "./checklist-card";
 import { Rep } from "@/types";
 import { ArrowLeft, Mail, Phone, Calendar, User, Users, Edit, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface RepDashboardProps {
   rep: Rep;
@@ -241,12 +242,12 @@ export function RepDashboard({ rep, onUpdateRep }: RepDashboardProps) {
                     <div className="space-y-3">
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                        <span className="text-sm">Joined: {new Date(rep.dateAdded).toLocaleDateString()}</span>
+                        <span className="text-sm">Joined: {formatDisplayDate(rep.dateAdded)}</span>
                       </div>
                       
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                        <span className="text-sm">Last Activity: {new Date(rep.lastActivity).toLocaleDateString()}</span>
+                        <span className="text-sm">Last Activity: {formatDisplayDate(rep.lastActivity)}</span>
                       </div>
                       
                       <div className="flex items-center">

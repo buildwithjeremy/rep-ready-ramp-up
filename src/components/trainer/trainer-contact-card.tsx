@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Trainer, Rep } from "@/types";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface TrainerContactCardProps {
   trainer: Trainer;
@@ -22,8 +23,8 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
     : 0;
 
   // Format trainer creation date and last activity from database
-  const dateAdded = new Date(trainer.created_at || Date.now()).toLocaleDateString();
-  const lastActivity = new Date(trainer.updated_at || Date.now()).toLocaleDateString();
+  const dateAdded = formatDisplayDate(trainer.created_at || new Date());
+  const lastActivity = formatDisplayDate(trainer.updated_at || new Date());
 
   return (
     <Card className="bg-white shadow-sm sticky top-0 z-10">

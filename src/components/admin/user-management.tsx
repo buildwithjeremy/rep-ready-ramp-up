@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { RepMigration } from './rep-migration';
 import { RepAssignmentSection } from './rep-assignment-section';
 import { Rep } from '@/types';
+import { formatDisplayDate } from '@/lib/utils';
 
 interface UserProfile {
   id: string;
@@ -361,7 +362,7 @@ export function UserManagement({ onBack }: UserManagementProps) {
                       {userProfile.email || userProfile.id}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Joined: {new Date(userProfile.created_at).toLocaleDateString()}
+                      Joined: {formatDisplayDate(userProfile.created_at)}
                     </p>
                     {userProfile.is_legacy && (
                       <p className="text-xs text-orange-600 mt-1">
