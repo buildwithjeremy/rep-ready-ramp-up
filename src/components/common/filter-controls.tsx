@@ -34,7 +34,7 @@ export function FilterControls({ sortBy, filterBy, onSortChange, onFilterChange 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Name A-Z</SelectItem>
-            <SelectItem value="stage">Stage (High to Low)</SelectItem>
+            <SelectItem value="milestone">Milestone (High to Low)</SelectItem>
             <SelectItem value="status">Status</SelectItem>
             <SelectItem value="progress">Progress</SelectItem>
             <SelectItem value="lastActivity">Last Activity</SelectItem>

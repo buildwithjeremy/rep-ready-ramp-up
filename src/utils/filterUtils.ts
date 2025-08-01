@@ -26,9 +26,11 @@ export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
 };
 
 const isRepStuck = (rep: Rep): boolean => {
+  // Now that we have database triggers, we can rely on the database status
+  // But also check the activity as a fallback for consistency
   const lastActivityDate = new Date(rep.lastActivity);
   const hoursSinceActivity = (Date.now() - lastActivityDate.getTime()) / (1000 * 60 * 60);
-  return hoursSinceActivity >= 48 && rep.status !== 'Independent';
+  return rep.status === 'Stuck' || (hoursSinceActivity >= 48 && rep.status !== 'Independent');
 };
 
 export const filterReps = (reps: Rep[], filterBy: RepFilterOption): Rep[] => {
