@@ -11,7 +11,7 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   const [currentPath, setCurrentPath] = useState('/dashboard');
   const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
-  const [repsFilter, setRepsFilter] = useState<RepFilterOption>('all');
+  const [repsFilter, setRepsFilter] = useState<RepFilterOption>('active');
 
   // Set initial path based on user role
   useEffect(() => {
@@ -35,7 +35,7 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
       setSelectedTrainerId(null);
     }
     if (path === '/reps') {
-      setRepsFilter('all');
+      setRepsFilter('active');
     }
   };
 

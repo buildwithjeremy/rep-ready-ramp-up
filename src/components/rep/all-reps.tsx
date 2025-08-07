@@ -18,7 +18,7 @@ interface AllRepsProps {
   onAddRep?: () => void;
 }
 
-export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'all', onAddRep }: AllRepsProps) {
+export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'active', onAddRep }: AllRepsProps) {
   const [sortBy, setSortBy] = useState<RepSortOption>('name');
   const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter);
 
