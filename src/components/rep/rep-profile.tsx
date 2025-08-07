@@ -6,6 +6,7 @@ import { ChecklistCard } from "./checklist-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Archive, RotateCcw } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
 
 interface RepProfileProps {
   rep: Rep;
@@ -19,6 +20,8 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
   const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, boolean>>({});
   const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const { profile } = useProfile();
+  const canArchive = (profile?.role === 'ADMIN') || (profile?.role === 'TRAINER' && profile?.id === rep.trainerId);
 
   const toggleMilestone = (milestone: number) => {
     setExpandedMilestones(prev => ({
@@ -154,13 +157,13 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
         <div className="relative">
           <RepContactCard rep={rep} trainer={trainer} onBack={onBack} />
           
-          {/* Archive/Reactivate Button - Only show for non-Independent reps */}
-          {rep.status !== 'Independent' && (
+          {/* Archive/Reactivate Button - Only show for permitted users and non-Independent reps */}
+          {rep.status !== 'Independent' && canArchive && (
             <Button
               variant={rep.status === 'Inactive' ? "default" : "outline"}
               size="sm"
               onClick={handleArchiveToggle}
-              className="absolute top-4 right-4 flex items-center gap-2"
+              className="absolute top-4 right-4 z-20 flex items-center gap-2"
             >
               {rep.status === 'Inactive' ? (
                 <>
