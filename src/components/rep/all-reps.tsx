@@ -80,6 +80,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
                   rep.status === 'Active' ? 'bg-green-100 text-green-800' :
                   rep.status === 'Stuck' ? 'bg-red-100 text-red-800' :
                   rep.status === 'Independent' ? 'bg-blue-100 text-blue-800' :
+                  rep.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
                   'bg-gray-100 text-gray-800'
                 }`}>
                   {rep.status}
