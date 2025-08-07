@@ -21,6 +21,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
 
   const stuckReps = reps.filter(rep => rep.status === 'Stuck');
   const activeReps = reps.filter(rep => rep.status === 'Active');
+  const allActiveReps = reps.filter(rep => rep.status !== 'Inactive'); // Exclude inactive from active counts
 
   const getLastCompletedTask = (rep: Rep) => {
     const completedTasks = rep.checklist
@@ -119,7 +120,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
           <CardTitle>My Reps</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {reps.map(rep => (
+          {allActiveReps.map(rep => (
             <div 
               key={rep.id} 
               className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
@@ -134,6 +135,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
                   rep.status === 'Active' ? 'bg-green-100 text-green-800' :
                   rep.status === 'Stuck' ? 'bg-red-100 text-red-800' :
                   rep.status === 'Independent' ? 'bg-blue-100 text-blue-800' :
+                  rep.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
                   'bg-gray-100 text-gray-800'
                 }`}>
                   {rep.status}

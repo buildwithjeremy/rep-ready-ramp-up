@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { Rep, ChecklistItem, Trainer } from "@/types";
 import { RepContactCard } from "./rep-contact-card";
 import { ChecklistCard } from "./checklist-card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Archive, RotateCcw } from "lucide-react";
 
 interface RepProfileProps {
   rep: Rep;
@@ -15,6 +18,7 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
   const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
   const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, boolean>>({});
   const [showIndependentCelebration, setShowIndependentCelebration] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   const toggleMilestone = (milestone: number) => {
     setExpandedMilestones(prev => ({
@@ -103,6 +107,31 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
     );
   };
 
+  const handleArchiveToggle = () => {
+    if (rep.status === 'Inactive') {
+      // Reactivate - move back to Active status
+      const updatedRep: Rep = {
+        ...rep,
+        status: 'Active',
+        lastActivity: new Date().toISOString()
+      };
+      onUpdateRep(updatedRep);
+    } else {
+      // Show confirmation dialog for archiving
+      setShowArchiveDialog(true);
+    }
+  };
+
+  const confirmArchive = () => {
+    const updatedRep: Rep = {
+      ...rep,
+      status: 'Inactive',
+      lastActivity: new Date().toISOString()
+    };
+    onUpdateRep(updatedRep);
+    setShowArchiveDialog(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 relative">
       {/* Independent Celebration Overlay */}
@@ -122,7 +151,31 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
       )}
 
       <div className="p-4 space-y-4">
-        <RepContactCard rep={rep} trainer={trainer} onBack={onBack} />
+        <div className="relative">
+          <RepContactCard rep={rep} trainer={trainer} onBack={onBack} />
+          
+          {/* Archive/Reactivate Button - Only show for non-Independent reps */}
+          {rep.status !== 'Independent' && (
+            <Button
+              variant={rep.status === 'Inactive' ? "default" : "outline"}
+              size="sm"
+              onClick={handleArchiveToggle}
+              className="absolute top-4 right-4 flex items-center gap-2"
+            >
+              {rep.status === 'Inactive' ? (
+                <>
+                  <RotateCcw className="w-4 h-4" />
+                  Reactivate
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4" />
+                  Archive
+                </>
+              )}
+            </Button>
+          )}
+        </div>
 
         <div className="space-y-3">
           {rep.checklist.map((item) => (
@@ -140,6 +193,38 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
           ))}
         </div>
       </div>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Archive Rep</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive {rep.name}? This will:
+              <br />
+              <br />
+              • Mark them as Inactive in the system
+              <br />
+              • Remove them from active rep counts and progress calculations
+              <br />
+              • Preserve all their checklist data and progress
+              <br />
+              • Allow you to reactivate them later if needed
+              <br />
+              <br />
+              This action is reversible and won't delete any data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmArchive} className="bg-orange-600 hover:bg-orange-700">
+              Archive Rep
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
