@@ -407,6 +407,18 @@ export type Database = {
         Args: { trainer_id_param: string }
         Returns: number
       }
+      get_admin_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_reps: number
+          avg_time_to_independent: number
+          conversion_rate: number
+          independent_reps: number
+          stuck_reps_by_activity: number
+          stuck_reps_by_status: number
+          total_reps: number
+        }[]
+      }
       get_available_trainers: {
         Args: Record<PropertyKey, never>
         Returns: {
