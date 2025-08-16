@@ -452,11 +452,16 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       promote_user_role: {
-        Args: {
-          new_role: Database["public"]["Enums"]["user_role"]
-          promoted_by_user_id: string
-          target_user_id: string
-        }
+        Args:
+          | {
+              new_role: Database["public"]["Enums"]["user_role"]
+              promoted_by_user_id: string
+              target_user_id: string
+            }
+          | {
+              new_role: Database["public"]["Enums"]["user_role"]
+              target_user_id: string
+            }
         Returns: boolean
       }
       reassign_rep_to_trainer: {
