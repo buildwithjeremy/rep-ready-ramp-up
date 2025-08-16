@@ -29,7 +29,6 @@ export function AuthScreen({
   const [trainers, setTrainers] = useState<{
     id: string;
     full_name: string;
-    assigned_reps: number;
   }[]>([]);
 
   // Determine initial mode based on URL or prop
@@ -330,7 +329,7 @@ export function AuthScreen({
                     </SelectTrigger>
                     <SelectContent>
                       {trainers.map(trainer => <SelectItem key={trainer.id} value={trainer.id}>
-                          {trainer.full_name} ({trainer.assigned_reps} reps)
+                          {trainer.full_name}
                         </SelectItem>)}
                     </SelectContent>
                   </Select>

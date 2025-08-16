@@ -454,7 +454,6 @@ export type Database = {
       get_trainers_for_signup: {
         Args: Record<PropertyKey, never>
         Returns: {
-          assigned_reps: number
           full_name: string
           id: string
         }[]
