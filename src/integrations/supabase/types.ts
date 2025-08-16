@@ -451,6 +451,14 @@ export type Database = {
         Args: { trainer_id_param: string }
         Returns: number
       }
+      get_trainers_for_signup: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          assigned_reps: number
+          full_name: string
+          id: string
+        }[]
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]

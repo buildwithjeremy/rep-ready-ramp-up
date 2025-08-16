@@ -59,7 +59,7 @@ export function AuthScreen({
       const {
         data,
         error
-      } = await supabase.rpc('get_available_trainers');
+      } = await supabase.rpc('get_trainers_for_signup');
       if (error) {
         console.error('Error loading trainers:', error);
       } else {
