@@ -173,6 +173,57 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Security check: Verify JWT token and admin/trainer role
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Missing or invalid authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Verify user role using Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
+    // Check user role
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !userData.user) {
+      console.log('Invalid user token');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const { data: profileData, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (profileError || !profileData || !['ADMIN', 'TRAINER'].includes(profileData.role)) {
+      console.log('Unauthorized user or invalid role:', profileData?.role);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Insufficient permissions' }),
+        { 
+          status: 403, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
     const ezTextGroupId = Deno.env.get('EZTEXT_GROUP_ID')

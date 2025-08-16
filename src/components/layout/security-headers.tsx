@@ -12,14 +12,15 @@ export function SecurityHeaders() {
     cspMeta.httpEquiv = 'Content-Security-Policy';
     cspMeta.content = `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://wpinbiwlbsyqtayqixea.supabase.co;
+      script-src 'self' 'unsafe-inline' https://wpinbiwlbsyqtayqixea.supabase.co;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https:;
+      img-src 'self' data: blob: https://wpinbiwlbsyqtayqixea.supabase.co;
       font-src 'self' data:;
-      connect-src 'self' https://wpinbiwlbsyqtayqixea.supabase.co https://api.eztexting.com;
+      connect-src 'self' https://wpinbiwlbsyqtayqixea.supabase.co;
       frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
+      object-src 'none';
     `.replace(/\s+/g, ' ').trim();
     
     // X-Frame-Options

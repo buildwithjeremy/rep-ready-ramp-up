@@ -39,12 +39,11 @@ export function useUserManagement() {
     }
   };
 
-  const promoteUser = async (userId: string, newRole: 'ADMIN' | 'TRAINER' | 'REP', currentUserId: string) => {
+  const promoteUser = async (userId: string, newRole: 'ADMIN' | 'TRAINER' | 'REP') => {
     try {
       const { data, error } = await supabase.rpc('promote_user_role', {
         target_user_id: userId,
-        new_role: newRole,
-        promoted_by_user_id: currentUserId
+        new_role: newRole
       });
 
       if (error) {
