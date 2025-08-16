@@ -439,6 +439,10 @@ export type Database = {
         Args: { trainer_id_param?: string }
         Returns: number
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       get_stuck_reps_count: {
         Args: { trainer_id_param?: string }
         Returns: number
