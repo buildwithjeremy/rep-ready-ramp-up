@@ -32,9 +32,7 @@ export function useAdminMetrics() {
       console.log('Fetching admin metrics...');
 
       const { data, error: metricsError } = await supabase
-        .from('admin_dashboard_metrics')
-        .select('*')
-        .single();
+        .rpc('get_admin_dashboard_metrics_secure');
 
       if (metricsError) {
         console.error('Error fetching admin metrics:', metricsError);
@@ -42,13 +40,19 @@ export function useAdminMetrics() {
         return;
       }
 
+      const metrics_data = data?.[0];
+      if (!metrics_data) {
+        setError('No metrics data received');
+        return;
+      }
+
       const adminMetrics: AdminMetrics = {
-        totalReps: data.total_reps || 0,
-        activeReps: data.active_reps || 0,
-        independentReps: data.independent_reps || 0,
-        stuckReps: data.stuck_reps_by_activity || 0, // Use activity-based stuck reps
-        conversionRate: data.conversion_rate || 0,
-        avgTimeToIndependent: data.avg_time_to_independent || 0,
+        totalReps: metrics_data.total_reps || 0,
+        activeReps: metrics_data.active_reps || 0,
+        independentReps: metrics_data.independent_reps || 0,
+        stuckReps: metrics_data.stuck_reps_by_activity || 0, // Use activity-based stuck reps
+        conversionRate: metrics_data.conversion_rate || 0,
+        avgTimeToIndependent: metrics_data.avg_time_to_independent || 0,
       };
 
       console.log('Admin metrics:', adminMetrics);

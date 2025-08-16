@@ -381,18 +381,7 @@ export type Database = {
       }
     }
     Views: {
-      admin_dashboard_metrics: {
-        Row: {
-          active_reps: number | null
-          avg_time_to_independent: number | null
-          conversion_rate: number | null
-          independent_reps: number | null
-          stuck_reps_by_activity: number | null
-          stuck_reps_by_status: number | null
-          total_reps: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_rep_progress: {
@@ -408,6 +397,18 @@ export type Database = {
         Returns: number
       }
       get_admin_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_reps: number
+          avg_time_to_independent: number
+          conversion_rate: number
+          independent_reps: number
+          stuck_reps_by_activity: number
+          stuck_reps_by_status: number
+          total_reps: number
+        }[]
+      }
+      get_admin_dashboard_metrics_secure: {
         Args: Record<PropertyKey, never>
         Returns: {
           active_reps: number
