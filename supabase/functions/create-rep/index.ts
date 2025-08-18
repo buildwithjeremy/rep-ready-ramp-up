@@ -204,22 +204,17 @@ Deno.serve(async (req) => {
       if (!serviceRoleKey) {
         console.error('SUPABASE_SERVICE_ROLE_KEY not available for EZ Text integration');
       } else {
-        const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceRoleKey}`
-          },
-          body: JSON.stringify({
+        const ezTextResponse = await supabaseAdmin.functions.invoke('eztext-integration', {
+          body: {
             name: name,
             phone: phone,
             email: email,
             birthday: birthday
-          })
+          }
         });
 
-        if (!ezTextResponse.ok) {
-          console.error('EZ Text integration failed:', await ezTextResponse.text());
+        if (ezTextResponse.error) {
+          console.error('EZ Text integration failed:', ezTextResponse.error);
         } else {
           console.log('EZ Text contact created successfully');
         }
