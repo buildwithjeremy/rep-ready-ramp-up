@@ -196,13 +196,13 @@ Deno.serve(async (req) => {
 
     console.log('Rep record updated successfully')
 
-    // Create contact in EZ Text
+    // Create contact in EZ Text - use the original JWT token from the request
     try {
       const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          'Authorization': req.headers.get('Authorization')! // Pass through the original JWT token
         },
         body: JSON.stringify({
           name: name,
