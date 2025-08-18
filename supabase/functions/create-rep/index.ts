@@ -196,20 +196,19 @@ Deno.serve(async (req) => {
 
     console.log('Rep record updated successfully')
 
-    // Create contact in EZ Text - use the original JWT token from the request
+    // Create contact in EZ Text - use service role key for server-to-server communication
     try {
-      const authHeader = req.headers.get('Authorization');
-      console.log('Create-rep auth header:', authHeader ? 'Present' : 'Missing');
-      console.log('Create-rep auth format:', authHeader ? (authHeader.startsWith('Bearer ') ? 'Valid Bearer format' : `Invalid format: ${authHeader.substring(0, 20)}...`) : 'N/A');
-      if (!authHeader) {
-        console.error('No authorization header found for EZ Text integration');
-        // Continue without EZ Text integration rather than failing the whole operation
+      const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      console.log('Using service role key for EZ Text integration');
+      
+      if (!serviceRoleKey) {
+        console.error('SUPABASE_SERVICE_ROLE_KEY not available for EZ Text integration');
       } else {
         const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': authHeader
+            'Authorization': `Bearer ${serviceRoleKey}`
           },
           body: JSON.stringify({
             name: name,

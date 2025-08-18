@@ -190,42 +190,71 @@ Deno.serve(async (req) => {
     }
 
     // Verify user role using Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: { headers: { Authorization: authHeader } }
-      }
-    );
-
-    // Check user role
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !userData.user) {
-      console.log('Invalid user token');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Invalid token' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    let isServiceRoleAuth = false;
+    let supabaseClient;
+    
+    // Check if this is a service role token (server-to-server)
+    if (authHeader.includes(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')) {
+      console.log('Service role authentication detected');
+      isServiceRoleAuth = true;
+      // Use service role client for admin operations
+      supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+    } else {
+      console.log('User JWT authentication detected');
+      // Use regular client with user JWT
+      supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        {
+          global: { headers: { Authorization: authHeader } }
         }
       );
     }
 
-    const { data: profileData, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', userData.user.id)
-      .single();
+    if (!isServiceRoleAuth) {
+      // Check user role for JWT tokens only
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+      console.log('getUser result:', { userData: userData?.user?.id, error: userError?.message });
+      
+      if (userError || !userData.user) {
+        console.log('Invalid user token - Error details:', userError);
+        console.log('User data received:', userData);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+          { 
+            status: 401, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
 
-    if (profileError || !profileData || !['ADMIN', 'TRAINER'].includes(profileData.role)) {
-      console.log('Unauthorized user or invalid role:', profileData?.role);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Insufficient permissions' }),
-        { 
-          status: 403, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      const { data: profileData, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userData.user.id)
+        .single();
+
+      if (profileError || !profileData || !['ADMIN', 'TRAINER'].includes(profileData.role)) {
+        console.log('Unauthorized user or invalid role:', profileData?.role);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Insufficient permissions' }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    } else {
+      console.log('Service role request - skipping user verification');
     }
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
