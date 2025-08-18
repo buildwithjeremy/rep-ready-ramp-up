@@ -198,24 +198,30 @@ Deno.serve(async (req) => {
 
     // Create contact in EZ Text - use the original JWT token from the request
     try {
-      const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': req.headers.get('Authorization')! // Pass through the original JWT token
-        },
-        body: JSON.stringify({
-          name: name,
-          phone: phone,
-          email: email,
-          birthday: birthday
-        })
-      });
-
-      if (!ezTextResponse.ok) {
-        console.error('EZ Text integration failed:', await ezTextResponse.text());
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        console.error('No authorization header found for EZ Text integration');
+        // Continue without EZ Text integration rather than failing the whole operation
       } else {
-        console.log('EZ Text contact created successfully');
+        const ezTextResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/eztext-integration`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader
+          },
+          body: JSON.stringify({
+            name: name,
+            phone: phone,
+            email: email,
+            birthday: birthday
+          })
+        });
+
+        if (!ezTextResponse.ok) {
+          console.error('EZ Text integration failed:', await ezTextResponse.text());
+        } else {
+          console.log('EZ Text contact created successfully');
+        }
       }
     } catch (ezTextError) {
       console.error('Error calling EZ Text integration:', ezTextError);
