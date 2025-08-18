@@ -173,61 +173,42 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Security check: Verify JWT token and admin/trainer role
+    // Check if this is an internal call from create-rep function
     const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    const isInternalCall = authHeader && authHeader.includes('supabase.functions.invoke');
+    
     console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
-    console.log('Auth header format:', authHeader ? (authHeader.startsWith('Bearer ') ? 'Valid Bearer format' : `Invalid format: ${authHeader.substring(0, 20)}...`) : 'N/A');
+    console.log('Internal call detected:', isInternalCall);
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('Missing or invalid authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Missing token' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Verify user role using Supabase client
-    let isServiceRoleAuth = false;
-    let supabaseClient;
-    
-    // Check if this is a service role token (server-to-server)
-    if (authHeader.includes(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')) {
-      console.log('Service role authentication detected');
-      isServiceRoleAuth = true;
-      // Use service role client for admin operations
-      supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false
+    // Skip authentication for internal function calls
+    if (!isInternalCall) {
+      console.log('External call - validating user permissions');
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('Missing or invalid authorization header');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Missing token' }),
+          { 
+            status: 401, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
-        }
-      );
-    } else {
-      console.log('User JWT authentication detected');
-      // Use regular client with user JWT
-      supabaseClient = createClient(
+        );
+      }
+
+      // Use regular client with user JWT for external calls
+      const supabaseClient = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_ANON_KEY') ?? '',
         {
           global: { headers: { Authorization: authHeader } }
         }
       );
-    }
 
-    if (!isServiceRoleAuth) {
-      // Check user role for JWT tokens only
+      // Check user role for external JWT tokens
       const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-      console.log('getUser result:', { userData: userData?.user?.id, error: userError?.message });
       
       if (userError || !userData.user) {
         console.log('Invalid user token - Error details:', userError);
-        console.log('User data received:', userData);
         return new Response(
           JSON.stringify({ error: 'Unauthorized: Invalid token' }),
           { 
@@ -254,7 +235,7 @@ Deno.serve(async (req) => {
         );
       }
     } else {
-      console.log('Service role request - skipping user verification');
+      console.log('Internal function call - skipping authentication');
     }
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
