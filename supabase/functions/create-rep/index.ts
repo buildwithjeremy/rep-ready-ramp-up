@@ -199,6 +199,8 @@ Deno.serve(async (req) => {
     // Create contact in EZ Text - use the original JWT token from the request
     try {
       const authHeader = req.headers.get('Authorization');
+      console.log('Create-rep auth header:', authHeader ? 'Present' : 'Missing');
+      console.log('Create-rep auth format:', authHeader ? (authHeader.startsWith('Bearer ') ? 'Valid Bearer format' : `Invalid format: ${authHeader.substring(0, 20)}...`) : 'N/A');
       if (!authHeader) {
         console.error('No authorization header found for EZ Text integration');
         // Continue without EZ Text integration rather than failing the whole operation

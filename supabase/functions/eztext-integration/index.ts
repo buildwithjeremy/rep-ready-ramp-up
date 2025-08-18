@@ -174,7 +174,10 @@ Deno.serve(async (req) => {
 
   try {
     // Security check: Verify JWT token and admin/trainer role
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
+    console.log('Auth header format:', authHeader ? (authHeader.startsWith('Bearer ') ? 'Valid Bearer format' : `Invalid format: ${authHeader.substring(0, 20)}...`) : 'N/A');
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('Missing or invalid authorization header');
       return new Response(
