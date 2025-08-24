@@ -173,70 +173,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Check if this is an internal call from create-rep function
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-    const isInternalCall = authHeader && authHeader.includes('supabase.functions.invoke');
-    
-    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
-    console.log('Internal call detected:', isInternalCall);
-    
-    // Skip authentication for internal function calls
-    if (!isInternalCall) {
-      console.log('External call - validating user permissions');
-      
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('Missing or invalid authorization header');
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized: Missing token' }),
-          { 
-            status: 401, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-
-      // Use regular client with user JWT for external calls
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-        {
-          global: { headers: { Authorization: authHeader } }
-        }
-      );
-
-      // Check user role for external JWT tokens
-      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-      
-      if (userError || !userData.user) {
-        console.log('Invalid user token - Error details:', userError);
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized: Invalid token' }),
-          { 
-            status: 401, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-
-      const { data: profileData, error: profileError } = await supabaseClient
-        .from('profiles')
-        .select('role')
-        .eq('id', userData.user.id)
-        .single();
-
-      if (profileError || !profileData || !['ADMIN', 'TRAINER'].includes(profileData.role)) {
-        console.log('Unauthorized user or invalid role:', profileData?.role);
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized: Insufficient permissions' }),
-          { 
-            status: 403, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-    } else {
-      console.log('Internal function call - skipping authentication');
-    }
+    // This function is now called internally by create-rep after authentication
+    // No need to verify user permissions since create-rep handles that
+    console.log('EZ Text integration called - processing contact creation');
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
     const ezTextGroupId = Deno.env.get('EZTEXT_GROUP_ID')
