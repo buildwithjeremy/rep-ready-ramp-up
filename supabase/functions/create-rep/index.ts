@@ -194,32 +194,7 @@ Deno.serve(async (req) => {
       console.error('Error updating rep record:', repUpdateError)
     }
 
-    console.log('Rep record updated successfully')
-
-    // Create contact in EZ Text with proper tracking
-    try {
-      const requestId = `create-rep-${newUser.user.id}-${Date.now()}`;
-      console.log(`[${requestId}] Calling EZ Text integration for new rep`);
-      
-      const ezTextResponse = await supabaseAdmin.functions.invoke('eztext-integration', {
-        body: {
-          name: name,
-          phone: phone,
-          email: email,
-          birthday: birthday,
-          requestId: requestId,
-          source: 'create-rep-function'
-        }
-      });
-
-      if (ezTextResponse.error) {
-        console.error(`[${requestId}] EZ Text integration failed:`, ezTextResponse.error);
-      } else {
-        console.log(`[${requestId}] EZ Text integration completed:`, ezTextResponse.data);
-      }
-    } catch (ezTextError) {
-      console.error('Error calling EZ Text integration:', ezTextError);
-    }
+    console.log('Rep record updated successfully - EZ Text integration will be handled by database trigger')
 
     // Return the created rep data
     const { data: finalRep, error: repFetchError } = await supabase

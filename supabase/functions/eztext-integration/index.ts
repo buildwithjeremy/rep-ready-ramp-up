@@ -35,8 +35,6 @@ function isTokenValid(token: EZTextToken | null): boolean {
 
 // Function to create a new access token
 async function createToken(appKey: string, appSecret: string): Promise<EZTextToken> {
-  console.log('Creating new EZ Text token')
-  
   const response = await fetch('https://a.eztexting.com/v1/tokens/create', {
     method: 'POST',
     headers: {
@@ -61,14 +59,11 @@ async function createToken(appKey: string, appSecret: string): Promise<EZTextTok
     createdAt: Date.now()
   }
   
-  console.log('New token created, expires in:', token.expiresInSeconds, 'seconds')
   return token
 }
 
 // Function to refresh an access token
 async function refreshToken(refreshToken: string): Promise<EZTextToken> {
-  console.log('Refreshing EZ Text token')
-  
   const response = await fetch('https://a.eztexting.com/v1/tokens/refresh', {
     method: 'POST',
     headers: {
@@ -92,7 +87,6 @@ async function refreshToken(refreshToken: string): Promise<EZTextToken> {
     createdAt: Date.now()
   }
   
-  console.log('Token refreshed, expires in:', token.expiresInSeconds, 'seconds')
   return token
 }
 
@@ -100,7 +94,6 @@ async function refreshToken(refreshToken: string): Promise<EZTextToken> {
 async function getValidToken(appKey: string, appSecret: string): Promise<string> {
   // Check if we have a valid cached token
   if (isTokenValid(cachedToken)) {
-    console.log('Using cached token')
     return cachedToken!.accessToken
   }
 
@@ -110,7 +103,6 @@ async function getValidToken(appKey: string, appSecret: string): Promise<string>
       cachedToken = await refreshToken(cachedToken.refreshToken)
       return cachedToken.accessToken
     } catch (error) {
-      console.warn('Token refresh failed, creating new token:', error.message)
       cachedToken = null
     }
   }
@@ -145,7 +137,6 @@ function getPhoneForGroup(formattedPhone: string): string {
 async function addContactToGroup(accessToken: string, groupId: string, phoneNumber: string): Promise<boolean> {
   try {
     const phoneForGroup = getPhoneForGroup(phoneNumber);
-    console.log(`Attempting to add contact ${phoneForGroup} to group ${groupId}`);
     
     const groupResponse = await fetch(`https://a.eztexting.com/v1/contact-groups/${groupId}/contacts?phoneNumbers=${phoneForGroup}`, {
       method: 'POST',
@@ -156,23 +147,17 @@ async function addContactToGroup(accessToken: string, groupId: string, phoneNumb
     });
 
     if (!groupResponse.ok) {
-      const errorText = await groupResponse.text();
-      console.error(`Failed to add contact to group: ${groupResponse.status} ${errorText}`);
       return false;
     }
 
-    const groupResult = await groupResponse.json();
-    console.log(`Successfully added contact ${phoneForGroup} to group ${groupId}:`, groupResult);
     return true;
   } catch (error) {
-    console.error('Error adding contact to group:', error);
     return false;
   }
 }
 
 // Helper function to check if contact exists by trying to add to group first
 async function checkContactExistsAndAddToGroup(accessToken: string, groupId: string, phoneNumber: string): Promise<boolean> {
-  console.log('Checking if contact exists by attempting group assignment...');
   return await addContactToGroup(accessToken, groupId, phoneNumber);
 }
 
@@ -184,10 +169,14 @@ Deno.serve(async (req) => {
 
   try {
     // Parse request body
-    const { name, phone, email, birthday, groupId, requestId, source }: EZTextContact = await req.json()
+    const { name, phone, email, birthday, groupId, requestId, source, debug }: EZTextContact & { debug?: boolean } = await req.json()
     
     const trackingId = requestId || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    console.log(`[${trackingId}] EZ Text integration called from: ${source || 'unknown'} - processing contact creation`);
+    const isDebugMode = debug || false;
+    
+    if (isDebugMode) {
+      console.log(`[${trackingId}] EZ Text integration called from: ${source || 'unknown'} - processing contact creation`);
+    }
     
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
@@ -209,13 +198,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log(`[${trackingId}] Processing EZ Text contact for:`, { name, phone, email })
-    console.log(`[${trackingId}] EZ Text Group ID:`, ezTextGroupId)
-
     // Format phone number consistently
     const formattedPhone = formatPhoneNumber(phone);
-    console.log(`[${trackingId}] Original phone:`, phone);
-    console.log(`[${trackingId}] Formatted phone:`, formattedPhone);
+    
+    if (isDebugMode) {
+      console.log(`[${trackingId}] Processing EZ Text contact for:`, { name, phone, email })
+      console.log(`[${trackingId}] EZ Text Group ID:`, ezTextGroupId)
+      console.log(`[${trackingId}] Original phone:`, phone);
+      console.log(`[${trackingId}] Formatted phone:`, formattedPhone);
+    }
 
     // Get valid access token
     const accessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
@@ -225,11 +216,9 @@ Deno.serve(async (req) => {
     
     // Step 1: If group ID is provided, try to add contact to group first (this is idempotent)
     if (ezTextGroupId) {
-      console.log(`[${trackingId}] Attempting to add existing contact to group first...`);
       contactExistsInGroup = await checkContactExistsAndAddToGroup(accessToken, ezTextGroupId, formattedPhone);
       
       if (contactExistsInGroup) {
-        console.log(`[${trackingId}] ✅ Contact already exists and was added to group successfully`);
         return new Response(JSON.stringify({ 
           success: true, 
           contactId: formattedPhone,
@@ -242,13 +231,10 @@ Deno.serve(async (req) => {
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
-      } else {
-        console.log(`[${trackingId}] Contact not found or couldn't be added to group - will create new contact`);
       }
     }
 
     // Step 2: Create contact in EZ Text
-    console.log(`[${trackingId}] Creating new contact in EZ Text...`);
     const requestBody = {
       firstName: name.split(' ')[0] || name,
       lastName: name.split(' ').slice(1).join(' ') || '',
@@ -257,7 +243,10 @@ Deno.serve(async (req) => {
       ...(birthday && { birthday: birthday })
     }
     
-    console.log(`[${trackingId}] Request body for EZ Text:`, JSON.stringify(requestBody, null, 2))
+    if (isDebugMode) {
+      console.log(`[${trackingId}] Creating new contact in EZ Text...`);
+      console.log(`[${trackingId}] Request body for EZ Text:`, JSON.stringify(requestBody, null, 2));
+    }
 
     const createContactResponse = await fetch('https://a.eztexting.com/v1/contacts', {
       method: 'POST',
@@ -273,11 +262,9 @@ Deno.serve(async (req) => {
     
     if (!createContactResponse.ok) {
       const errorText = await createContactResponse.text()
-      console.error(`[${trackingId}] EZ Text contact creation failed:`, createContactResponse.status, errorText)
       
       // If it's a 401, retry with fresh token
       if (createContactResponse.status === 401) {
-        console.log(`[${trackingId}] Token might be invalid, clearing cache and retrying`)
         cachedToken = null
         const newAccessToken = await getValidToken(ezTextAppKey, ezTextAppSecret)
         
@@ -293,7 +280,6 @@ Deno.serve(async (req) => {
         
         if (!retryResponse.ok) {
           const retryErrorText = await retryResponse.text()
-          console.error(`[${trackingId}] EZ Text contact creation failed on retry:`, retryResponse.status, retryErrorText)
           return new Response(
             JSON.stringify({ 
               error: 'Failed to create contact in EZ Text after retry',
@@ -307,10 +293,8 @@ Deno.serve(async (req) => {
         const contactData = await retryResponse.json()
         contactId = contactData.id;
         contactCreated = true;
-        console.log(`[${trackingId}] EZ Text contact created on retry:`, contactData)
       } else if (createContactResponse.status === 409 || errorText.includes('already exists')) {
         // Contact already exists - this is fine, we can proceed with group assignment
-        console.log(`[${trackingId}] Contact already exists in EZ Text - proceeding with group assignment`)
         contactId = formattedPhone;
         contactCreated = false;
       } else {
@@ -328,20 +312,12 @@ Deno.serve(async (req) => {
       const contactData = await createContactResponse.json()
       contactId = contactData.id;
       contactCreated = true;
-      console.log(`[${trackingId}] EZ Text contact response:`, JSON.stringify(contactData, null, 2))
     }
 
     // Step 3: Add to group if we have a group ID and haven't already done so
     let groupAssigned = contactExistsInGroup;
     if (ezTextGroupId && !contactExistsInGroup) {
-      console.log(`[${trackingId}] Adding ${contactCreated ? 'newly created' : 'existing'} contact to group...`);
       groupAssigned = await addContactToGroup(accessToken, ezTextGroupId, formattedPhone);
-      
-      if (groupAssigned) {
-        console.log(`[${trackingId}] ✅ Successfully added contact to group`);
-      } else {
-        console.log(`[${trackingId}] ⚠️ Failed to add contact to group, but contact exists`);
-      }
     }
 
     // Return success response

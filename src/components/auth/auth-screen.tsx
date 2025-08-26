@@ -178,31 +178,7 @@ export function AuthScreen({
         if (error) {
           setError(error.message);
         } else {
-          // Rep record will be created automatically by database trigger
-          // EZ Text integration will be handled automatically by the database trigger
-          if (data.user) {
-            console.log('Rep account created successfully - invoking EZ Text integration');
-            try {
-              const requestId = `self-signup-client-${data.user.id}-${Date.now()}`;
-              const { data: ezData, error: ezError } = await supabase.functions.invoke('eztext-integration', {
-                body: {
-                  name: sanitizedFullName,
-                  phone: phoneValidation.formatted,
-                  email: sanitizedEmail,
-                  birthday: birthday || undefined,
-                  requestId,
-                  source: 'self-signup-client'
-                }
-              });
-              if (ezError) {
-                console.error(`[${requestId}] EZ Text invoke error:`, ezError);
-              } else {
-                console.log(`[${requestId}] EZ Text invoke success:`, ezData);
-              }
-            } catch (e) {
-              console.error('EZ Text invoke threw exception:', e);
-            }
-          }
+          // Rep record and EZ Text integration will be handled automatically by database trigger
           setMessage('Check your email for the confirmation link!');
         }
       } else {
