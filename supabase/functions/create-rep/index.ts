@@ -196,28 +196,26 @@ Deno.serve(async (req) => {
 
     console.log('Rep record updated successfully')
 
-    // Create contact in EZ Text - use service role key for server-to-server communication
+    // Create contact in EZ Text with proper tracking
     try {
-      const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-      console.log('Using service role key for EZ Text integration');
+      const requestId = `create-rep-${newUser.user.id}-${Date.now()}`;
+      console.log(`[${requestId}] Calling EZ Text integration for new rep`);
       
-      if (!serviceRoleKey) {
-        console.error('SUPABASE_SERVICE_ROLE_KEY not available for EZ Text integration');
-      } else {
-        const ezTextResponse = await supabaseAdmin.functions.invoke('eztext-integration', {
-          body: {
-            name: name,
-            phone: phone,
-            email: email,
-            birthday: birthday
-          }
-        });
-
-        if (ezTextResponse.error) {
-          console.error('EZ Text integration failed:', ezTextResponse.error);
-        } else {
-          console.log('EZ Text contact created successfully');
+      const ezTextResponse = await supabaseAdmin.functions.invoke('eztext-integration', {
+        body: {
+          name: name,
+          phone: phone,
+          email: email,
+          birthday: birthday,
+          requestId: requestId,
+          source: 'create-rep-function'
         }
+      });
+
+      if (ezTextResponse.error) {
+        console.error(`[${requestId}] EZ Text integration failed:`, ezTextResponse.error);
+      } else {
+        console.log(`[${requestId}] EZ Text integration completed:`, ezTextResponse.data);
       }
     } catch (ezTextError) {
       console.error('Error calling EZ Text integration:', ezTextError);

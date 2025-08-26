@@ -179,23 +179,9 @@ export function AuthScreen({
           setError(error.message);
         } else {
           // Rep record will be created automatically by database trigger
-          // Just handle EZ Text integration for self-signups
+          // EZ Text integration will be handled automatically by the database trigger
           if (data.user) {
-            try {
-              // Create contact in EZ Text
-              const { error: ezTextError } = await supabase.functions.invoke('eztext-integration', {
-                body: {
-                  name: sanitizedFullName,
-                  phone: phoneValidation.formatted,
-                  email: sanitizedEmail
-                }
-              });
-              if (ezTextError) {
-                console.error('Error creating EZ Text contact:', ezTextError);
-              }
-            } catch (ezTextErr) {
-              console.error('Error in EZ Text integration:', ezTextErr);
-            }
+            console.log('Rep account created successfully - EZ Text integration will be handled by backend');
           }
           setMessage('Check your email for the confirmation link!');
         }
