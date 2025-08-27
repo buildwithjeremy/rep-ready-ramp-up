@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
     
     const ezTextAppKey = Deno.env.get('EZTEXT_APP_KEY')
     const ezTextAppSecret = Deno.env.get('EZTEXT_APP_SECRET')
-    const ezTextGroupId = Deno.env.get('EZTEXT_GROUP_ID')
+    const ezTextGroupIds = Deno.env.get('EZTEXT_GROUP_ID')?.split(',').map(id => id.trim()).filter(id => id) || []
     
     if (!ezTextAppKey || !ezTextAppSecret) {
       console.error(`[${trackingId}] EZTEXT_APP_KEY or EZTEXT_APP_SECRET not configured`)
@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     const formattedPhone = formatPhoneNumber(phone);
     
     console.log(`[${trackingId}] Processing EZ Text contact for:`, { name, phone, email })
-    console.log(`[${trackingId}] EZ Text Group ID:`, ezTextGroupId)
+    console.log(`[${trackingId}] EZ Text Group IDs:`, ezTextGroupIds)
     console.log(`[${trackingId}] Original phone:`, phone);
     console.log(`[${trackingId}] Formatted phone:`, formattedPhone);
 
@@ -295,20 +295,31 @@ Deno.serve(async (req) => {
       console.log(`[${trackingId}] Contact created successfully:`, contactId);
     }
 
-    // Step 2: Add to group if we have a group ID
-    let groupAssigned = false;
-    if (ezTextGroupId) {
-      console.log(`[${trackingId}] Adding contact to group:`, ezTextGroupId);
-      groupAssigned = await addContactToGroup(accessToken, ezTextGroupId, formattedPhone);
-      console.log(`[${trackingId}] Group assignment result:`, groupAssigned);
+    // Step 2: Add to all groups
+    let groupResults: { [groupId: string]: boolean } = {};
+    let anyGroupAssigned = false;
+    
+    if (ezTextGroupIds.length > 0) {
+      console.log(`[${trackingId}] Adding contact to ${ezTextGroupIds.length} groups...`);
+      
+      for (const groupId of ezTextGroupIds) {
+        console.log(`[${trackingId}] Adding contact to group: ${groupId}`);
+        const groupAssigned = await addContactToGroup(accessToken, groupId, formattedPhone);
+        groupResults[groupId] = groupAssigned;
+        if (groupAssigned) anyGroupAssigned = true;
+        console.log(`[${trackingId}] Group ${groupId} assignment result: ${groupAssigned}`);
+      }
     } else {
-      console.log(`[${trackingId}] No group ID provided, skipping group assignment`);
+      console.log(`[${trackingId}] No group IDs configured, skipping group assignment`);
     }
 
     // Return success response
     const message = contactCreated 
-      ? 'New contact created and processed successfully' 
-      : 'Existing contact processed successfully';
+      ? `New contact created and assigned to ${Object.values(groupResults).filter(Boolean).length}/${ezTextGroupIds.length} groups` 
+      : `Existing contact processed and assigned to ${Object.values(groupResults).filter(Boolean).length}/${ezTextGroupIds.length} groups`;
+      
+    console.log(`[${trackingId}] Final result: ${message}`);
+    console.log(`[${trackingId}] Group assignment summary:`, groupResults);
       
     return new Response(JSON.stringify({ 
       success: true, 
@@ -317,7 +328,8 @@ Deno.serve(async (req) => {
       email: email,
       existed: !contactCreated,
       created: contactCreated,
-      groupAssigned: groupAssigned,
+      groupAssigned: anyGroupAssigned,
+      groupResults: groupResults,
       message: message,
       trackingId
     }), {
