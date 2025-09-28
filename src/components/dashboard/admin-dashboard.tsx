@@ -33,7 +33,7 @@ export function AdminDashboard({ trainers, reps, onStatCardClick }: AdminDashboa
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center justify-between">
+        <div className="space-y-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-600">Overall funnel metrics and trainer performance</p>
@@ -42,7 +42,7 @@ export function AdminDashboard({ trainers, reps, onStatCardClick }: AdminDashboa
             variant="outline"
             size="sm"
             onClick={() => setShowUserManagement(true)}
-            className="flex items-center"
+            className="flex items-center w-fit"
           >
             <Settings className="w-4 h-4 mr-2" />
             User Management
