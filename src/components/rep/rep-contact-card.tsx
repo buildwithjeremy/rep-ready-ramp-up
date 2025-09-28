@@ -93,7 +93,7 @@ export function RepContactCard({ rep, trainer, onBack }: RepContactCardProps) {
               </div>
               <div className="flex items-center">
                 <Calendar className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Added {formatDisplayDate(rep.dateAdded)}</span>
+                <span className="truncate">Start Date: {formatDisplayDate(rep.dateAdded)}</span>
               </div>
               <div className="flex items-center">
                 <User className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
