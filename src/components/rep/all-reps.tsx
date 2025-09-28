@@ -102,7 +102,7 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
                 
                 {/* Footer Info - Stack on mobile */}
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-xs text-gray-600">
-                  <span>Milestone: {rep.milestone}</span>
+                  <span>Start Date: ({formatDisplayDate(rep.dateAdded)})</span>
                   <span>Last activity: {formatDisplayDate(rep.lastActivity)}</span>
                 </div>
               </div>
