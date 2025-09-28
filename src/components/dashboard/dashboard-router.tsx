@@ -101,8 +101,6 @@ export function DashboardRouter({
       <AdminDashboard 
         trainers={trainers}
         reps={reps}
-        onTrainerClick={onTrainerClick}
-        onRepClick={onRepClick}
         onStatCardClick={onStatCardClick}
       />
     );

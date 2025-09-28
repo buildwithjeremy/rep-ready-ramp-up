@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +10,10 @@ import { Rep, Trainer } from "@/types";
 interface AdminDashboardProps {
   trainers: Trainer[];
   reps: Rep[];
-  onTrainerClick: (trainerId: string) => void;
-  onRepClick: (repId: string) => void;
   onStatCardClick?: (filter: 'all' | 'active' | 'stuck' | 'independent') => void;
 }
 
-export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onStatCardClick }: AdminDashboardProps) {
+export function AdminDashboard({ trainers, reps, onStatCardClick }: AdminDashboardProps) {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const { metrics, loading: metricsLoading, error: metricsError } = useAdminMetrics();
   
@@ -111,93 +108,6 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
               <span className="text-lg font-bold text-red-600">{stuckReps}</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Trainer Cards */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Trainers</h2>
-        {trainers.map(trainer => (
-          <Card 
-            key={trainer.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => onTrainerClick(trainer.id)}
-          >
-            <CardContent className="p-3">
-              <div className="space-y-3">
-                {/* Header - Stack on mobile */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-sm truncate">{trainer.name}</h3>
-                    <p className="text-xs text-gray-600 truncate">{trainer.email}</p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-base font-bold text-blue-600">{trainer.successRate}%</p>
-                    <p className="text-xs text-gray-600">Success Rate</p>
-                  </div>
-                </div>
-                
-                {/* Stats Grid - 4 columns */}
-                <div className="grid grid-cols-4 gap-3 text-center">
-                  <div>
-                    <p className="text-base font-semibold">{trainer.assignedReps}</p>
-                    <p className="text-xs text-gray-600">Total</p>
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-green-600">{trainer.activeReps}</p>
-                    <p className="text-xs text-gray-600">Active</p>
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-blue-600">{trainer.independentReps}</p>
-                    <p className="text-xs text-gray-600">Independent</p>
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-red-600">{trainer.stuckReps}</p>
-                    <p className="text-xs text-gray-600">Stuck</p>
-                  </div>
-                </div>
-                
-                {/* Footer */}
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-600">
-                    Avg. Time: {trainer.averageTimeToIndependent} days
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* All Reps Quick View */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Reps</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {reps.map(rep => (
-            <div 
-              key={rep.id}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => onRepClick(rep.id)}
-            >
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-sm truncate">{rep.name}</p>
-                <p className="text-xs text-gray-600">
-                  Milestone {rep.milestone} • {rep.overallProgress}% complete
-                </p>
-              </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium self-start ${
-                rep.status === 'Active' ? 'bg-green-100 text-green-800' :
-                rep.status === 'Stuck' ? 'bg-red-100 text-red-800' :
-                rep.status === 'Independent' ? 'bg-blue-100 text-blue-800' :
-                rep.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {rep.status}
-              </span>
-            </div>
-          ))}
         </CardContent>
       </Card>
     </div>
