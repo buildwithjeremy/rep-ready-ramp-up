@@ -66,7 +66,7 @@ export function AppLayout({
         onSignIn={onSignIn}
       />
 
-      <div className="p-4">
+      <div className="p-3">
         <DashboardRouter
           currentPath={currentPath}
           userRole={userRole}

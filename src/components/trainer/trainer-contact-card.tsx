@@ -28,30 +28,30 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
 
   return (
     <Card className="bg-white shadow-sm sticky top-0 z-10">
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         {/* Header with Back Button */}
-        <div className="flex items-center mb-4">
-          <Button variant="ghost" size="sm" onClick={onBack} className="mr-3 p-2">
-            <ArrowLeft className="w-5 h-5" />
+        <div className="flex items-center mb-3">
+          <Button variant="ghost" size="sm" onClick={onBack} className="mr-2 p-2">
+            <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-lg truncate">{trainer.name}</h1>
-            <p className="text-sm text-gray-600">Field Trainer</p>
+            <h1 className="font-bold text-base truncate">{trainer.name}</h1>
+            <p className="text-xs text-gray-600">Field Trainer</p>
           </div>
         </div>
 
         {/* Profile Section */}
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+        <div className="flex items-center space-x-3 mb-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
             {trainer.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="mb-2">
+            <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Team Average Progress</span>
-                <span className="text-sm font-bold text-blue-600">{averageProgress}%</span>
+                <span className="text-xs font-medium text-gray-700">Team Avg Progress</span>
+                <span className="text-xs font-bold text-blue-600">{averageProgress}%</span>
               </div>
-              <ProgressBar progress={averageProgress} size="md" />
+              <ProgressBar progress={averageProgress} size="sm" />
               <p className="text-xs text-gray-500 mt-1">
                 Based on {activeReps.length} active rep{activeReps.length !== 1 ? 's' : ''}
               </p>
@@ -60,7 +60,7 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
         </div>
 
         {/* Quick Stats Row */}
-        <div className="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
+        <div className="grid grid-cols-3 gap-2 mb-3 text-center text-xs">
           <div className="bg-green-50 p-2 rounded-lg">
             <p className="font-semibold text-green-600">{trainer.activeReps}</p>
             <p className="text-xs text-gray-600">Active</p>
@@ -78,38 +78,38 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
         {/* Toggle Details Button */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="w-full flex items-center justify-between p-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          className="w-full flex items-center justify-between p-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
         >
           <span>Contact Details</span>
           {showDetails ? (
-            <ChevronUp className="w-4 h-4" />
+            <ChevronUp className="w-3 h-3" />
           ) : (
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-3 h-3" />
           )}
         </button>
 
         {/* Collapsible Contact Details */}
         {showDetails && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <div className="grid grid-cols-1 gap-3 text-sm">
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="grid grid-cols-1 gap-2 text-xs">
               <div className="flex items-center">
-                <Mail className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <Mail className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
                 <span className="truncate">{trainer.email}</span>
               </div>
               <div className="flex items-center">
-                <Phone className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <Phone className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
                 <span className="truncate">{trainer.phone || 'Not provided'}</span>
               </div>
               <div className="flex items-center">
-                <User className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <User className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
                 <span className="truncate">Trainer: {trainer.name}</span>
               </div>
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <Calendar className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
                 <span className="truncate">Became trainer: {dateAdded}</span>
               </div>
               <div className="flex items-center">
-                <Users className="w-4 h-4 mr-3 text-gray-500 flex-shrink-0" />
+                <Users className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
                 <span className="truncate">Last activity: {lastActivity}</span>
               </div>
             </div>

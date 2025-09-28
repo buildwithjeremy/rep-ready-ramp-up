@@ -105,54 +105,59 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
             className="cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => onTrainerClick(trainer.id)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {trainer.name.charAt(0).toUpperCase()}
+            <CardContent className="p-3">
+              <div className="space-y-3">
+                {/* Header - Stack name/email and success rate on mobile */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {trainer.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-sm truncate">{trainer.name}</h3>
+                      <p className="text-xs text-gray-600 truncate">{trainer.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-base font-bold text-blue-600">{trainer.successRate}%</p>
+                    <p className="text-xs text-gray-600">Success Rate</p>
+                  </div>
+                </div>
+                
+                {/* Stats Grid - 2 columns on mobile, 4 on larger screens */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                  <div>
+                    <p className="text-base font-semibold">{trainer.assignedReps}</p>
+                    <p className="text-xs text-gray-600">Total</p>
                   </div>
                   <div>
-                    <h3 className="font-medium">{trainer.name}</h3>
-                    <p className="text-sm text-gray-600">{trainer.email}</p>
+                    <p className="text-base font-semibold text-green-600">{trainer.activeReps}</p>
+                    <p className="text-xs text-gray-600">Active</p>
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-blue-600">{trainer.independentReps}</p>
+                    <p className="text-xs text-gray-600">Independent</p>
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-red-600">{trainer.stuckReps}</p>
+                    <p className="text-xs text-gray-600">Stuck</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-blue-600">{trainer.successRate}%</p>
-                  <p className="text-xs text-gray-600">Success Rate</p>
+                
+                {/* Footer - Stack attention and activity on mobile */}
+                <div className="pt-2 border-t flex flex-col sm:flex-row sm:justify-between gap-1">
+                  <div className="flex items-center">
+                    {trainer.stuckReps > 0 && (
+                      <span className="flex items-center text-xs text-red-600">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Needs Attention
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    Last Activity: {formatDisplayDate(trainer.lastActivity || trainer.updated_at || '')}
+                  </p>
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-4 gap-4 text-center">
-                <div>
-                  <p className="text-lg font-semibold">{trainer.assignedReps}</p>
-                  <p className="text-xs text-gray-600">Total</p>
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-green-600">{trainer.activeReps}</p>
-                  <p className="text-xs text-gray-600">Active</p>
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-blue-600">{trainer.independentReps}</p>
-                  <p className="text-xs text-gray-600">Independent</p>
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-red-600">{trainer.stuckReps}</p>
-                  <p className="text-xs text-gray-600">Stuck</p>
-                </div>
-              </div>
-              
-              <div className="mt-3 pt-3 border-t flex justify-between items-center">
-                <div className="flex items-center">
-                  {trainer.stuckReps > 0 && (
-                    <span className="flex items-center text-xs text-red-600">
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      Needs Attention
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-600">
-                  Last Activity: {formatDisplayDate(trainer.lastActivity || trainer.updated_at || '')}
-                </p>
               </div>
             </CardContent>
           </Card>

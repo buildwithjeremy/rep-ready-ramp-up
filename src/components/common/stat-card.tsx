@@ -32,14 +32,14 @@ export function StatCard({
       )}
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-gray-600 truncate">{title}</p>
+            <p className="text-xl font-bold text-gray-900 truncate">{value}</p>
             {trend && (
               <p className={cn(
-                "text-sm font-medium",
+                "text-xs font-medium",
                 trend.isPositive ? "text-green-600" : "text-red-600"
               )}>
                 {trend.isPositive ? "+" : ""}{trend.value}%
@@ -47,8 +47,8 @@ export function StatCard({
             )}
           </div>
           {Icon && (
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Icon className="w-6 h-6 text-blue-600" />
+            <div className="p-2 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
+              <Icon className="w-5 h-5 text-blue-600" />
             </div>
           )}
         </div>

@@ -43,8 +43,8 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
         <p className="text-gray-600">Here's how your reps are progressing</p>
       </div>
 
-      {/* Key Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Key Stats - Single column on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <StatCard
           title="Active Reps"
           value={trainer.activeReps}
@@ -87,24 +87,22 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
               Stuck Reps Require Attention
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             {stuckReps.map(rep => {
               const daysSinceLastActivity = getDaysSinceLastActivity(rep.lastActivity);
               const lastTask = getLastCompletedTask(rep);
               
               return (
-                <div key={rep.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium">{rep.name}</p>
-                    <p className="text-sm text-gray-600">Milestone {rep.milestone}</p>
-                    <p className="text-xs text-gray-500">
-                      {daysSinceLastActivity} days since last activity
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Last task: {lastTask}
-                    </p>
+                <div key={rep.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-white rounded-lg">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{rep.name}</p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p>Milestone {rep.milestone}</p>
+                      <p>{daysSinceLastActivity} days since last activity</p>
+                      <p className="truncate">Last task: {lastTask}</p>
+                    </div>
                   </div>
-                  <Button size="sm" onClick={() => onRepClick(rep.id)}>
+                  <Button size="sm" onClick={() => onRepClick(rep.id)} className="self-start sm:self-center">
                     View
                   </Button>
                 </div>
@@ -123,15 +121,15 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
           {allActiveReps.map(rep => (
             <div 
               key={rep.id} 
-              className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => onRepClick(rep.id)}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="font-medium">{rep.name}</h3>
-                  <p className="text-sm text-gray-600">Milestone {rep.milestone} of 10</p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-sm truncate">{rep.name}</h3>
+                  <p className="text-xs text-gray-600">Milestone {rep.milestone} of 10</p>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                <span className={`px-2 py-1 rounded-full text-xs font-medium self-start ${
                   rep.status === 'Active' ? 'bg-green-100 text-green-800' :
                   rep.status === 'Stuck' ? 'bg-red-100 text-red-800' :
                   rep.status === 'Independent' ? 'bg-blue-100 text-blue-800' :
@@ -142,7 +140,7 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
                 </span>
               </div>
               <ProgressBar progress={rep.overallProgress} size="sm" />
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-500 mt-1">
                 Last activity: {formatDisplayDate(rep.lastActivity)}
               </p>
             </div>
@@ -170,14 +168,14 @@ export function TrainerDashboard({ trainer, reps, onRepClick, onStatCardClick }:
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">3</p>
-              <p className="text-sm text-gray-600">Reps Advanced</p>
+              <p className="text-xl font-bold text-blue-600">3</p>
+              <p className="text-xs text-gray-600">Reps Advanced</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">1</p>
-              <p className="text-sm text-gray-600">Became Independent</p>
+              <p className="text-xl font-bold text-green-600">1</p>
+              <p className="text-xs text-gray-600">Became Independent</p>
             </div>
           </div>
         </CardContent>
