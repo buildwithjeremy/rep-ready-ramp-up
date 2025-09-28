@@ -141,15 +141,17 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
               </div>
               
               <div className="mt-3 pt-3 border-t flex justify-between items-center">
+                <div className="flex items-center">
+                  {trainer.stuckReps > 0 && (
+                    <span className="flex items-center text-xs text-red-600">
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      Needs Attention
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600">
-                  Avg. Time: {trainer.averageTimeToIndependent} days
+                  Last Activity: {trainer.lastActivity ? new Date(trainer.lastActivity).toLocaleDateString() : new Date(trainer.updated_at || '').toLocaleDateString()}
                 </p>
-                {trainer.stuckReps > 0 && (
-                  <span className="flex items-center text-xs text-red-600">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    Needs Attention
-                  </span>
-                )}
               </div>
             </CardContent>
           </Card>
