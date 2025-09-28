@@ -29,7 +29,7 @@ export function useAdminMetrics() {
 
     try {
       setLoading(true);
-      console.log('Fetching admin metrics...');
+      console.log('Fetching admin metrics for dashboard...');
 
       const { data, error: metricsError } = await supabase
         .rpc('get_admin_dashboard_metrics_secure');
