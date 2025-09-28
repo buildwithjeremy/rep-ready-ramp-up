@@ -46,6 +46,7 @@ export interface Trainer {
   successRate: number; // percentage
   created_at?: string;
   updated_at?: string;
+  lastActivity?: string; // For sorting by last activity
 }
 
 export interface User {

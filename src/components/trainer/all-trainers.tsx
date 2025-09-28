@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterControls } from "@/components/common/filter-controls";
-import { Users, Trophy, TrendingUp, AlertTriangle } from "lucide-react";
+import { Users, Trophy, TrendingUp, AlertTriangle, Filter, ArrowUpDown } from "lucide-react";
 import { Trainer } from "@/types";
 
 interface AllTrainersProps {
@@ -12,7 +12,7 @@ interface AllTrainersProps {
   title?: string;
 }
 
-type TrainerSortOption = 'name' | 'successRate' | 'assignedReps' | 'activeReps';
+type TrainerSortOption = 'name' | 'successRate' | 'assignedReps' | 'activeReps' | 'lastActivity';
 type TrainerFilterOption = 'all' | 'highPerformers' | 'needsAttention';
 
 export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }: AllTrainersProps) {
@@ -42,6 +42,10 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
         return b.assignedReps - a.assignedReps;
       case 'activeReps':
         return b.activeReps - a.activeReps;
+      case 'lastActivity':
+        const aActivity = a.lastActivity || a.updated_at || '';
+        const bActivity = b.lastActivity || b.updated_at || '';
+        return new Date(bActivity).getTime() - new Date(aActivity).getTime();
       default:
         return 0;
     }
@@ -58,6 +62,10 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
       {/* Filters */}
       <div className="flex gap-4 mb-4">
         <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Filter</span>
+          </div>
           <select
             value={filterBy}
             onChange={(e) => setFilterBy(e.target.value as TrainerFilterOption)}
@@ -70,6 +78,10 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
         </div>
         
         <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Sort</span>
+          </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as TrainerSortOption)}
@@ -79,6 +91,7 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
             <option value="successRate">Success Rate</option>
             <option value="assignedReps">Total Reps</option>
             <option value="activeReps">Active Reps</option>
+            <option value="lastActivity">Last Activity</option>
           </select>
         </div>
       </div>

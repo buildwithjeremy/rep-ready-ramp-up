@@ -3,7 +3,7 @@ import { Rep, Trainer } from "@/types";
 
 export type RepSortOption = 'name' | 'milestone' | 'status' | 'lastActivity' | 'progress';
 export type RepFilterOption = 'all' | 'active' | 'stuck' | 'independent' | 'inactive';
-export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate';
+export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate' | 'lastActivity';
 
 export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
   return [...reps].sort((a, b) => {
@@ -58,6 +58,10 @@ export const sortTrainers = (trainers: Trainer[], sortBy: TrainerSortOption): Tr
         return b.activeReps - a.activeReps;
       case 'successRate':
         return b.successRate - a.successRate;
+      case 'lastActivity':
+        const aActivity = a.lastActivity || a.updated_at || '';
+        const bActivity = b.lastActivity || b.updated_at || '';
+        return new Date(bActivity).getTime() - new Date(aActivity).getTime();
       default:
         return 0;
     }
