@@ -1,7 +1,7 @@
 
 import { Rep, Trainer } from "@/types";
 
-export type RepSortOption = 'name' | 'milestone' | 'status' | 'lastActivity' | 'progress';
+export type RepSortOption = 'name' | 'milestone' | 'status' | 'lastActivity' | 'progress' | 'startDate';
 export type RepFilterOption = 'all' | 'active' | 'stuck' | 'independent' | 'inactive';
 export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate' | 'lastActivity';
 
@@ -19,6 +19,8 @@ export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
         return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
       case 'progress':
         return b.overallProgress - a.overallProgress;
+      case 'startDate':
+        return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
       default:
         return 0;
     }

@@ -47,6 +47,7 @@ export function FilterControls({ sortBy, filterBy, onSortChange, onFilterChange 
             <SelectItem value="status">Status</SelectItem>
             <SelectItem value="progress">Progress</SelectItem>
             <SelectItem value="lastActivity">Last Activity</SelectItem>
+            <SelectItem value="startDate">Start Date</SelectItem>
           </SelectContent>
         </Select>
       </div>
