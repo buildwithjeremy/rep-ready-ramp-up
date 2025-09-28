@@ -124,8 +124,8 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
                   </div>
                 </div>
                 
-                {/* Stats Grid - 2 columns on mobile, 4 on larger screens */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                {/* Stats Grid - 4 columns */}
+                <div className="grid grid-cols-4 gap-3 text-center">
                   <div>
                     <p className="text-base font-semibold">{trainer.assignedReps}</p>
                     <p className="text-xs text-gray-600">Total</p>
