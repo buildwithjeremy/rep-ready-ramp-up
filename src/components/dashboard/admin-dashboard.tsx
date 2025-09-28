@@ -53,8 +53,8 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
         </div>
       </div>
 
-      {/* Overall Metrics - Single column on mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Overall Metrics - 2 columns */}
+      <div className="grid grid-cols-2 gap-3">
         <StatCard
           title="Total Reps"
           value={totalReps}
@@ -137,8 +137,8 @@ export function AdminDashboard({ trainers, reps, onTrainerClick, onRepClick, onS
                   </div>
                 </div>
                 
-                {/* Stats Grid - 2 columns on mobile */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                {/* Stats Grid - 4 columns */}
+                <div className="grid grid-cols-4 gap-3 text-center">
                   <div>
                     <p className="text-base font-semibold">{trainer.assignedReps}</p>
                     <p className="text-xs text-gray-600">Total</p>

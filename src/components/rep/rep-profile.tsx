@@ -160,10 +160,10 @@ export function RepProfile({ rep, trainer, onBack, onUpdateRep }: RepProfileProp
           {/* Archive/Reactivate Button - Only show for permitted users and non-Independent reps */}
           {rep.status !== 'Independent' && canArchive && (
             <Button
-              variant={rep.status === 'Inactive' ? "default" : "outline"}
+              variant={rep.status === 'Inactive' ? "default" : "ghost"}
               size="sm"
               onClick={handleArchiveToggle}
-              className="absolute top-4 right-4 z-20 flex items-center gap-2"
+              className="absolute top-16 right-2 z-20 flex items-center gap-1 text-xs px-2 py-1 h-7"
             >
               {rep.status === 'Inactive' ? (
                 <>
