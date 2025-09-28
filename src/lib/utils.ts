@@ -14,8 +14,8 @@ export function formatDisplayDate(dateString: string | Date): string {
   if (isNaN(date.getTime())) return 'N/A';
   
   return date.toLocaleDateString('en-US', {
-    month: 'short',
+    month: 'numeric',
     day: 'numeric',
-    year: 'numeric'
+    year: '2-digit'
   });
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FilterControls } from "@/components/common/filter-controls";
 import { Users, Trophy, TrendingUp, AlertTriangle, Filter, ArrowUpDown } from "lucide-react";
 import { Trainer } from "@/types";
+import { formatDisplayDate } from "@/lib/utils";
 
 interface AllTrainersProps {
   trainers: Trainer[];
@@ -150,7 +151,7 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
-                  Last Activity: {trainer.lastActivity ? new Date(trainer.lastActivity).toLocaleDateString() : new Date(trainer.updated_at || '').toLocaleDateString()}
+                  Last Activity: {formatDisplayDate(trainer.lastActivity || trainer.updated_at || '')}
                 </p>
               </div>
             </CardContent>
