@@ -1,9 +1,8 @@
 
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, Users } from "lucide-react";
 import { Rep, Trainer } from "@/types";
 import { formatDisplayDate } from "@/lib/utils";
 
@@ -14,8 +13,6 @@ interface RepContactCardProps {
 }
 
 export function RepContactCard({ rep, trainer, onBack }: RepContactCardProps) {
-  const [showDetails, setShowDetails] = useState(false);
-
   const getStatusColor = (status: Rep['status']) => {
     switch (status) {
       case 'Active': return 'bg-green-100 text-green-800';
@@ -62,46 +59,31 @@ export function RepContactCard({ rep, trainer, onBack }: RepContactCardProps) {
           <Progress value={rep.overallProgress} className="h-2" />
         </div>
 
-        {/* Toggle Details Button */}
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="w-full flex items-center justify-between p-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-        >
-          <span>Contact Details</span>
-          {showDetails ? (
-            <ChevronUp className="w-3 h-3" />
-          ) : (
-            <ChevronDown className="w-3 h-3" />
-          )}
-        </button>
-
-        {/* Collapsible Contact Details */}
-        {showDetails && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <div className="grid grid-cols-1 gap-2 text-xs">
-              <div className="flex items-center">
-                <Mail className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">{rep.email}</span>
-              </div>
-              <div className="flex items-center">
-                <Phone className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">{rep.phone}</span>
-              </div>
-              <div className="flex items-center">
-                <Users className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Trainer: {trainer?.name || 'Not assigned'}</span>
-              </div>
-              <div className="flex items-center">
-                <Calendar className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Start Date: {formatDisplayDate(rep.dateAdded)}</span>
-              </div>
-              <div className="flex items-center">
-                <User className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
-                <span className="truncate">Last activity: {formatDisplayDate(rep.lastActivity)}</span>
-              </div>
+        {/* Contact Details */}
+        <div className="mt-2 pt-2 border-t border-gray-100">
+          <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="flex items-center">
+              <Mail className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
+              <span className="truncate">{rep.email}</span>
+            </div>
+            <div className="flex items-center">
+              <Phone className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
+              <span className="truncate">{rep.phone}</span>
+            </div>
+            <div className="flex items-center">
+              <Users className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
+              <span className="truncate">Trainer: {trainer?.name || 'Not assigned'}</span>
+            </div>
+            <div className="flex items-center">
+              <Calendar className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
+              <span className="truncate">Start Date: {formatDisplayDate(rep.dateAdded)}</span>
+            </div>
+            <div className="flex items-center">
+              <User className="w-3 h-3 mr-2 text-gray-500 flex-shrink-0" />
+              <span className="truncate">Last activity: {formatDisplayDate(rep.lastActivity)}</span>
             </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
