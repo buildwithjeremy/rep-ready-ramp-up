@@ -461,7 +461,7 @@ export type Database = {
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
+        Returns: string
       }
       promote_user_role: {
         Args:
@@ -489,6 +489,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_all_trainer_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      sync_rep_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

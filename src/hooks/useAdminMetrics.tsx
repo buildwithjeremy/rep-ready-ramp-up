@@ -50,7 +50,7 @@ export function useAdminMetrics() {
         totalReps: metrics_data.total_reps || 0,
         activeReps: metrics_data.active_reps || 0,
         independentReps: metrics_data.independent_reps || 0,
-        stuckReps: metrics_data.stuck_reps_by_activity || 0, // Use activity-based stuck reps
+        stuckReps: metrics_data.stuck_reps_by_status || 0, // Use status-based stuck reps for consistency
         conversionRate: metrics_data.conversion_rate || 0,
         avgTimeToIndependent: metrics_data.avg_time_to_independent || 0,
       };
