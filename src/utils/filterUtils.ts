@@ -4,26 +4,37 @@ import { Rep, Trainer } from "@/types";
 export type RepSortOption = 'name' | 'milestone' | 'status' | 'lastActivity' | 'progress' | 'startDate';
 export type RepFilterOption = 'all' | 'active' | 'stuck' | 'independent' | 'inactive';
 export type TrainerSortOption = 'name' | 'assignedReps' | 'activeReps' | 'successRate' | 'lastActivity';
+export type SortOrder = 'asc' | 'desc';
 
-export const sortReps = (reps: Rep[], sortBy: RepSortOption): Rep[] => {
+export const sortReps = (reps: Rep[], sortBy: RepSortOption, order: SortOrder = 'desc'): Rep[] => {
   return [...reps].sort((a, b) => {
+    let result = 0;
+    
     switch (sortBy) {
       case 'name':
-        return a.name.localeCompare(b.name);
+        result = a.name.localeCompare(b.name);
+        break;
       case 'milestone':
-        return b.milestone - a.milestone; // Higher milestones first
+        result = b.milestone - a.milestone; // Higher milestones first by default
+        break;
       case 'status':
         const statusOrder = { 'Independent': 0, 'Active': 1, 'Stuck': 2, 'Inactive': 3 };
-        return statusOrder[a.status] - statusOrder[b.status];
+        result = statusOrder[a.status] - statusOrder[b.status];
+        break;
       case 'lastActivity':
-        return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+        result = new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+        break;
       case 'progress':
-        return b.overallProgress - a.overallProgress;
+        result = b.overallProgress - a.overallProgress;
+        break;
       case 'startDate':
-        return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+        result = new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+        break;
       default:
-        return 0;
+        result = 0;
     }
+    
+    return order === 'asc' ? -result : result;
   });
 };
 
@@ -49,23 +60,32 @@ export const filterReps = (reps: Rep[], filterBy: RepFilterOption): Rep[] => {
   }
 };
 
-export const sortTrainers = (trainers: Trainer[], sortBy: TrainerSortOption): Trainer[] => {
+export const sortTrainers = (trainers: Trainer[], sortBy: TrainerSortOption, order: SortOrder = 'desc'): Trainer[] => {
   return [...trainers].sort((a, b) => {
+    let result = 0;
+    
     switch (sortBy) {
       case 'name':
-        return a.name.localeCompare(b.name);
+        result = a.name.localeCompare(b.name);
+        break;
       case 'assignedReps':
-        return b.assignedReps - a.assignedReps;
+        result = b.assignedReps - a.assignedReps;
+        break;
       case 'activeReps':
-        return b.activeReps - a.activeReps;
+        result = b.activeReps - a.activeReps;
+        break;
       case 'successRate':
-        return b.successRate - a.successRate;
+        result = b.successRate - a.successRate;
+        break;
       case 'lastActivity':
         const aActivity = a.lastActivity || a.updated_at || '';
         const bActivity = b.lastActivity || b.updated_at || '';
-        return new Date(bActivity).getTime() - new Date(aActivity).getTime();
+        result = new Date(bActivity).getTime() - new Date(aActivity).getTime();
+        break;
       default:
-        return 0;
+        result = 0;
     }
+    
+    return order === 'asc' ? -result : result;
   });
 };

@@ -1,18 +1,26 @@
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RepSortOption, RepFilterOption, SortOrder } from "@/utils/filterUtils";
-import { Filter, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { TrainerSortOption, SortOrder } from "@/utils/filterUtils";
+import { Filter, ArrowUp, ArrowDown } from "lucide-react";
 
-interface FilterControlsProps {
-  sortBy: RepSortOption;
-  filterBy: RepFilterOption;
+type TrainerFilterOption = 'all' | 'highPerformers' | 'needsAttention';
+
+interface TrainerFilterControlsProps {
+  sortBy: TrainerSortOption;
+  filterBy: TrainerFilterOption;
   sortOrder: SortOrder;
-  onSortChange: (value: RepSortOption) => void;
-  onFilterChange: (value: RepFilterOption) => void;
+  onSortChange: (value: TrainerSortOption) => void;
+  onFilterChange: (value: TrainerFilterOption) => void;
   onSortOrderToggle: () => void;
 }
 
-export function FilterControls({ sortBy, filterBy, sortOrder, onSortChange, onFilterChange, onSortOrderToggle }: FilterControlsProps) {
+export function TrainerFilterControls({ 
+  sortBy, 
+  filterBy, 
+  sortOrder, 
+  onSortChange, 
+  onFilterChange, 
+  onSortOrderToggle 
+}: TrainerFilterControlsProps) {
   return (
     <div className="flex gap-4 mb-4">
       <div className="flex-1">
@@ -25,11 +33,9 @@ export function FilterControls({ sortBy, filterBy, sortOrder, onSortChange, onFi
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Reps</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="stuck">Stuck</SelectItem>
-            <SelectItem value="independent">Independent</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">All Trainers</SelectItem>
+            <SelectItem value="highPerformers">High Performers (75%+)</SelectItem>
+            <SelectItem value="needsAttention">Needs Attention</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -54,14 +60,15 @@ export function FilterControls({ sortBy, filterBy, sortOrder, onSortChange, onFi
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Name A-Z</SelectItem>
-            <SelectItem value="milestone">Milestone</SelectItem>
-            <SelectItem value="status">Status</SelectItem>
-            <SelectItem value="progress">Progress</SelectItem>
+            <SelectItem value="successRate">Success Rate</SelectItem>
+            <SelectItem value="assignedReps">Total Reps</SelectItem>
+            <SelectItem value="activeReps">Active Reps</SelectItem>
             <SelectItem value="lastActivity">Last Activity</SelectItem>
-            <SelectItem value="startDate">Start Date</SelectItem>
           </SelectContent>
         </Select>
       </div>
     </div>
   );
 }
+
+export type { TrainerFilterOption };

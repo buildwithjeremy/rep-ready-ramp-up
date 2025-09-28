@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FilterControls } from "@/components/common/filter-controls";
-import { Users, Trophy, TrendingUp, AlertTriangle, Filter, ArrowUpDown } from "lucide-react";
+import { TrainerFilterControls, TrainerFilterOption } from "@/components/common/trainer-filter-controls";
+import { Users, Trophy, TrendingUp, AlertTriangle } from "lucide-react";
 import { Trainer } from "@/types";
+import { TrainerSortOption, SortOrder, sortTrainers } from "@/utils/filterUtils";
 import { formatDisplayDate } from "@/lib/utils";
 
 interface AllTrainersProps {
@@ -13,12 +14,10 @@ interface AllTrainersProps {
   title?: string;
 }
 
-type TrainerSortOption = 'name' | 'successRate' | 'assignedReps' | 'activeReps' | 'lastActivity';
-type TrainerFilterOption = 'all' | 'highPerformers' | 'needsAttention';
-
 export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }: AllTrainersProps) {
   const [sortBy, setSortBy] = useState<TrainerSortOption>('name');
   const [filterBy, setFilterBy] = useState<TrainerFilterOption>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // Filter trainers
   const filteredTrainers = trainers.filter(trainer => {
@@ -32,25 +31,12 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
     }
   });
 
-  // Sort trainers
-  const sortedTrainers = [...filteredTrainers].sort((a, b) => {
-    switch (sortBy) {
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'successRate':
-        return b.successRate - a.successRate;
-      case 'assignedReps':
-        return b.assignedReps - a.assignedReps;
-      case 'activeReps':
-        return b.activeReps - a.activeReps;
-      case 'lastActivity':
-        const aActivity = a.lastActivity || a.updated_at || '';
-        const bActivity = b.lastActivity || b.updated_at || '';
-        return new Date(bActivity).getTime() - new Date(aActivity).getTime();
-      default:
-        return 0;
-    }
-  });
+  // Sort trainers using utility function
+  const sortedTrainers = sortTrainers(filteredTrainers, sortBy, sortOrder);
+
+  const handleSortOrderToggle = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   return (
     <div className="space-y-4 pb-20">
@@ -61,41 +47,14 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Filter</span>
-          </div>
-          <select
-            value={filterBy}
-            onChange={(e) => setFilterBy(e.target.value as TrainerFilterOption)}
-            className="w-full p-2 border rounded-lg text-sm"
-          >
-            <option value="all">All Trainers</option>
-            <option value="highPerformers">High Performers (75%+)</option>
-            <option value="needsAttention">Needs Attention</option>
-          </select>
-        </div>
-        
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Sort</span>
-          </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as TrainerSortOption)}
-            className="w-full p-2 border rounded-lg text-sm"
-          >
-            <option value="name">Name A-Z</option>
-            <option value="successRate">Success Rate</option>
-            <option value="assignedReps">Total Reps</option>
-            <option value="activeReps">Active Reps</option>
-            <option value="lastActivity">Last Activity</option>
-          </select>
-        </div>
-      </div>
+      <TrainerFilterControls
+        sortBy={sortBy}
+        filterBy={filterBy}
+        sortOrder={sortOrder}
+        onSortChange={setSortBy}
+        onFilterChange={setFilterBy}
+        onSortOrderToggle={handleSortOrderToggle}
+      />
 
       {/* Trainers List */}
       <div className="space-y-3">

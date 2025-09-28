@@ -6,7 +6,7 @@ import { FilterControls } from "@/components/common/filter-controls";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { Users, UserPlus } from "lucide-react";
 import { Rep } from "@/types";
-import { RepSortOption, RepFilterOption, sortReps, filterReps } from "@/utils/filterUtils";
+import { RepSortOption, RepFilterOption, SortOrder, sortReps, filterReps } from "@/utils/filterUtils";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { formatDisplayDate } from "@/lib/utils";
 
@@ -21,9 +21,14 @@ interface AllRepsProps {
 export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 'active', onAddRep }: AllRepsProps) {
   const [sortBy, setSortBy] = useState<RepSortOption>('name');
   const [filterBy, setFilterBy] = useState<RepFilterOption>(initialFilter);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const filteredReps = filterReps(reps, filterBy);
-  const sortedReps = sortReps(filteredReps, sortBy);
+  const sortedReps = sortReps(filteredReps, sortBy, sortOrder);
+
+  const handleSortOrderToggle = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const handleAddRep = () => {
     onAddRep?.();
@@ -53,8 +58,10 @@ export function AllReps({ reps, onRepClick, title = "All Reps", initialFilter = 
       <FilterControls
         sortBy={sortBy}
         filterBy={filterBy}
+        sortOrder={sortOrder}
         onSortChange={setSortBy}
         onFilterChange={setFilterBy}
+        onSortOrderToggle={handleSortOrderToggle}
       />
 
       {/* Reps List */}
