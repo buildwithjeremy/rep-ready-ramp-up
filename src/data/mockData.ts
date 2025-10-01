@@ -124,7 +124,8 @@ export const mockTrainers: Trainer[] = [
     independentReps: 2,
     stuckReps: 1,
     averageTimeToIndependent: 28,
-    successRate: 85
+    successRate: 85,
+    status: 'Active'
   },
   {
     id: 'trainer-2',
@@ -135,7 +136,8 @@ export const mockTrainers: Trainer[] = [
     independentReps: 1,
     stuckReps: 2,
     averageTimeToIndependent: 32,
-    successRate: 78
+    successRate: 78,
+    status: 'Active'
   },
   {
     id: 'trainer-3',
@@ -146,7 +148,8 @@ export const mockTrainers: Trainer[] = [
     independentReps: 3,
     stuckReps: 0,
     averageTimeToIndependent: 25,
-    successRate: 92
+    successRate: 92,
+    status: 'Active'
   }
 ];
 

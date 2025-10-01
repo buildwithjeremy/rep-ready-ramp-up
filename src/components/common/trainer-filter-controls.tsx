@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TrainerSortOption, SortOrder } from "@/utils/filterUtils";
 import { Filter, ArrowUp, ArrowDown } from "lucide-react";
 
-type TrainerFilterOption = 'all' | 'highPerformers' | 'needsAttention';
+type TrainerFilterOption = 'all' | 'active' | 'inactive' | 'highPerformers' | 'needsAttention';
 
 interface TrainerFilterControlsProps {
   sortBy: TrainerSortOption;
@@ -34,6 +34,8 @@ export function TrainerFilterControls({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Trainers</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="inactive">Inactive Only</SelectItem>
             <SelectItem value="highPerformers">High Performers (75%+)</SelectItem>
             <SelectItem value="needsAttention">Needs Attention</SelectItem>
           </SelectContent>

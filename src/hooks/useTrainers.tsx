@@ -39,6 +39,7 @@ export function useTrainers() {
         stuckReps: trainer.stuck_reps,
         averageTimeToIndependent: trainer.average_time_to_independent,
         successRate: trainer.success_rate,
+        status: (trainer.status || 'Active') as 'Active' | 'Inactive',
         created_at: trainer.created_at,
         updated_at: trainer.updated_at
       })) || [];
@@ -81,6 +82,52 @@ export function useTrainers() {
     }
   };
 
+  const archiveTrainer = async (trainerId: string, adminUserId: string) => {
+    try {
+      console.log('Archiving trainer:', trainerId);
+
+      const { error } = await supabase.rpc('update_trainer_status', {
+        target_trainer_id: trainerId,
+        new_status: 'Inactive',
+        admin_user_id: adminUserId
+      });
+
+      if (error) {
+        console.error('Error archiving trainer:', error);
+        throw error;
+      }
+
+      await fetchTrainers();
+      console.log('Trainer archived successfully');
+    } catch (error) {
+      console.error('Error archiving trainer:', error);
+      throw error;
+    }
+  };
+
+  const reactivateTrainer = async (trainerId: string, adminUserId: string) => {
+    try {
+      console.log('Reactivating trainer:', trainerId);
+
+      const { error } = await supabase.rpc('update_trainer_status', {
+        target_trainer_id: trainerId,
+        new_status: 'Active',
+        admin_user_id: adminUserId
+      });
+
+      if (error) {
+        console.error('Error reactivating trainer:', error);
+        throw error;
+      }
+
+      await fetchTrainers();
+      console.log('Trainer reactivated successfully');
+    } catch (error) {
+      console.error('Error reactivating trainer:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchTrainers();
   }, [user]);
@@ -90,6 +137,8 @@ export function useTrainers() {
     loading,
     error,
     fetchTrainers,
-    updateTrainer
+    updateTrainer,
+    archiveTrainer,
+    reactivateTrainer
   };
 }

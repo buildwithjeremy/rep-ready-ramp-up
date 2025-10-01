@@ -29,6 +29,8 @@ interface AppLayoutProps {
   onAddRep: (rep: Rep) => void;
   onUpdateRep: (rep: Rep) => void;
   onAddRepClick: () => void;
+  onArchiveTrainer?: (trainerId: string) => Promise<void>;
+  onReactivateTrainer?: (trainerId: string) => Promise<void>;
 }
 
 export function AppLayout({
@@ -54,7 +56,9 @@ export function AppLayout({
   onBackFromAddRep,
   onAddRep,
   onUpdateRep,
-  onAddRepClick
+  onAddRepClick,
+  onArchiveTrainer,
+  onReactivateTrainer
 }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,6 +90,8 @@ export function AppLayout({
           onAddRep={onAddRep}
           onUpdateRep={onUpdateRep}
           onAddRepClick={onAddRepClick}
+          onArchiveTrainer={onArchiveTrainer}
+          onReactivateTrainer={onReactivateTrainer}
         />
       </div>
 

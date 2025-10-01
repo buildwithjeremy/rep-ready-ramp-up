@@ -29,6 +29,8 @@ interface DashboardRouterProps {
   onAddRep: (rep: Rep) => void;
   onUpdateRep: (rep: Rep) => void;
   onAddRepClick: () => void;
+  onArchiveTrainer?: (trainerId: string) => Promise<void>;
+  onReactivateTrainer?: (trainerId: string) => Promise<void>;
 }
 
 export function DashboardRouter({
@@ -49,7 +51,9 @@ export function DashboardRouter({
   onBackFromAddRep,
   onAddRep,
   onUpdateRep,
-  onAddRepClick
+  onAddRepClick,
+  onArchiveTrainer,
+  onReactivateTrainer
 }: DashboardRouterProps) {
   // Get current rep for profile view
   const selectedRep = selectedRepId ? reps.find(rep => rep.id === selectedRepId) : null;
@@ -125,6 +129,9 @@ export function DashboardRouter({
         reps={reps}
         onBack={onBackFromTrainer}
         onRepClick={onRepClick}
+        onArchiveTrainer={onArchiveTrainer}
+        onReactivateTrainer={onReactivateTrainer}
+        isAdmin={userRole === 'ADMIN'}
       />
     );
   }

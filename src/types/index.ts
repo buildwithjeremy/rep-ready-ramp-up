@@ -44,6 +44,7 @@ export interface Trainer {
   stuckReps: number;
   averageTimeToIndependent: number; // days
   successRate: number; // percentage
+  status: 'Active' | 'Inactive';
   created_at?: string;
   updated_at?: string;
   lastActivity?: string; // For sorting by last activity

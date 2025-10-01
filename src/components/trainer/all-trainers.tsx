@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { TrainerFilterControls, TrainerFilterOption } from "@/components/common/trainer-filter-controls";
-import { Users, Trophy, TrendingUp, AlertTriangle } from "lucide-react";
+import { Users, Trophy, TrendingUp, AlertTriangle, Archive } from "lucide-react";
 import { Trainer } from "@/types";
 import { TrainerSortOption, SortOrder, sortTrainers } from "@/utils/filterUtils";
 import { formatDisplayDate } from "@/lib/utils";
@@ -22,10 +23,14 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
   // Filter trainers
   const filteredTrainers = trainers.filter(trainer => {
     switch (filterBy) {
+      case 'active':
+        return trainer.status === 'Active';
+      case 'inactive':
+        return trainer.status === 'Inactive';
       case 'highPerformers':
-        return trainer.successRate >= 75;
+        return trainer.status === 'Active' && trainer.successRate >= 75;
       case 'needsAttention':
-        return trainer.stuckReps > 0 || trainer.successRate < 50;
+        return trainer.status === 'Active' && (trainer.stuckReps > 0 || trainer.successRate < 50);
       default:
         return true;
     }
@@ -61,7 +66,9 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
         {sortedTrainers.map(trainer => (
           <Card 
             key={trainer.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
+            className={`cursor-pointer hover:shadow-md transition-shadow ${
+              trainer.status === 'Inactive' ? 'opacity-60 bg-gray-50' : ''
+            }`}
             onClick={() => onTrainerClick(trainer.id)}
           >
             <CardContent className="p-3">
@@ -69,11 +76,27 @@ export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }
                 {/* Header - Stack name/email and success rate on mobile */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {trainer.name.charAt(0).toUpperCase()}
+                    <div className={`w-10 h-10 bg-gradient-to-br ${
+                      trainer.status === 'Inactive' 
+                        ? 'from-gray-300 to-gray-400' 
+                        : 'from-purple-400 to-blue-500'
+                    } rounded-full flex items-center justify-center text-white font-bold text-sm`}>
+                      {trainer.status === 'Inactive' ? (
+                        <Archive className="w-5 h-5" />
+                      ) : (
+                        trainer.name.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-sm truncate">{trainer.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-sm truncate">{trainer.name}</h3>
+                        <Badge 
+                          variant={trainer.status === 'Active' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {trainer.status}
+                        </Badge>
+                      </div>
                       <p className="text-xs text-gray-600 truncate">{trainer.email}</p>
                     </div>
                   </div>

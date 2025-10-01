@@ -336,6 +336,7 @@ export type Database = {
           id: string
           independent_reps: number
           phone: string | null
+          status: string
           stuck_reps: number
           success_rate: number
           updated_at: string
@@ -354,6 +355,7 @@ export type Database = {
           id?: string
           independent_reps?: number
           phone?: string | null
+          status?: string
           stuck_reps?: number
           success_rate?: number
           updated_at?: string
@@ -372,6 +374,7 @@ export type Database = {
           id?: string
           independent_reps?: number
           phone?: string | null
+          status?: string
           stuck_reps?: number
           success_rate?: number
           updated_at?: string
@@ -496,9 +499,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      trainer_has_active_reps: {
+        Args: { trainer_user_id: string }
+        Returns: boolean
+      }
       update_trainer_stats_for_trainer: {
         Args: { target_trainer_id: string }
         Returns: undefined
+      }
+      update_trainer_status: {
+        Args: {
+          admin_user_id: string
+          new_status: string
+          target_trainer_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

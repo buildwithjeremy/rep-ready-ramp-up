@@ -13,7 +13,7 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { reps, loading: repsLoading, addRep: addRepToDb, updateRep: updateRepInDb } = useReps();
-  const { trainers, loading: trainersLoading } = useTrainers();
+  const { trainers, loading: trainersLoading, archiveTrainer, reactivateTrainer } = useTrainers();
 
   console.log('Index render - authLoading:', authLoading, 'profileLoading:', profileLoading, 'user email:', user?.email, 'profile role:', profile?.role);
 
@@ -116,6 +116,28 @@ const Index = () => {
     }
   };
 
+  const handleArchiveTrainer = async (trainerId: string) => {
+    if (!profile?.id) return;
+    try {
+      await archiveTrainer(trainerId, profile.id);
+      console.log('Trainer archived:', trainerId);
+    } catch (error) {
+      console.error('Error archiving trainer:', error);
+      throw error;
+    }
+  };
+
+  const handleReactivateTrainer = async (trainerId: string) => {
+    if (!profile?.id) return;
+    try {
+      await reactivateTrainer(trainerId, profile.id);
+      console.log('Trainer reactivated:', trainerId);
+    } catch (error) {
+      console.error('Error reactivating trainer:', error);
+      throw error;
+    }
+  };
+
   return (
     <AppLayout
       profileName={profile.full_name}
@@ -141,6 +163,8 @@ const Index = () => {
       onAddRep={handleAddRep}
       onUpdateRep={handleUpdateRep}
       onAddRepClick={navigation.handleAddRepClick}
+      onArchiveTrainer={handleArchiveTrainer}
+      onReactivateTrainer={handleReactivateTrainer}
     />
   );
 };
