@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/common/progress-bar";
-import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, ChevronDown, ChevronUp, Users, Archive, RotateCcw } from "lucide-react";
 import { Trainer, Rep } from "@/types";
 import { formatDisplayDate } from "@/lib/utils";
 
@@ -11,9 +11,12 @@ interface TrainerContactCardProps {
   trainer: Trainer;
   reps: Rep[];
   onBack: () => void;
+  isAdmin?: boolean;
+  onArchiveClick?: () => void;
+  onReactivateClick?: () => void;
 }
 
-export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCardProps) {
+export function TrainerContactCard({ trainer, reps, onBack, isAdmin = false, onArchiveClick, onReactivateClick }: TrainerContactCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   // Calculate average progress of active reps
@@ -30,7 +33,7 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
     <Card className="bg-white shadow-sm sticky top-0 z-10">
       <CardContent className="p-3">
         {/* Header with Back Button */}
-        <div className="flex items-center mb-3">
+        <div className="flex items-center mb-3 relative">
           <Button variant="ghost" size="sm" onClick={onBack} className="mr-2 p-2">
             <ArrowLeft className="w-4 h-4" />
           </Button>
@@ -38,6 +41,28 @@ export function TrainerContactCard({ trainer, reps, onBack }: TrainerContactCard
             <h1 className="font-bold text-base truncate">{trainer.name}</h1>
             <p className="text-xs text-gray-600">Field Trainer</p>
           </div>
+          
+          {/* Archive/Reactivate Button - Admin only */}
+          {isAdmin && (
+            <Button
+              variant={trainer.status === 'Inactive' ? "default" : "ghost"}
+              size="sm"
+              onClick={() => trainer.status === 'Inactive' ? onReactivateClick?.() : onArchiveClick?.()}
+              className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+            >
+              {trainer.status === 'Inactive' ? (
+                <>
+                  <RotateCcw className="w-4 h-4" />
+                  Reactivate
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4" />
+                  Archive
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {/* Profile Section */}

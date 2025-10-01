@@ -80,34 +80,16 @@ export function TrainerProfile({
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <TrainerContactCard trainer={trainer} reps={trainerReps} onBack={onBack} />
+      <TrainerContactCard 
+        trainer={trainer} 
+        reps={trainerReps} 
+        onBack={onBack}
+        isAdmin={isAdmin}
+        onArchiveClick={() => setShowArchiveDialog(true)}
+        onReactivateClick={() => setShowReactivateDialog(true)}
+      />
       
       <div className="px-4 py-4 space-y-4">
-        <div className="relative">
-          <div className="mb-4"></div> {/* Spacer for button */}
-          
-          {/* Archive/Reactivate Button - Admin only */}
-          {isAdmin && (
-            <Button
-              variant={trainer.status === 'Inactive' ? "default" : "ghost"}
-              size="sm"
-              onClick={() => trainer.status === 'Inactive' ? setShowReactivateDialog(true) : setShowArchiveDialog(true)}
-              className="absolute top-0 right-0 z-20 flex items-center gap-1 text-xs px-2 py-1 h-7"
-            >
-              {trainer.status === 'Inactive' ? (
-                <>
-                  <RotateCcw className="w-4 h-4" />
-                  Reactivate
-                </>
-              ) : (
-                <>
-                  <Archive className="w-4 h-4" />
-                  Archive
-                </>
-              )}
-            </Button>
-          )}
-        </div>
 
         {/* Tab Navigation */}
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
