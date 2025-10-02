@@ -17,7 +17,7 @@ interface AllTrainersProps {
 
 export function AllTrainers({ trainers, onTrainerClick, title = "All Trainers" }: AllTrainersProps) {
   const [sortBy, setSortBy] = useState<TrainerSortOption>('name');
-  const [filterBy, setFilterBy] = useState<TrainerFilterOption>('all');
+  const [filterBy, setFilterBy] = useState<TrainerFilterOption>('active');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // Filter trainers
