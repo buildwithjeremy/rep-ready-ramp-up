@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ActivityFilterOption, ActivitySortOption, SortOrder, EnrichedActivityLog } from '@/types/activity';
+import { enrichActivityLog, filterActivities, sortActivities } from '@/utils/activityUtils';
 
 export interface ActivityLog {
   id: string;
@@ -13,10 +15,15 @@ export interface ActivityLog {
   user_name?: string;
 }
 
-export function useRecentActivity(limit: number = 20) {
+export function useRecentActivity(initialLimit: number = 50) {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterByAction, setFilterByAction] = useState<ActivityFilterOption>('all');
+  const [filterByTrainer, setFilterByTrainer] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<ActivitySortOption>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [limit, setLimit] = useState(initialLimit);
 
   useEffect(() => {
     fetchActivities();
@@ -27,7 +34,7 @@ export function useRecentActivity(limit: number = 20) {
       setLoading(true);
       setError(null);
 
-      // Fetch recent activity logs
+      // Fetch recent activity logs with limit
       const { data: logs, error: logsError } = await supabase
         .from('security_audit_log')
         .select('*')
@@ -62,5 +69,28 @@ export function useRecentActivity(limit: number = 20) {
     }
   };
 
-  return { activities, loading, error, refetch: fetchActivities };
+  // Process activities with enrichment, filtering, and sorting
+  const processedActivities: EnrichedActivityLog[] = useMemo(() => {
+    const enriched = activities.map(enrichActivityLog);
+    const filtered = filterActivities(enriched, filterByAction, filterByTrainer);
+    const sorted = sortActivities(filtered, sortBy, sortOrder);
+    return sorted;
+  }, [activities, filterByAction, filterByTrainer, sortBy, sortOrder]);
+
+  return { 
+    activities: processedActivities, 
+    loading, 
+    error, 
+    refetch: fetchActivities,
+    filterByAction,
+    setFilterByAction,
+    filterByTrainer,
+    setFilterByTrainer,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    limit,
+    setLimit
+  };
 }
