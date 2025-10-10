@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ActivityFilterControls } from "./activity-filter-controls";
 import { ActivityItem } from "./activity-item";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useRef } from 'react';
 
 export function RecentActivityCard() {
   const { 
@@ -22,7 +23,16 @@ export function RecentActivityCard() {
     setSortOrder,
     limit,
     setLimit
-  } = useRecentActivity(50);
+  } = useRecentActivity(1000);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: activities.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 80,
+    overscan: 10,
+  });
 
   const handleSortOrderToggle = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -62,31 +72,50 @@ export function RecentActivityCard() {
             <RefreshCw className="h-5 w-5 animate-spin mr-2" />
             Loading activities...
           </div>
+        ) : activities.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <p className="text-sm">No activities found matching your filters</p>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => {
+                setFilterByAction('all');
+                setFilterByTrainer(null);
+              }}
+              className="mt-2"
+            >
+              Clear filters
+            </Button>
+          </div>
         ) : (
-          <ScrollArea className="h-[500px] pr-4">
-            {activities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <p className="text-sm">No activities found matching your filters</p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  onClick={() => {
-                    setFilterByAction('all');
-                    setFilterByTrainer(null);
+          <div
+            ref={parentRef}
+            className="h-[500px] overflow-auto"
+          >
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualItem) => (
+                <div
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className="mt-2"
                 >
-                  Clear filters
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {activities.map((activity) => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
-              </div>
-            )}
-          </ScrollArea>
+                  <ActivityItem activity={activities[virtualItem.index]} />
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>

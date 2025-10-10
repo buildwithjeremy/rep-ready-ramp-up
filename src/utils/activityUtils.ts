@@ -5,7 +5,6 @@ import {
   Archive,
   RefreshCw,
   Shield,
-  AlertTriangle,
   RefreshCcw,
   type LucideIcon
 } from "lucide-react";
@@ -37,7 +36,6 @@ export function getActionLabel(action: string): string {
     'trainer_reactivated': 'Trainer Reactivated',
     'subtask_completed': 'Task Completed',
     'milestone_completed': 'Milestone Completed',
-    'incomplete_rep_data': 'Incomplete Profile',
     'status_change': 'Status Changed',
     'status_sync': 'Status Sync',
     'role_change': 'Role Changed',
@@ -106,15 +104,6 @@ export function formatActivityMessage(activity: ActivityLog): string {
       return `${actorName} changed ${statusRepName}'s status to ${newStatus}`;
     }
     
-    case 'incomplete_rep_data': {
-      const repName = activity.new_values?.rep_name || 'Rep';
-      const missing = [];
-      if (activity.new_values?.phone_missing) missing.push('phone');
-      if (activity.new_values?.birthday_missing) missing.push('birthday');
-      const missingText = missing.length > 0 ? ` (missing: ${missing.join(', ')})` : '';
-      return `System detected incomplete profile for ${repName}${missingText}`;
-    }
-    
     default:
       return `${actorName} performed ${getActionLabel(activity.action)}`;
   }
@@ -130,7 +119,6 @@ export function getActivityIcon(action: string): LucideIcon {
     'rep_reactivated': UserCheck,
     'subtask_completed': CheckSquare,
     'rep_created': UserPlus,
-    'incomplete_rep_data': AlertTriangle,
     'status_sync': RefreshCcw,
     'status_change': RefreshCw
   };

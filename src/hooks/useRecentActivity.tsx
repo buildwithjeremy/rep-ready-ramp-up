@@ -15,7 +15,7 @@ export interface ActivityLog {
   user_name?: string;
 }
 
-export function useRecentActivity(initialLimit: number = 50) {
+export function useRecentActivity(initialLimit: number = 1000) {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
