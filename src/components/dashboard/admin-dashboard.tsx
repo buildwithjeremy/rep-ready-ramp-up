@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/common/stat-card";
 import { UserManagement } from "@/components/admin/user-management";
+import { RecentActivityCard } from "@/components/admin/recent-activity-card";
 import { useAdminMetrics } from "@/hooks/useAdminMetrics";
 import { Users, TrendingUp, Clock, AlertTriangle, UserCheck, Settings } from "lucide-react";
 import { Rep, Trainer } from "@/types";
@@ -110,6 +111,9 @@ export function AdminDashboard({ trainers, reps, onStatCardClick }: AdminDashboa
           </div>
         </CardContent>
       </Card>
+
+      {/* Recent Activity */}
+      <RecentActivityCard />
     </div>
   );
 }
