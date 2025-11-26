@@ -288,7 +288,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -300,7 +300,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -312,7 +312,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -387,20 +387,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_rep_progress: {
-        Args: { rep_id: string }
-        Returns: number
-      }
+      calculate_rep_progress: { Args: { rep_id: string }; Returns: number }
       delete_user_completely: {
         Args: { target_user_id: string }
         Returns: boolean
       }
-      get_activity_rate: {
-        Args: { trainer_id_param: string }
-        Returns: number
-      }
+      get_activity_rate: { Args: { trainer_id_param: string }; Returns: number }
       get_admin_dashboard_metrics: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_reps: number
           avg_time_to_independent: number
@@ -412,7 +406,7 @@ export type Database = {
         }[]
       }
       get_admin_dashboard_metrics_secure: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_reps: number
           avg_time_to_independent: number
@@ -424,7 +418,7 @@ export type Database = {
         }[]
       }
       get_available_trainers: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           assigned_reps: number
           full_name: string
@@ -444,7 +438,7 @@ export type Database = {
         Returns: number
       }
       get_current_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
       get_stuck_reps_count: {
@@ -456,29 +450,34 @@ export type Database = {
         Returns: number
       }
       get_trainers_for_signup: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           full_name: string
           id: string
         }[]
       }
-      get_user_role: {
-        Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: string
-      }
-      promote_user_role: {
-        Args:
-          | {
+      get_user_role:
+        | { Args: never; Returns: string }
+        | {
+            Args: { user_id: string }
+            Returns: Database["public"]["Enums"]["user_role"]
+          }
+      promote_user_role:
+        | {
+            Args: {
+              new_role: Database["public"]["Enums"]["user_role"]
+              target_user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
               new_role: Database["public"]["Enums"]["user_role"]
               promoted_by_user_id: string
               target_user_id: string
             }
-          | {
-              new_role: Database["public"]["Enums"]["user_role"]
-              target_user_id: string
-            }
-        Returns: boolean
-      }
+            Returns: boolean
+          }
       reassign_rep_to_trainer: {
         Args: {
           admin_user_id: string
@@ -487,18 +486,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      refresh_all_rep_statuses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      refresh_all_trainer_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      sync_rep_statuses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_all_rep_statuses: { Args: never; Returns: undefined }
+      refresh_all_trainer_stats: { Args: never; Returns: undefined }
+      sync_rep_statuses: { Args: never; Returns: undefined }
       trainer_has_active_reps: {
         Args: { trainer_user_id: string }
         Returns: boolean

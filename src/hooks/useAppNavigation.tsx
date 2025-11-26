@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Rep } from '@/types';
 import { RepFilterOption } from '@/utils/filterUtils';
 
@@ -7,26 +7,61 @@ interface UseAppNavigationProps {
   userRole: 'ADMIN' | 'TRAINER' | 'REP';
 }
 
+interface NavigationState {
+  path: string;
+  repId: string | null;
+  trainerId: string | null;
+  filter: RepFilterOption;
+}
+
 export function useAppNavigation({ userRole }: UseAppNavigationProps) {
   const [currentPath, setCurrentPath] = useState('/dashboard');
   const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [repsFilter, setRepsFilter] = useState<RepFilterOption>('active');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Set initial path based on user role
   useEffect(() => {
+    let initialPath = '/dashboard';
     if (userRole === 'ADMIN') {
-      setCurrentPath('/admin');
+      initialPath = '/admin';
     } else if (userRole === 'TRAINER') {
-      setCurrentPath('/dashboard');
+      initialPath = '/dashboard';
     } else if (userRole === 'REP') {
-      setCurrentPath('/dashboard');
-    } else {
-      setCurrentPath('/dashboard');
+      initialPath = '/dashboard';
     }
+    
+    setCurrentPath(initialPath);
+    
+    // Use replaceState for initial path to avoid creating history entry
+    const initialState: NavigationState = {
+      path: initialPath,
+      repId: null,
+      trainerId: null,
+      filter: 'active'
+    };
+    window.history.replaceState(initialState, '', window.location.pathname);
+    setIsInitialized(true);
   }, [userRole]);
 
-  const handleNavigate = (path: string) => {
+  // Listen for browser back/forward button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state) {
+        const state = event.state as NavigationState;
+        setCurrentPath(state.path);
+        setSelectedRepId(state.repId);
+        setSelectedTrainerId(state.trainerId);
+        setRepsFilter(state.filter);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleNavigate = useCallback((path: string) => {
     setCurrentPath(path);
     if (path !== '/rep-profile') {
       setSelectedRepId(null);
@@ -37,40 +72,95 @@ export function useAppNavigation({ userRole }: UseAppNavigationProps) {
     if (path === '/reps') {
       setRepsFilter('active');
     }
-  };
 
-  const handleRepClick = (repId: string) => {
+    // Push to browser history only after initialization
+    if (isInitialized) {
+      const state: NavigationState = {
+        path,
+        repId: path === '/rep-profile' ? selectedRepId : null,
+        trainerId: path === '/trainer-profile' ? selectedTrainerId : null,
+        filter: path === '/reps' ? 'active' : repsFilter
+      };
+      window.history.pushState(state, '', window.location.pathname);
+    }
+  }, [isInitialized, selectedRepId, selectedTrainerId, repsFilter]);
+
+  const handleRepClick = useCallback((repId: string) => {
     setSelectedRepId(repId);
     setCurrentPath('/rep-profile');
-  };
 
-  const handleTrainerClick = (trainerId: string) => {
+    if (isInitialized) {
+      const state: NavigationState = {
+        path: '/rep-profile',
+        repId,
+        trainerId: null,
+        filter: repsFilter
+      };
+      window.history.pushState(state, '', window.location.pathname);
+    }
+  }, [isInitialized, repsFilter]);
+
+  const handleTrainerClick = useCallback((trainerId: string) => {
     setSelectedTrainerId(trainerId);
     setCurrentPath('/trainer-profile');
-  };
 
-  const handleBackFromRep = () => {
-    setSelectedRepId(null);
-    setCurrentPath(userRole === 'ADMIN' ? '/admin' : '/dashboard');
-  };
+    if (isInitialized) {
+      const state: NavigationState = {
+        path: '/trainer-profile',
+        repId: null,
+        trainerId,
+        filter: repsFilter
+      };
+      window.history.pushState(state, '', window.location.pathname);
+    }
+  }, [isInitialized, repsFilter]);
 
-  const handleBackFromTrainer = () => {
-    setSelectedTrainerId(null);
-    setCurrentPath(userRole === 'ADMIN' ? '/admin' : '/dashboard');
-  };
+  const handleBackFromRep = useCallback(() => {
+    if (isInitialized) {
+      window.history.back();
+    }
+  }, [isInitialized]);
 
-  const handleBackFromAddRep = () => {
-    setCurrentPath('/reps');
-  };
+  const handleBackFromTrainer = useCallback(() => {
+    if (isInitialized) {
+      window.history.back();
+    }
+  }, [isInitialized]);
 
-  const handleStatCardClick = (filter: 'all' | 'active' | 'stuck' | 'independent') => {
+  const handleBackFromAddRep = useCallback(() => {
+    if (isInitialized) {
+      window.history.back();
+    }
+  }, [isInitialized]);
+
+  const handleStatCardClick = useCallback((filter: 'all' | 'active' | 'stuck' | 'independent') => {
     setRepsFilter(filter);
     setCurrentPath('/reps');
-  };
 
-  const handleAddRepClick = () => {
+    if (isInitialized) {
+      const state: NavigationState = {
+        path: '/reps',
+        repId: null,
+        trainerId: null,
+        filter
+      };
+      window.history.pushState(state, '', window.location.pathname);
+    }
+  }, [isInitialized]);
+
+  const handleAddRepClick = useCallback(() => {
     setCurrentPath('/add-rep');
-  };
+
+    if (isInitialized) {
+      const state: NavigationState = {
+        path: '/add-rep',
+        repId: null,
+        trainerId: null,
+        filter: repsFilter
+      };
+      window.history.pushState(state, '', window.location.pathname);
+    }
+  }, [isInitialized, repsFilter]);
 
   return {
     currentPath,
